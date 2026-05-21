@@ -6,10 +6,20 @@ import { splitSentences } from './detector';
 export function stripAIDashes(text: string): string {
   return text
     .replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2')
-    .replace(/([^0-9])\s*—\s*([^0-9])/g, '$1, $2')
-    .replace(/([^0-9])\s*–\s*([^0-9])/g, '$1, $2')
-    .replace(/—\s*/g, ', ')
-    .replace(/–\s*/g, ', ');
+    .replace(/([^0-9])\s*[—–]\s*([^0-9])/g, '$1, $2')
+    .replace(/[—–]\s*/g, ', ')
+    .replace(/;/g, '.');
+}
+
+export function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/__/g, '')
+    .replace(/`/g, '')
+    .replace(/###\s/g, '')
+    .replace(/##\s/g, '')
+    .replace(/#\s/g, '');
 }
 
 export function swapSafeSynonyms(text: string, rate = 0.25): string {
@@ -198,9 +208,11 @@ export function randomizeParagraphStructure(text: string): string {
 }
 
 const NATURAL_ASIDES = [
-  '(which matters here)',
-  '(and that point matters)',
-  '(at least in this context)',
+  '(I think)',
+  '(perhaps)',
+  '(maybe slightly)',
+  '(or at least it seems that way)',
+  '(if that makes sense)',
 ];
 
 export function softenFlow(text: string, style: HumanizeStyle): string {
@@ -278,6 +290,7 @@ export function postProcess(
   style: HumanizeStyle = 'academic',
 ): string {
   let result = stripAIDashes(text);
+  result = stripMarkdown(result);
   result = applyCollocations(result);
   result = simplifyWordyPhrases(result);
   result = manipulateSentenceLengths(result);

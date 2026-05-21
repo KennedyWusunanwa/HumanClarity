@@ -9,6 +9,7 @@ dist/
 .next-dev.err.log
 dev-server.log
 *.log
+*.png
 
 tsconfig.tsbuildinfo
 

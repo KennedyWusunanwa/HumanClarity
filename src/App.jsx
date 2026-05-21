@@ -682,16 +682,16 @@ function Landing({ onStart, onSignIn }) {
   return (
     <div className="page-fade" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: bodyBg, color: text1 }}>
 
-      <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 32px', background: navBg, backdropFilter: 'blur(22px)', borderBottom: `1px solid ${navBdr}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/HumanClarity AI icon.png" alt="HumanClarity AI" style={{ height: 38, filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.7))' }} />
-          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 17, background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.01em' }}>HumanClarity AI</span>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', padding: '14px clamp(16px, 4vw, 32px)', background: navBg, backdropFilter: 'blur(22px)', borderBottom: `1px solid ${navBdr}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: '1 1 220px' }}>
+          <img src="/HumanClarity AI icon.png" alt="HumanClarity AI" style={{ height: 34, flexShrink: 0, filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.7))' }} />
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 'clamp(15px, 2.3vw, 17px)', background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.01em', lineHeight: 1.1, whiteSpace: 'normal' }}>HumanClarity AI</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={onSignIn} style={{ padding: '9px 16px', borderRadius: 10, background: 'transparent', color: '#cbd5e1', fontWeight: 600, fontSize: 13, border: '1px solid rgba(99,102,241,0.16)', cursor: 'pointer', fontFamily: 'inherit' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 10, flex: '1 1 220px' }}>
+          <button onClick={onSignIn} style={{ padding: '9px 14px', borderRadius: 10, background: 'transparent', color: '#cbd5e1', fontWeight: 600, fontSize: 13, border: '1px solid rgba(99,102,241,0.16)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
             Sign In
           </button>
-          <button onClick={onStart} style={{ padding: '10px 22px', borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 0 22px rgba(99,102,241,0.38)' }}>
+          <button onClick={onStart} style={{ padding: '10px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 0 22px rgba(99,102,241,0.38)', whiteSpace: 'nowrap' }}>
             Get Started Free
           </button>
         </div>
@@ -953,30 +953,44 @@ function Header({ profile, onSignOut, onSignIn, onMenuOpen }) {
   const isSignedIn = Boolean(profile.name.trim() || profile.email.trim());
 
   return (
-    <header style={{ height: 56, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px 0 20px', background: 'rgba(6,9,15,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(99,102,241,0.12)', position: 'relative', zIndex: 10 }}>
-      <button className="lg:hidden" onClick={onMenuOpen} style={{ color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', marginRight: 8 }}>
-        <Ic d={P.menu} s={22} />
-      </button>
-      <div className="block" />
+    <header style={{ minHeight: 62, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 14px 10px 16px', background: 'rgba(6,9,15,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(99,102,241,0.12)', position: 'relative', zIndex: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: '1 1 auto' }}>
+        <button className="lg:hidden" onClick={onMenuOpen} aria-label="Open menu" style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(99,102,241,0.16)', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, flexShrink: 0 }}>
+          <Ic d={P.menu} s={20} />
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 30, height: 30, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.4))' }} />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#f8fafc', lineHeight: 1.05, letterSpacing: '-0.01em', fontFamily: '"Space Grotesk", sans-serif', whiteSpace: 'nowrap' }}>
+              HumanClarity
+            </div>
+            <div className="hidden sm:block" style={{ fontSize: 10, fontWeight: 600, color: '#818cf8', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3, whiteSpace: 'nowrap' }}>
+              Natural Writing, Fast
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', minWidth: 0 }}>
         {isSignedIn ? (
           <>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', boxShadow: '0 0 14px rgba(99,102,241,0.5)', cursor: 'default', userSelect: 'none' }}>
+            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', boxShadow: '0 0 14px rgba(99,102,241,0.5)', cursor: 'default', userSelect: 'none', flexShrink: 0 }}>
               {initials(profile.name)}
             </div>
-            <span className="hidden sm:block" style={{ fontSize: 13, fontWeight: 500, color: '#64748b', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.name || profile.email}</span>
+            <span className="hidden md:block" style={{ fontSize: 13, fontWeight: 500, color: '#94a3b8', maxWidth: 148, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.name || profile.email}</span>
             <button onClick={onSignOut}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 9, border: '1px solid rgba(99,102,241,0.2)', color: '#64748b', background: 'transparent', cursor: 'pointer', fontSize: 13, transition: 'all 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.color = '#94a3b8'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; e.currentTarget.style.color = '#64748b'; }}>
-              <Ic d={P.signout} s={15} /> Sign Out
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(99,102,241,0.22)', color: '#94a3b8', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', fontSize: 13, transition: 'all 0.15s', flexShrink: 0 }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.42)'; e.currentTarget.style.color = '#cbd5e1'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.22)'; e.currentTarget.style.color = '#94a3b8'; }}>
+              <Ic d={P.signout} s={15} />
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
           </>
         ) : (
           <button onClick={onSignIn}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 0 18px rgba(99,102,241,0.38)' }}>
-            <Ic d={P.user} s={14} /> Sign In
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 0 18px rgba(99,102,241,0.38)', flexShrink: 0 }}>
+            <Ic d={P.user} s={14} />
+            <span className="hidden sm:inline">Sign In</span>
           </button>
         )}
       </div>

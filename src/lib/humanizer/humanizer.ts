@@ -94,7 +94,7 @@ async function refineStiffSentences(
       const rewritten = await callLLM(options.provider, {
         systemPrompt,
         userText:
-          'Revise only this sentence so it reads more naturally and fluently while preserving its exact meaning. Return only the revised sentence.\n\n' +
+          'Revise only this sentence so it reads more naturally, spartan, and fluently while adding slight human imperfections like hesitation or slight redundancy if it fits. Return only the revised sentence. Avoid all markdown, asterisks, semicolons, and em dashes.\n\n' +
           sentence,
         temperature,
         maxTokens: 300,
