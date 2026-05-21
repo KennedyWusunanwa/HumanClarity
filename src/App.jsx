@@ -380,7 +380,39 @@ function SignInModal({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1200 : window.innerWidth));
+  const [viewportHeight, setViewportHeight] = useState(() => (typeof window === 'undefined' ? 900 : window.innerHeight));
   const strength = useMemo(() => passwordStrength(password), [password]);
+  const isTablet = viewportWidth <= 920;
+  const isPhone = viewportWidth <= 640;
+  const isNarrowPhone = viewportWidth <= 380;
+  const isCompactHeight = viewportHeight <= 520;
+  const showPreview = !isPhone && !isCompactHeight;
+  const isStacked = isTablet || !showPreview;
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const previousTouchAction = document.body.style.touchAction;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.touchAction = previousTouchAction;
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleResize() {
+      setViewportWidth(window.innerWidth);
+      setViewportHeight(window.innerHeight);
+    }
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     setLocalError('');
@@ -466,47 +498,58 @@ function SignInModal({
   };
   const showStrengthMeter = mode === 'signup';
   const fullSpan = mode === 'signup' ? { gridColumn: '1 / -1' } : null;
+  const overlayPadding = isNarrowPhone ? 8 : isTablet ? 12 : 16;
+  const shellRadius = isNarrowPhone ? 20 : isPhone ? 22 : isTablet ? 24 : 30;
+  const mainPadding = isNarrowPhone ? '18px 14px 16px' : isPhone ? '22px 16px 18px' : isTablet ? '26px 22px 22px' : '32px 30px 28px';
+  const previewPadding = isTablet ? '18px 18px 22px' : '24px';
+  const formColumns = mode === 'signup' ? (isPhone ? '1fr' : 'repeat(2, minmax(0, 1fr))') : '1fr';
+  const titleSize = isNarrowPhone ? 'clamp(1.8rem, 10vw, 2.15rem)' : isPhone ? 'clamp(2rem, 9vw, 2.4rem)' : 'clamp(30px, 4.3vw, 40px)';
+  const subtitleSize = isPhone ? 13 : 14;
+  const shellHeight = isTablet || isCompactHeight ? `calc(100dvh - ${overlayPadding * 2}px)` : 'auto';
 
   return (
     <div
-      style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(16px)', padding: 16 }}
+      className="auth-modal-overlay"
+      style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: isTablet ? 'flex-start' : 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(16px)', padding: overlayPadding, overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="page-fade surface-fade" style={{ width: 'min(1120px, 100%)', background: 'linear-gradient(160deg, #0a0e22, #07091a)', border: '1px solid rgba(99,102,241,0.24)', borderRadius: 30, position: 'relative', boxShadow: '0 0 100px rgba(99,102,241,0.22), 0 35px 70px rgba(0,0,0,0.62)', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -80, left: '18%', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.28), transparent 70%)', filter: 'blur(48px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -110, right: '10%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.22), transparent 72%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, borderRadius: 30, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.09) 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none', opacity: 0.75 }} />
+      <div className="page-fade surface-fade auth-modal-shell" style={{ width: `min(1120px, calc(100vw - ${overlayPadding * 2}px))`, maxHeight: `calc(100dvh - ${overlayPadding * 2}px)`, height: shellHeight, background: 'linear-gradient(160deg, #0a0e22, #07091a)', border: '1px solid rgba(99,102,241,0.24)', borderRadius: shellRadius, position: 'relative', boxShadow: '0 0 100px rgba(99,102,241,0.22), 0 35px 70px rgba(0,0,0,0.62)', overflow: 'hidden' }}>
+        <div className="auth-modal-glow auth-modal-glow-top" style={{ position: 'absolute', top: -80, left: isPhone ? -40 : '18%', width: isPhone ? 220 : 340, height: isPhone ? 220 : 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.28), transparent 70%)', filter: 'blur(48px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
+        <div className="auth-modal-glow auth-modal-glow-bottom" style={{ position: 'absolute', bottom: -110, right: isPhone ? -60 : '10%', width: isPhone ? 240 : 360, height: isPhone ? 240 : 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.22), transparent 72%)', filter: 'blur(60px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
+        <div style={{ position: 'absolute', inset: 0, borderRadius: shellRadius, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.09) 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none', opacity: 0.75 }} />
 
-        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#64748b', cursor: 'pointer', zIndex: 2 }}>
+        <button onClick={onClose} className="auth-modal-close" style={{ position: 'absolute', top: isPhone ? 12 : 18, right: isPhone ? 12 : 18, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#64748b', cursor: 'pointer', zIndex: 2 }}>
           <Ic d={P.close} s={14} />
         </button>
 
-        <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', alignItems: 'stretch' }}>
-          <div style={{ padding: '32px 30px 28px', borderRight: '1px solid rgba(99,102,241,0.12)', minWidth: 0 }}>
-            <button onClick={onClose} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 22, padding: 0, background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
+        <div className="auth-modal-grid" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: isStacked ? 'minmax(0, 1fr)' : 'minmax(0, 1.05fr) minmax(320px, 0.95fr)', alignItems: 'stretch', minHeight: 0, height: '100%' }}>
+          <div className="auth-modal-main" style={{ padding: mainPadding, borderRight: isStacked ? 'none' : '1px solid rgba(99,102,241,0.12)', minWidth: 0, overflowY: 'auto', minHeight: 0, height: '100%' }}>
+            {!isPhone && (
+              <button onClick={onClose} className="auth-modal-back" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 22, padding: 0, background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
               <Ic d={P.arrow} s={14} /> Back to home
-            </button>
+              </button>
+            )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-              <img src="/HumanClarity AI icon.png" alt="" style={{ width: 42, height: 42, objectFit: 'contain', filter: 'drop-shadow(0 0 18px rgba(99,102,241,0.8)) drop-shadow(0 0 30px rgba(139,92,246,0.35))' }} />
+            <div className="auth-modal-brand" style={{ display: 'flex', alignItems: 'center', gap: isPhone ? 10 : 12, marginBottom: isPhone ? 12 : 14 }}>
+              <img src="/HumanClarity AI icon.png" alt="" className="auth-modal-brand-icon" style={{ width: isPhone ? 36 : 42, height: isPhone ? 36 : 42, objectFit: 'contain', filter: 'drop-shadow(0 0 18px rgba(99,102,241,0.8)) drop-shadow(0 0 30px rgba(139,92,246,0.35))' }} />
               <div>
                 <p style={{ margin: 0, color: '#f8fafc', fontWeight: 700, fontSize: 16, fontFamily: '"Space Grotesk", sans-serif' }}>HumanClarity AI</p>
                 <p style={{ margin: '2px 0 0', color: '#818cf8', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural writing, fast</p>
               </div>
             </div>
 
-            <div style={{ marginBottom: 18 }}>
-              <h2 style={{ fontSize: 'clamp(30px, 4.3vw, 40px)', fontWeight: 700, color: '#f1f5f9', fontFamily: '"Space Grotesk", sans-serif', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.02 }}>
+            <div className="auth-modal-copy" style={{ marginBottom: isPhone ? 16 : 18 }}>
+              <h2 className="auth-modal-title" style={{ fontSize: titleSize, fontWeight: 700, color: '#f1f5f9', fontFamily: '"Space Grotesk", sans-serif', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: isPhone ? 0.98 : 1.02 }}>
                 {mode === 'signup' ? 'Create your HumanClarity space' : 'Sign in to your account'}
               </h2>
-              <p style={{ fontSize: 14, color: '#94a3b8', margin: 0, lineHeight: 1.6, maxWidth: 480 }}>
+              <p className="auth-modal-subtitle" style={{ fontSize: subtitleSize, color: '#94a3b8', margin: 0, lineHeight: isPhone ? 1.55 : 1.6, maxWidth: 480 }}>
                 {mode === 'signup'
                   ? 'Create an account to save documents, track usage, and unlock upgrades from the dashboard.'
                   : 'Sign in to continue reviewing, saving, and refining your writing.'}
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 10, gridTemplateColumns: mode === 'signup' ? 'repeat(auto-fit, minmax(220px, 1fr))' : '1fr' }}>
+            <form className={`auth-modal-form ${mode === 'signup' ? 'is-signup' : 'is-signin'}`} onSubmit={handleSubmit} style={{ display: 'grid', gap: isPhone ? 12 : 10, gridTemplateColumns: formColumns }}>
               {mode === 'signup' && (
                 <div>
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#94a3b8', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
@@ -634,11 +677,13 @@ function SignInModal({
             </form>
           </div>
 
-          <div style={{ padding: '24px', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}>
+          {showPreview && (
+            <div className="auth-modal-preview" style={{ padding: previewPadding, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0, overflowY: 'auto', borderTop: isStacked ? '1px solid rgba(99,102,241,0.12)' : 'none', height: '100%' }}>
             <div style={{ width: '100%', maxWidth: 520 }}>
               <DetectionPreview compact />
             </div>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
