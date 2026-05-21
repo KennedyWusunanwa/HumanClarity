@@ -682,16 +682,16 @@ function Landing({ onStart, onSignIn }) {
   return (
     <div className="page-fade" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: bodyBg, color: text1 }}>
 
-      <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', padding: '14px clamp(16px, 4vw, 32px)', background: navBg, backdropFilter: 'blur(22px)', borderBottom: `1px solid ${navBdr}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: '1 1 220px' }}>
-          <img src="/HumanClarity AI icon.png" alt="HumanClarity AI" style={{ height: 34, flexShrink: 0, filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.7))' }} />
-          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 'clamp(15px, 2.3vw, 17px)', background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.01em', lineHeight: 1.1, whiteSpace: 'normal' }}>HumanClarity AI</span>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(8px, 2vw, 14px)', flexWrap: 'nowrap', padding: '12px clamp(14px, 3vw, 32px)', background: navBg, backdropFilter: 'blur(22px)', borderBottom: `1px solid ${navBdr}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 1.8vw, 10px)', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
+          <img src="/HumanClarity AI icon.png" alt="HumanClarity AI" style={{ height: 'clamp(24px, 6.2vw, 34px)', flexShrink: 0, filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.7))' }} />
+          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 'clamp(11px, 3.7vw, 17px)', background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.01em', lineHeight: 1.1, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>HumanClarity AI</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 10, flex: '1 1 220px' }}>
-          <button onClick={onSignIn} style={{ padding: '9px 14px', borderRadius: 10, background: 'transparent', color: '#cbd5e1', fontWeight: 600, fontSize: 13, border: '1px solid rgba(99,102,241,0.16)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'clamp(8px, 1.6vw, 10px)', flex: '0 0 auto', flexShrink: 0 }}>
+          <button onClick={onSignIn} style={{ padding: '8px clamp(10px, 2.8vw, 14px)', borderRadius: 10, background: 'transparent', color: '#cbd5e1', fontWeight: 600, fontSize: 'clamp(11px, 3vw, 13px)', border: '1px solid rgba(99,102,241,0.16)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
             Sign In
           </button>
-          <button onClick={onStart} style={{ padding: '10px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 0 22px rgba(99,102,241,0.38)', whiteSpace: 'nowrap' }}>
+          <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 0 22px rgba(99,102,241,0.38)', whiteSpace: 'nowrap' }}>
             Get Started Free
           </button>
         </div>
