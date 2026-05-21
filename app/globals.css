@@ -1,0 +1,170 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap");
+@import "tailwindcss";
+@source "../src/**/*.{js,jsx,ts,tsx}";
+@source "../app/**/*.{js,jsx,ts,tsx}";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Design tokens ───────────────────────────────────────────────── */
+:root {
+  --bg:        #f8fafc;
+  --surface:   #f1f5f9;
+  --card:      #ffffff;
+  --card2:     #f1f5f9;
+  --border:    #e2e8f0;
+  --text1:     #0f172a;
+  --text2:     #475569;
+  --text3:     #94a3b8;
+  --input:     #ffffff;
+  --active:    #e0e7ff;
+  --active-t:  #3730a3;
+  --hover:     #f1f5f9;
+  --glass:     rgba(255,255,255,0.82);
+  --glass-b:   rgba(99,102,241,0.18);
+}
+
+html.dark {
+  --bg:        #060912;
+  --surface:   #080c18;
+  --card:      #0e1628;
+  --card2:     #060912;
+  --border:    #1a2540;
+  --text1:     #f1f5f9;
+  --text2:     #94a3b8;
+  --text3:     #475569;
+  --input:     #0e1628;
+  --active:    rgba(99,102,241,0.18);
+  --active-t:  #a5b4fc;
+  --hover:     rgba(255,255,255,0.04);
+  --glass:     rgba(14,22,40,0.75);
+  --glass-b:   rgba(99,102,241,0.22);
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text1);
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+button {
+  transition:
+    transform 0.16s ease,
+    opacity 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.font-display {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+/* ── Landing animations ──────────────────────────────────────────── */
+@keyframes drift1 {
+  0%, 100% { transform: translate(0px,   0px)  scale(1);    }
+  33%       { transform: translate(55px, -40px) scale(1.07); }
+  66%       { transform: translate(-28px, 28px) scale(0.93); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0px,   0px)  scale(1);    }
+  40%       { transform: translate(-65px, 55px) scale(1.1);  }
+  80%       { transform: translate(38px, -28px) scale(0.9);  }
+}
+@keyframes drift3 {
+  0%, 100% { transform: translate(0px,   0px);  }
+  50%       { transform: translate(32px, -55px); }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px);  }
+  50%       { transform: translateY(-9px); }
+}
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 22px rgba(99,102,241,0.45),
+      0 0 60px rgba(99,102,241,0.18),
+      0 4px 20px rgba(0,0,0,0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 38px rgba(99,102,241,0.75),
+      0 0 95px rgba(99,102,241,0.32),
+      0 4px 24px rgba(0,0,0,0.38);
+  }
+}
+
+@keyframes fade-in-soft {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin-soft {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes top-progress {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.4;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(280%);
+    opacity: 0;
+  }
+}
+
+.page-fade {
+  animation: fade-in-soft 0.28s ease both;
+}
+
+.surface-fade {
+  animation: fade-in-up 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.spin-soft {
+  animation: spin-soft 0.85s linear infinite;
+}
+
+.top-progress-bar {
+  animation: top-progress 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
