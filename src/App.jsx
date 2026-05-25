@@ -50,6 +50,25 @@ function fmtBytes(n) {
 }
 
 function fmtNum(n) { return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n); }
+function normalizeAuthErrorMessage(error) {
+  const msg = error?.message || 'Authentication failed.';
+  const status = Number(error?.status || error?.statusCode || 0);
+  const code = String(error?.code || error?.error_code || '').toLowerCase();
+  const full = `${code} ${msg}`.toLowerCase();
+
+  if (/confirm|verified|verification/i.test(msg)) {
+    return 'Your email is not confirmed yet. Use "Resend confirmation email" if needed.';
+  }
+
+  if (
+    status === 429 ||
+    /rate.limit|too many|limit reached|over_email_send_rate_limit|email rate limit|email link is invalid or has expired/.test(full)
+  ) {
+    return 'Signup email limit reached. Please wait and try again shortly. If this keeps happening, the Supabase project email rate limit needs to be increased or moved to custom SMTP.';
+  }
+
+  return msg;
+}
 function passwordStrength(password) {
   let score = 0;
   if (password.length >= 8) score += 1;
@@ -57,7 +76,7 @@ function passwordStrength(password) {
   if (/[a-z]/.test(password) && /\d/.test(password)) score += 1;
   if (/[^A-Za-z0-9]/.test(password)) score += 1;
 
-  if (password.length === 0) return { score: 0, label: 'Enter a password', color: '#64748b' };
+  if (password.length === 0) return { score: 0, label: 'Enter a password', color: '#8e918f' };
   if (score <= 1) return { score: 1, label: 'Weak', color: '#f87171' };
   if (score === 2) return { score: 2, label: 'Fair', color: '#fbbf24' };
   if (score === 3) return { score: 3, label: 'Good', color: '#60a5fa' };
@@ -119,45 +138,56 @@ const UPLOAD_ACCEPT =
 
 // ─── icon ─────────────────────────────────────────────────────────────────────
 
-function Ic({ d, s = 20 }) {
+function Ic({ d, s = 20, fill = false }) {
+  if (typeof d === 'string' && !d.startsWith('M')) {
+    return (
+      <span
+        className="material-symbols-outlined"
+        style={{ fontSize: s, fontVariationSettings: `"FILL" ${fill ? 1 : 0}, "wght" 400, "GRAD" 0, "opsz" ${Math.max(20, Math.min(48, s))}` }}
+        aria-hidden="true"
+      >
+        {d}
+      </span>
+    );
+  }
+
   return (
     <svg width={s} height={s} fill="none" stroke="currentColor" viewBox="0 0 24 24"
-      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d={d} />
     </svg>
   );
 }
 
 const P = {
-  pen:      'M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931z',
-  grid:     'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6zM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25zM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25z',
-  clock:    'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
-  bookmark: 'M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0z',
-  gear:     'M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
-  sun:      'M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0z',
-  moon:     'M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998z',
-  upload:   'M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5',
-  copy:     'M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9z',
-  check:    'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
-  signout:  'M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9',
-  doc:      'M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9z',
-  search:   'M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607z',
-  arrow:    'M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3',
-  trash:    'M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0',
-  star:     'M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5z',
-  save:     'M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3',
-  menu:     'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5',
-  spark:    'M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09zM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456z',
-  check2:   'M4.5 12.75l6 6 9-13.5',
-  zap:      'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
-  shield:   'M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z',
-  user:     'M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0zM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632z',
-  mail:     'M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75',
-  close:    'M6 18 18 6M6 6l12 12',
-  eye:      'M2.036 12.322a1.012 1.012 0 0 1 0-.644C3.423 7.51 7.36 4.5 12 4.5s8.577 3.01 9.964 7.178c.07.21.07.434 0 .644C20.577 16.49 16.64 19.5 12 19.5s-8.577-3.01-9.964-7.178zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
-  eyeOff:   'M3 3l18 18M10.477 10.482A3 3 0 0 0 13.5 13.5m2.121 2.121A9.77 9.77 0 0 1 12 16.5c-4.64 0-8.577-3.01-9.964-7.178a1.01 1.01 0 0 1 0-.644 10.96 10.96 0 0 1 3.043-4.568M9.88 5.084A10.935 10.935 0 0 1 12 4.5c4.64 0 8.577 3.01 9.964 7.178.07.21.07.434 0 .644a10.956 10.956 0 0 1-1.678 3.043M6.228 6.228A3 3 0 0 0 10.5 10.5',
+  pen: 'edit',
+  grid: 'dashboard',
+  clock: 'history',
+  bookmark: 'bookmark',
+  gear: 'settings',
+  sun: 'light_mode',
+  moon: 'dark_mode',
+  upload: 'upload_file',
+  copy: 'content_copy',
+  check: 'check_circle',
+  signout: 'logout',
+  doc: 'article',
+  search: 'search',
+  arrow: 'arrow_forward',
+  trash: 'delete',
+  star: 'star',
+  save: 'save',
+  menu: 'menu',
+  spark: 'auto_awesome',
+  check2: 'done',
+  zap: 'bolt',
+  shield: 'verified_user',
+  user: 'account_circle',
+  mail: 'mail',
+  close: 'close',
+  eye: 'visibility',
+  eyeOff: 'visibility_off',
 };
-
 // ─── particle canvas ──────────────────────────────────────────────────────────
 
 function ParticleCanvas({ count = 70, isDark = true, speed = 1 }) {
@@ -185,8 +215,8 @@ function ParticleCanvas({ count = 70, isDark = true, speed = 1 }) {
       o:  Math.random() * 0.45 + 0.18,
     }));
 
-    const lineRGB = '99,102,241';
-    const dotRGB  = isDark ? '139,92,246' : '99,102,241';
+    const lineRGB = '168,199,250';
+    const dotRGB  = isDark ? '66,133,244' : '168,199,250';
     const lineA   = isDark ? 0.22 : 0.1;
     const dotA    = isDark ? 1    : 0.5;
 
@@ -230,65 +260,130 @@ function ParticleCanvas({ count = 70, isDark = true, speed = 1 }) {
 }
 
 function DetectionPreview({ compact = false }) {
-  return (
-    <div
-      style={{
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: compact ? 26 : 30,
-        border: '1px solid rgba(99,102,241,0.18)',
-        background: 'linear-gradient(180deg, rgba(8,12,24,0.96), rgba(7,10,20,0.92))',
-        boxShadow: compact
-          ? '0 24px 90px rgba(0,0,0,0.5), 0 0 40px rgba(99,102,241,0.14)'
-          : '0 28px 110px rgba(0,0,0,0.55), 0 0 50px rgba(99,102,241,0.16)',
-      }}
-    >
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 18% 16%, rgba(99,102,241,0.22), transparent 36%), radial-gradient(circle at 82% 24%, rgba(139,92,246,0.18), transparent 30%), radial-gradient(circle at 50% 100%, rgba(56,189,248,0.12), transparent 36%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)', backgroundSize: '28px 28px', opacity: 0.24, pointerEvents: 'none' }} />
+  const [progress, setProgress] = useState(0);
+  const [visibleLines, setVisibleLines] = useState(0);
 
-      <div style={{ position: 'relative', zIndex: 1, padding: compact ? '24px 24px 22px' : '26px 26px 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 12px rgba(34,197,94,0.7)' }} />
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#93c5fd' }}>Deep Scan</span>
+  useEffect(() => {
+    let raf;
+    const duration = 1800;
+    let startTime = null;
+
+    const tick = (now) => {
+      if (!startTime) startTime = now;
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 2.8);
+      setProgress(Math.round(eased * 97));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+
+    const delay = setTimeout(() => { raf = requestAnimationFrame(tick); }, 350);
+    return () => { clearTimeout(delay); cancelAnimationFrame(raf); };
+  }, []);
+
+  useEffect(() => {
+    if (progress >= 20) setVisibleLines(v => Math.max(v, 1));
+    if (progress >= 52) setVisibleLines(v => Math.max(v, 2));
+    if (progress >= 78) setVisibleLines(v => Math.max(v, 3));
+  }, [progress]);
+
+  const deg = (progress / 100) * 360;
+  const sz = compact ? 84 : 92;
+  const innerSz = compact ? 60 : 66;
+  const hl = (text) => (
+    <span style={{ background: 'rgba(52,211,153,0.18)', color: '#6ee7b7', borderRadius: 4, padding: '1px 5px' }}>{text}</span>
+  );
+
+  const lines = [
+    <span>Regular movement helps your brain <b style={{ fontWeight: 500 }}>{hl('stay sharp')}</b> over time.</span>,
+    <span>It {hl('strengthens memory')}, {hl('supports focus')}, and reduces strain from long sedentary stretches.</span>,
+    <span>Light exercise {hl('improves mood')} and weekly cardio boosts {hl('long-term cognitive health')}.</span>,
+  ];
+
+  return (
+    <div style={{
+      position: 'relative',
+      overflow: 'hidden',
+      borderRadius: compact ? 18 : 22,
+      border: '1px solid rgba(168,199,250,0.12)',
+      background: 'linear-gradient(155deg, rgba(13,17,32,0.99), rgba(8,10,18,0.99))',
+    }}>
+      <div style={{ position: 'absolute', top: -50, left: -30, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,199,250,0.1), transparent 70%)', filter: 'blur(28px)', pointerEvents: 'none' }} />
+
+      <div style={{ position: 'relative', zIndex: 1, padding: compact ? '18px 18px 16px' : '20px 20px 18px' }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px rgba(34,197,94,0.45)' }} />
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: '#7eb8f7' }}>Deep Scan</span>
           </div>
-          <div style={{ padding: '6px 12px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.28)', color: '#4ade80', fontSize: 11, fontWeight: 700 }}>
-            Human
+          <div style={{
+            padding: '3px 9px', borderRadius: 999,
+            background: 'rgba(52,211,153,0.09)', border: '1px solid rgba(52,211,153,0.2)',
+            color: '#4ade80', fontSize: 10, fontWeight: 700,
+            opacity: progress >= 88 ? 1 : 0,
+            transition: 'opacity 0.5s ease',
+          }}>
+            Human ✓
           </div>
         </div>
 
-        <div style={{ borderRadius: 20, border: '1px solid rgba(99,102,241,0.14)', background: 'rgba(255,255,255,0.02)', padding: compact ? 18 : 20, marginBottom: 20 }}>
-          {[
-            'Regular movement helps your brain stay sharp over time.',
-            'It strengthens memory, supports focus, and lowers the strain caused by long sedentary stretches.',
-            'Even light exercise can improve mood, while consistent weekly cardio supports stronger long-term cognitive health.',
-          ].map((line) => (
-            <div key={line} style={{ display: 'inline', lineHeight: 1.9 }}>
-              <span style={{ background: 'rgba(52,211,153,0.14)', color: '#86efac', borderRadius: 7, padding: '2px 5px', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone', fontSize: compact ? 13 : 14 }}>
-                {line}
-              </span>{' '}
-            </div>
+        <div style={{
+          borderRadius: 12, border: '1px solid rgba(168,199,250,0.08)',
+          background: 'rgba(255,255,255,0.02)', padding: compact ? 12 : 14, marginBottom: 16,
+          fontSize: compact ? 12.5 : 13, lineHeight: 1.8, color: '#b8c8e0',
+        }}>
+          {lines.map((line, i) => (
+            <span key={i} style={{
+              display: 'block',
+              marginBottom: i < lines.length - 1 ? 5 : 0,
+              opacity: visibleLines > i ? 1 : 0,
+              transform: visibleLines > i ? 'translateY(0)' : 'translateY(5px)',
+              transition: 'opacity 0.55s ease, transform 0.55s ease',
+            }}>
+              {line}
+            </span>
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: compact ? '100px 1fr' : '110px 1fr', gap: 18, alignItems: 'center' }}>
-          <div style={{ width: compact ? 88 : 96, height: compact ? 88 : 96, borderRadius: '50%', margin: '0 auto', display: 'grid', placeItems: 'center', background: 'conic-gradient(#22c55e 0deg 340deg, rgba(255,255,255,0.08) 340deg 360deg)', boxShadow: '0 0 28px rgba(34,197,94,0.16)' }}>
-            <div style={{ width: compact ? 62 : 68, height: compact ? 62 : 68, borderRadius: '50%', background: '#08101b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4ade80', fontWeight: 800, fontSize: compact ? 22 : 24 }}>
-              97%
+        <div style={{ display: 'grid', gridTemplateColumns: `${sz + 10}px 1fr`, gap: 14, alignItems: 'center' }}>
+          <div style={{
+            width: sz, height: sz, borderRadius: '50%', margin: '0 auto',
+            display: 'grid', placeItems: 'center',
+            background: `conic-gradient(#22c55e 0deg ${deg}deg, rgba(255,255,255,0.05) ${deg}deg 360deg)`,
+          }}>
+            <div style={{
+              width: innerSz, height: innerSz, borderRadius: '50%',
+              background: 'rgba(9,11,19,0.98)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#4ade80', fontWeight: 800,
+              fontSize: compact ? 18 : 20,
+              fontFamily: '"Roboto", Arial, sans-serif',
+              letterSpacing: '-0.02em',
+            }}>
+              {progress}%
             </div>
           </div>
+
           <div>
-            <p style={{ margin: '0 0 6px', color: '#4ade80', fontSize: compact ? 26 : 30, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', lineHeight: 1 }}>
-              97% Human
+            <p style={{ margin: '0 0 4px', color: '#4ade80', fontSize: compact ? 20 : 24, fontWeight: 800, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>
+              {progress}% Human
             </p>
-            <p style={{ margin: '0 0 10px', color: '#94a3b8', fontSize: compact ? 13 : 14, lineHeight: 1.6 }}>
-              HumanClarity highlights natural phrasing while preserving meaning and tone.
+            <p style={{ margin: '0 0 10px', color: '#6b7a94', fontSize: compact ? 11.5 : 12.5, lineHeight: 1.55 }}>
+              Natural phrasing preserved. Meaning intact.
             </p>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.22)', color: '#c4b5fd', fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: '4px 9px', borderRadius: 999,
+              background: 'rgba(168,199,250,0.06)', border: '1px solid rgba(168,199,250,0.14)',
+              color: '#7eb8f7', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+              opacity: progress >= 88 ? 1 : 0,
+              transition: 'opacity 0.5s ease 0.15s',
+            }}>
               Looks natural
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -304,8 +399,8 @@ function TopProgress({ active = false }) {
         style={{
           width: '38%',
           height: '100%',
-          background: 'linear-gradient(90deg, rgba(99,102,241,0), rgba(129,140,248,0.95), rgba(192,132,252,0.95), rgba(99,102,241,0))',
-          boxShadow: '0 0 18px rgba(99,102,241,0.65)',
+          background: 'linear-gradient(90deg, rgba(168,199,250,0), rgba(168,199,250,0.95), rgba(211,227,253,0.95), rgba(168,199,250,0))',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.28)',
         }}
       />
     </div>
@@ -339,9 +434,9 @@ function LoadingOverlay({ open = false, message = 'Loading...' }) {
           padding: '16px 18px',
           borderRadius: 18,
           background: 'rgba(10,14,34,0.88)',
-          border: '1px solid rgba(99,102,241,0.24)',
-          color: '#f8fafc',
-          boxShadow: '0 0 40px rgba(99,102,241,0.18)',
+          border: '1px solid rgba(168,199,250,0.24)',
+          color: '#e3e3e3',
+          boxShadow: '0 12px 28px rgba(0,0,0,0.32)',
         }}
       >
         <span
@@ -350,8 +445,8 @@ function LoadingOverlay({ open = false, message = 'Loading...' }) {
             width: 18,
             height: 18,
             borderRadius: '50%',
-            border: '2px solid rgba(129,140,248,0.18)',
-            borderTopColor: '#a5b4fc',
+            border: '2px solid rgba(168,199,250,0.18)',
+            borderTopColor: '#d3e3fd',
             flexShrink: 0,
           }}
         />
@@ -477,7 +572,7 @@ function SignInModal({
       if (resendError) throw resendError;
       onModeChange('signin');
     } catch (err) {
-      setLocalError(err.message || 'Could not resend confirmation email.');
+      setLocalError(normalizeAuthErrorMessage(err));
     } finally {
       setResendLoading(false);
     }
@@ -485,16 +580,16 @@ function SignInModal({
 
   const inp = {
     width: '100%', padding: '13px 14px', borderRadius: 12,
-    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(99,102,241,0.18)',
-    color: '#f1f5f9', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(168,199,250,0.2)',
+    color: '#e3e3e3', fontSize: 14, outline: 'none', boxSizing: 'border-box',
     transition: 'border-color 0.15s, box-shadow 0.15s',
     fontFamily: 'inherit',
   };
   const eyeBtn = {
     position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(99,102,241,0.14)',
-    background: 'rgba(255,255,255,0.03)', color: '#a5b4fc', cursor: 'pointer',
+    width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(168,199,250,0.16)',
+    background: 'rgba(255,255,255,0.06)', color: '#d3e3fd', cursor: 'pointer',
   };
   const showStrengthMeter = mode === 'signup';
   const fullSpan = mode === 'signup' ? { gridColumn: '1 / -1' } : null;
@@ -510,39 +605,39 @@ function SignInModal({
   return (
     <div
       className="auth-modal-overlay"
-      style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: isTablet ? 'flex-start' : 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(16px)', padding: overlayPadding, overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: isTablet ? 'flex-start' : 'center', justifyContent: 'center', background: 'rgba(5,7,16,0.82)', backdropFilter: 'blur(18px)', padding: overlayPadding, overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="page-fade surface-fade auth-modal-shell" style={{ width: `min(1120px, calc(100vw - ${overlayPadding * 2}px))`, maxHeight: `calc(100dvh - ${overlayPadding * 2}px)`, height: shellHeight, background: 'linear-gradient(160deg, #0a0e22, #07091a)', border: '1px solid rgba(99,102,241,0.24)', borderRadius: shellRadius, position: 'relative', boxShadow: '0 0 100px rgba(99,102,241,0.22), 0 35px 70px rgba(0,0,0,0.62)', overflow: 'hidden' }}>
-        <div className="auth-modal-glow auth-modal-glow-top" style={{ position: 'absolute', top: -80, left: isPhone ? -40 : '18%', width: isPhone ? 220 : 340, height: isPhone ? 220 : 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.28), transparent 70%)', filter: 'blur(48px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
-        <div className="auth-modal-glow auth-modal-glow-bottom" style={{ position: 'absolute', bottom: -110, right: isPhone ? -60 : '10%', width: isPhone ? 240 : 360, height: isPhone ? 240 : 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.22), transparent 72%)', filter: 'blur(60px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
-        <div style={{ position: 'absolute', inset: 0, borderRadius: shellRadius, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.09) 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none', opacity: 0.75 }} />
+      <div className="page-fade surface-fade auth-modal-shell" style={{ width: `min(1120px, calc(100vw - ${overlayPadding * 2}px))`, maxHeight: `calc(100dvh - ${overlayPadding * 2}px)`, height: shellHeight, background: 'linear-gradient(145deg, rgba(15,19,38,0.97) 0%, rgba(10,11,15,0.98) 100%)', border: '1px solid rgba(168,199,250,0.22)', borderRadius: shellRadius, position: 'relative', boxShadow: '0 30px 70px rgba(0,0,0,0.62)', overflow: 'hidden' }}>
+        <div className="auth-modal-glow auth-modal-glow-top" style={{ position: 'absolute', top: -80, left: isPhone ? -40 : '18%', width: isPhone ? 220 : 340, height: isPhone ? 220 : 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,199,250,0.28), transparent 70%)', filter: 'blur(48px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
+        <div className="auth-modal-glow auth-modal-glow-bottom" style={{ position: 'absolute', bottom: -110, right: isPhone ? -60 : '10%', width: isPhone ? 240 : 360, height: isPhone ? 240 : 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.22), transparent 72%)', filter: 'blur(60px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
+        <div style={{ position: 'absolute', inset: 0, borderRadius: shellRadius, backgroundImage: 'radial-gradient(circle, rgba(168,199,250,0.09) 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none', opacity: 0.75 }} />
 
-        <button onClick={onClose} className="auth-modal-close" style={{ position: 'absolute', top: isPhone ? 12 : 18, right: isPhone ? 12 : 18, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#64748b', cursor: 'pointer', zIndex: 2 }}>
+        <button onClick={onClose} className="auth-modal-close" style={{ position: 'absolute', top: isPhone ? 12 : 18, right: isPhone ? 12 : 18, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#8e918f', cursor: 'pointer', zIndex: 2 }}>
           <Ic d={P.close} s={14} />
         </button>
 
         <div className="auth-modal-grid" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: isStacked ? 'minmax(0, 1fr)' : 'minmax(0, 1.05fr) minmax(320px, 0.95fr)', alignItems: 'stretch', minHeight: 0, height: '100%' }}>
-          <div className="auth-modal-main" style={{ padding: mainPadding, borderRight: isStacked ? 'none' : '1px solid rgba(99,102,241,0.12)', minWidth: 0, overflowY: 'auto', minHeight: 0, height: '100%' }}>
+          <div className="auth-modal-main" style={{ padding: mainPadding, borderRight: isStacked ? 'none' : '1px solid rgba(168,199,250,0.12)', minWidth: 0, overflowY: 'auto', minHeight: 0, height: '100%' }}>
             {!isPhone && (
-              <button onClick={onClose} className="auth-modal-back" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 22, padding: 0, background: 'transparent', border: 'none', color: '#94a3b8', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={onClose} className="auth-modal-back" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 22, padding: 0, background: 'transparent', border: 'none', color: '#8e918f', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
               <Ic d={P.arrow} s={14} /> Back to home
               </button>
             )}
 
             <div className="auth-modal-brand" style={{ display: 'flex', alignItems: 'center', gap: isPhone ? 10 : 12, marginBottom: isPhone ? 12 : 14 }}>
-              <img src="/HumanClarity AI icon.png" alt="" className="auth-modal-brand-icon" style={{ width: isPhone ? 36 : 42, height: isPhone ? 36 : 42, objectFit: 'contain', filter: 'drop-shadow(0 0 18px rgba(99,102,241,0.8)) drop-shadow(0 0 30px rgba(139,92,246,0.35))' }} />
+              <img src="/HumanClarity AI icon.png" alt="" className="auth-modal-brand-icon" style={{ width: isPhone ? 36 : 42, height: isPhone ? 36 : 42, objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(168,199,250,0.3))' }} />
               <div>
-                <p style={{ margin: 0, color: '#f8fafc', fontWeight: 700, fontSize: 16, fontFamily: '"Space Grotesk", sans-serif' }}>HumanClarity AI</p>
-                <p style={{ margin: '2px 0 0', color: '#818cf8', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural writing, fast</p>
+                <p style={{ margin: 0, color: '#e3e3e3', fontWeight: 700, fontSize: 16, fontFamily: '"Roboto", Arial, sans-serif' }}>HumanClarity AI</p>
+                <p style={{ margin: '2px 0 0', color: '#a8c7fa', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural writing, fast</p>
               </div>
             </div>
 
             <div className="auth-modal-copy" style={{ marginBottom: isPhone ? 16 : 18 }}>
-              <h2 className="auth-modal-title" style={{ fontSize: titleSize, fontWeight: 700, color: '#f1f5f9', fontFamily: '"Space Grotesk", sans-serif', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: isPhone ? 0.98 : 1.02 }}>
+              <h2 className="auth-modal-title" style={{ fontSize: titleSize, fontWeight: 700, color: '#e3e3e3', fontFamily: '"Roboto", Arial, sans-serif', margin: '0 0 8px', letterSpacing: 0, lineHeight: isPhone ? 0.98 : 1.02 }}>
                 {mode === 'signup' ? 'Create your HumanClarity space' : 'Sign in to your account'}
               </h2>
-              <p className="auth-modal-subtitle" style={{ fontSize: subtitleSize, color: '#94a3b8', margin: 0, lineHeight: isPhone ? 1.55 : 1.6, maxWidth: 480 }}>
+              <p className="auth-modal-subtitle" style={{ fontSize: subtitleSize, color: '#8e918f', margin: 0, lineHeight: isPhone ? 1.55 : 1.6, maxWidth: 480 }}>
                 {mode === 'signup'
                   ? 'Create an account to save documents, track usage, and unlock upgrades from the dashboard.'
                   : 'Sign in to continue reviewing, saving, and refining your writing.'}
@@ -552,7 +647,7 @@ function SignInModal({
             <form className={`auth-modal-form ${mode === 'signup' ? 'is-signup' : 'is-signin'}`} onSubmit={handleSubmit} style={{ display: 'grid', gap: isPhone ? 12 : 10, gridTemplateColumns: formColumns }}>
               {mode === 'signup' && (
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#94a3b8', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#8e918f', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
                     <Ic d={P.user} s={12} /> Full Name
                   </label>
                   <input
@@ -560,15 +655,15 @@ function SignInModal({
                     onChange={e => { setName(e.target.value); setLocalError(''); }}
                     placeholder="Full name"
                     style={inp}
-                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
-                    onBlur={e => { e.target.style.borderColor = 'rgba(99,102,241,0.18)'; e.target.style.boxShadow = 'none'; }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(168,199,250,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(168,199,250,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(168,199,250,0.18)'; e.target.style.boxShadow = 'none'; }}
                     autoFocus
                   />
                 </div>
               )}
 
               <div style={mode === 'signup' ? null : fullSpan}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#94a3b8', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#8e918f', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
                   <Ic d={P.mail} s={12} /> Email
                 </label>
                 <input
@@ -577,13 +672,13 @@ function SignInModal({
                   onChange={e => { setEmail(e.target.value); setLocalError(''); }}
                   placeholder="m@example.com"
                   style={inp}
-                  onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
-                  onBlur={e => { e.target.style.borderColor = 'rgba(99,102,241,0.18)'; e.target.style.boxShadow = 'none'; }}
+                  onFocus={e => { e.target.style.borderColor = 'rgba(168,199,250,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(168,199,250,0.12)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(168,199,250,0.18)'; e.target.style.boxShadow = 'none'; }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#94a3b8', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#8e918f', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
                   <Ic d={P.shield} s={12} /> Password
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -593,8 +688,8 @@ function SignInModal({
                     onChange={e => { setPassword(e.target.value); setLocalError(''); }}
                     placeholder="At least 6 characters"
                     style={{ ...inp, paddingRight: 52 }}
-                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
-                    onBlur={e => { e.target.style.borderColor = 'rgba(99,102,241,0.18)'; e.target.style.boxShadow = 'none'; }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(168,199,250,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(168,199,250,0.12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(168,199,250,0.18)'; e.target.style.boxShadow = 'none'; }}
                   />
                   <button type="button" onClick={() => setShowPassword(v => !v)} style={eyeBtn}>
                     <Ic d={showPassword ? P.eyeOff : P.eye} s={15} />
@@ -624,7 +719,7 @@ function SignInModal({
 
               {mode === 'signup' && (
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#94a3b8', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#8e918f', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
                     <Ic d={P.check2} s={12} /> Confirm Password
                   </label>
                   <div style={{ position: 'relative' }}>
@@ -634,8 +729,8 @@ function SignInModal({
                       onChange={e => { setConfirmPassword(e.target.value); setLocalError(''); }}
                       placeholder="Repeat your password"
                       style={{ ...inp, paddingRight: 52 }}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.12)'; }}
-                      onBlur={e => { e.target.style.borderColor = 'rgba(99,102,241,0.18)'; e.target.style.boxShadow = 'none'; }}
+                      onFocus={e => { e.target.style.borderColor = 'rgba(168,199,250,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(168,199,250,0.12)'; }}
+                      onBlur={e => { e.target.style.borderColor = 'rgba(168,199,250,0.18)'; e.target.style.boxShadow = 'none'; }}
                     />
                     <button type="button" onClick={() => setShowConfirmPassword(v => !v)} style={eyeBtn}>
                       <Ic d={showConfirmPassword ? P.eyeOff : P.eye} s={15} />
@@ -651,26 +746,26 @@ function SignInModal({
                   type="button"
                   onClick={handleResendConfirmation}
                   disabled={resendLoading}
-                  style={{ ...fullSpan, padding: 0, background: 'transparent', border: 'none', color: '#a5b4fc', textAlign: 'left', fontSize: 12, cursor: resendLoading ? 'wait' : 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
+                  style={{ ...fullSpan, padding: 0, background: 'transparent', border: 'none', color: '#d3e3fd', textAlign: 'left', fontSize: 12, cursor: resendLoading ? 'wait' : 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
                 >
                   {resendLoading ? 'Resending confirmation email…' : 'Resend confirmation email'}
                 </button>
               )}
 
-              <button type="submit" disabled={loading} style={{ ...fullSpan, width: '100%', padding: '14px', borderRadius: 14, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 700, fontSize: 15, border: 'none', cursor: loading ? 'wait' : 'pointer', boxShadow: '0 0 30px rgba(99,102,241,0.46)', fontFamily: '"Space Grotesk", sans-serif', letterSpacing: '0.01em', animation: loading ? 'none' : 'pulse-glow 3s ease-in-out infinite', opacity: loading ? 0.7 : 1 }}>
+              <button type="submit" disabled={loading} style={{ ...fullSpan, width: '100%', padding: '14px', borderRadius: 14, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 15, border: 'none', cursor: loading ? 'wait' : 'pointer', boxShadow: '0 14px 28px rgba(73,104,255,0.24)', fontFamily: '"Roboto", Arial, sans-serif', letterSpacing: '0.01em', animation: 'none', opacity: loading ? 0.7 : 1 }}>
                 {loading ? 'Working…' : mode === 'signup' ? 'Create Account' : 'Sign In'}
               </button>
 
-              <div style={{ ...fullSpan, display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 4px', color: '#475569' }}>
-                <div style={{ flex: 1, height: 1, background: 'rgba(99,102,241,0.14)' }} />
+              <div style={{ ...fullSpan, display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 4px', color: '#5f6368' }}>
+                <div style={{ flex: 1, height: 1, background: 'rgba(168,199,250,0.14)' }} />
                 <span style={{ fontSize: 12 }}>{mode === 'signup' ? 'Already have an account?' : 'Need an account?'}</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(99,102,241,0.14)' }} />
+                <div style={{ flex: 1, height: 1, background: 'rgba(168,199,250,0.14)' }} />
               </div>
 
               <button
                 type="button"
                 onClick={() => onModeChange(mode === 'signup' ? 'signin' : 'signup')}
-                style={{ ...fullSpan, width: '100%', padding: '13px 14px', borderRadius: 14, background: 'rgba(255,255,255,0.02)', color: '#f8fafc', fontWeight: 600, fontSize: 14, border: '1px solid rgba(99,102,241,0.14)', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ ...fullSpan, width: '100%', padding: '13px 14px', borderRadius: 14, background: 'linear-gradient(135deg, rgba(30,43,80,0.72), rgba(17,24,39,0.72))', color: '#e8edff', fontWeight: 600, fontSize: 14, border: '1px solid rgba(126,151,255,0.32)', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 {mode === 'signup' ? 'Go to Sign In' : 'Create Account'}
               </button>
@@ -678,7 +773,7 @@ function SignInModal({
           </div>
 
           {showPreview && (
-            <div className="auth-modal-preview" style={{ padding: previewPadding, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0, overflowY: 'auto', borderTop: isStacked ? '1px solid rgba(99,102,241,0.12)' : 'none', height: '100%' }}>
+            <div className="auth-modal-preview" style={{ padding: previewPadding, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0, overflowY: 'auto', borderTop: isStacked ? '1px solid rgba(168,199,250,0.12)' : 'none', height: '100%' }}>
             <div style={{ width: '100%', maxWidth: 520 }}>
               <DetectionPreview compact />
             </div>
@@ -712,103 +807,84 @@ function Landing({ onStart, onSignIn }) {
     { n: '03', title: 'Copy and use',     desc: 'Get your polished result instantly and copy it anywhere.' },
   ];
 
-  const heroBg  = isDark ? 'radial-gradient(ellipse at 50% 70%, rgba(79,70,229,0.14) 0%, transparent 65%), #050814' : 'radial-gradient(ellipse at 50% 70%, rgba(99,102,241,0.08) 0%, transparent 65%), #f0f4ff';
-  const bodyBg  = isDark ? '#050814' : '#f0f4ff';
-  const featBg  = isDark ? '#07091c' : '#ffffff';
-  const stepsBg = isDark ? '#060916' : '#f8fafc';
-  const text1   = isDark ? '#f8fafc' : '#0f172a';
-  const text2   = isDark ? '#94a3b8' : '#475569';
-  const text3   = isDark ? '#64748b' : '#94a3b8';
-  const cardBg  = isDark ? 'rgba(255,255,255,0.025)' : 'rgba(99,102,241,0.04)';
-  const cardBdr = isDark ? 'rgba(99,102,241,0.22)'   : 'rgba(99,102,241,0.18)';
+  const heroBg  = isDark ? 'radial-gradient(ellipse at 50% 60%, rgba(66,133,244,0.12) 0%, transparent 60%), #0e0f11' : 'radial-gradient(ellipse at 50% 60%, rgba(168,199,250,0.08) 0%, transparent 60%), #f0f4ff';
+  const bodyBg  = isDark ? '#0e0f11' : '#f0f4ff';
+  const featBg  = bodyBg;
+  const stepsBg = bodyBg;
+  const text1   = isDark ? '#e3e3e3' : '#1f1f1f';
+  const text2   = isDark ? '#8e918f' : '#5f6368';
+  const text3   = isDark ? '#8e918f' : '#8e918f';
+  const cardBg  = isDark ? 'rgba(255,255,255,0.025)' : 'rgba(168,199,250,0.04)';
+  const cardBdr = isDark ? 'rgba(168,199,250,0.22)'   : 'rgba(168,199,250,0.18)';
   const navBg   = isDark ? 'rgba(5,8,20,0.82)' : 'rgba(255,255,255,0.82)';
-  const navBdr  = isDark ? 'rgba(99,102,241,0.16)' : 'rgba(99,102,241,0.2)';
+  const navBdr  = isDark ? 'rgba(168,199,250,0.16)' : 'rgba(168,199,250,0.2)';
 
   return (
     <div className="page-fade" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: bodyBg, color: text1 }}>
 
-      <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(8px, 2vw, 14px)', flexWrap: 'nowrap', padding: '12px clamp(14px, 3vw, 32px)', background: navBg, backdropFilter: 'blur(22px)', borderBottom: `1px solid ${navBdr}` }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(8px, 2vw, 14px)', flexWrap: 'nowrap', padding: '12px clamp(14px, 3vw, 32px)', background: 'transparent', borderBottom: 'none' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 1.8vw, 10px)', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
-          <img src="/HumanClarity AI icon.png" alt="HumanClarity AI" style={{ height: 'clamp(24px, 6.2vw, 34px)', flexShrink: 0, filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.7))' }} />
-          <span style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 'clamp(11px, 3.7vw, 17px)', background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-0.01em', lineHeight: 1.1, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>HumanClarity AI</span>
+          <img src="/HumanClarity AI icon.png" alt="HumanClarity AI" style={{ height: 'clamp(24px, 6.2vw, 34px)', flexShrink: 0, filter: 'drop-shadow(0 0 5px rgba(168,199,250,0.28))' }} />
+          <span style={{ fontFamily: '"Roboto", Arial, sans-serif', fontWeight: 700, fontSize: 'clamp(11px, 3.7vw, 17px)', background: 'linear-gradient(135deg, #a8c7fa 0%, #d3e3fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: 0, lineHeight: 1.1, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>HumanClarity AI</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'clamp(8px, 1.6vw, 10px)', flex: '0 0 auto', flexShrink: 0 }}>
-          <button onClick={onSignIn} style={{ padding: '8px clamp(10px, 2.8vw, 14px)', borderRadius: 10, background: 'transparent', color: '#cbd5e1', fontWeight: 600, fontSize: 'clamp(11px, 3vw, 13px)', border: '1px solid rgba(99,102,241,0.16)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+          <button onClick={onSignIn} style={{ padding: '8px clamp(10px, 2.8vw, 14px)', borderRadius: 10, background: 'linear-gradient(135deg, rgba(30,43,80,0.7), rgba(17,24,39,0.72))', color: '#e8edff', fontWeight: 700, fontSize: 'clamp(11px, 3vw, 13px)', border: '1px solid rgba(126,151,255,0.32)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', boxShadow: '0 10px 22px rgba(0,0,0,0.18)' }}>
             Sign In
           </button>
-          <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 0 22px rgba(99,102,241,0.38)', whiteSpace: 'nowrap' }}>
+          <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', whiteSpace: 'nowrap' }}>
             Get Started Free
           </button>
         </div>
       </nav>
 
-      <section style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '96px 24px 120px', background: heroBg }}>
-        <ParticleCanvas count={80} isDark={isDark} />
-        <div style={{ position: 'absolute', top: '4%', left: '-8%', width: 640, height: 640, borderRadius: '50%', background: isDark ? 'radial-gradient(circle,rgba(99,102,241,0.24) 0%,transparent 70%)' : 'radial-gradient(circle,rgba(99,102,241,0.1) 0%,transparent 70%)', filter: 'blur(80px)', animation: 'drift1 14s ease-in-out infinite', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '22%', right: '-10%', width: 720, height: 720, borderRadius: '50%', background: isDark ? 'radial-gradient(circle,rgba(139,92,246,0.2) 0%,transparent 70%)' : 'radial-gradient(circle,rgba(139,92,246,0.08) 0%,transparent 70%)', filter: 'blur(100px)', animation: 'drift2 18s ease-in-out infinite', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '12%', left: '22%', width: 420, height: 420, borderRadius: '50%', background: isDark ? 'radial-gradient(circle,rgba(56,189,248,0.14) 0%,transparent 70%)' : 'radial-gradient(circle,rgba(56,189,248,0.07) 0%,transparent 70%)', filter: 'blur(60px)', animation: 'drift3 11s ease-in-out infinite', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)', backgroundSize: '46px 46px', pointerEvents: 'none', opacity: isDark ? 0.7 : 0.5 }} />
+      <section style={{ position: 'relative', minHeight: 'calc(100vh - 64px)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '72px 20px 96px', background: heroBg }}>
+        <ParticleCanvas count={46} isDark={isDark} speed={0.55} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 47%, rgba(66,133,244,0.2) 0%, rgba(66,133,244,0.08) 34%, transparent 68%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(14,15,17,0.25), #0e0f11 96%)', pointerEvents: 'none' }} />
 
-        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 1180, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 44, alignItems: 'center' }}>
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, border: '1px solid rgba(99,102,241,0.42)', background: isDark ? 'rgba(99,102,241,0.1)' : 'rgba(99,102,241,0.08)', padding: '6px 18px', marginBottom: 28, backdropFilter: 'blur(12px)', animation: 'float-y 3.5s ease-in-out infinite' }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 10px rgba(99,102,241,0.9), 0 0 22px rgba(99,102,241,0.5)', display: 'inline-block', flexShrink: 0 }} />
-              <span style={{ fontSize: 11, color: isDark ? '#a5b4fc' : '#4f46e5', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural writing, faster</span>
-            </div>
+        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 780, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+          <h1 style={{ fontSize: 'clamp(26px, 4vw, 52px)', fontWeight: 700, lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 14px', maxWidth: 700 }}>
+            Your humanizer to turn AI content into{' '}
+            <span style={{ background: 'linear-gradient(135deg, #a8c7fa 0%, #d3e3fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>undetectable, human</span>{' '}text.
+          </h1>
+          <p style={{ fontSize: 'clamp(14px, 1.8vw, 17px)', color: text2, margin: '0 0 36px', maxWidth: 560, lineHeight: 1.65 }}>
+            Bypass AI detectors like Turnitin and convince your readers — in seconds.
+          </p>
 
-            <h1 style={{ fontSize: 'clamp(42px, 6.4vw, 78px)', fontWeight: 700, lineHeight: 1.02, letterSpacing: '-0.04em', margin: '0 0 20px', fontFamily: '"Space Grotesk", sans-serif', maxWidth: 620 }}>
-              <span style={{ display: 'block', color: text1 }}>Make Your AI Text</span>
-              <span style={{ display: 'block', background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 52%, #67e8f9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: isDark ? 'drop-shadow(0 0 30px rgba(129,140,248,0.65))' : 'none' }}>
-                Sound Fully Human
-              </span>
-            </h1>
+          <button onClick={onStart} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '14px clamp(24px, 4vw, 44px)', borderRadius: 12, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 'clamp(14px, 1.8vw, 16px)', border: 'none', cursor: 'pointer', boxShadow: '0 12px 28px rgba(73,104,255,0.28)', marginBottom: 28, viewTransitionName: 'humanizer-composer' }}>
+            Go to Main App <Ic d={P.arrow} s={18} />
+          </button>
 
-            <p style={{ fontSize: 17, color: text2, lineHeight: 1.8, maxWidth: 520, margin: '0 0 34px' }}>
-              Beat Turnitin, GPTZero, ZeroGPT, Originality.ai, and other detectors.
-            </p>
-
-            <p style={{ fontSize: 14, color: text3, lineHeight: 1.7, maxWidth: 520, margin: '-10px 0 34px', letterSpacing: '0.01em' }}>
-              Perfect for assignments, theses, reports, and professional documents.
-            </p>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 20 }}>
-              <button onClick={onStart} style={{ padding: '16px 34px', borderRadius: 14, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 700, fontSize: 16, border: 'none', cursor: 'pointer', animation: 'pulse-glow 3s ease-in-out infinite', letterSpacing: '0.01em', fontFamily: '"Space Grotesk", sans-serif' }}>
-                Start for Free
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 24 }}>
+            {features.map((f) => (
+              <button key={f.title} onClick={onStart} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 38, borderRadius: 999, border: '1px solid rgba(168,199,250,0.16)', background: 'rgba(168,199,250,0.06)', color: '#c4c7c5', padding: '0 14px', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                <Ic d={f.icon} s={16} /> {f.title}
               </button>
-              <button onClick={onSignIn} style={{ padding: '15px 24px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', color: '#e2e8f0', fontWeight: 600, fontSize: 15, border: '1px solid rgba(99,102,241,0.18)', cursor: 'pointer', fontFamily: 'inherit' }}>
-                Sign In
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-              {previewFeatures.map((item) => (
-                <span key={item} style={{ fontSize: 12, color: text3, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  <Ic d={P.check2} s={12} /> {item}
-                </span>
-              ))}
-            </div>
+            ))}
           </div>
 
-          <div style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', inset: '-8% -6% auto 12%', height: 120, background: 'radial-gradient(circle, rgba(99,102,241,0.28), transparent 68%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
-            <DetectionPreview />
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 20 }}>
+            {previewFeatures.map((item) => (
+              <span key={item} style={{ fontSize: 12, color: text3, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <Ic d={P.check2} s={13} /> {item}
+              </span>
+            ))}
           </div>
         </div>
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 130, background: `linear-gradient(to top, ${isDark ? '#050814' : '#f0f4ff'}, transparent)`, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 96, background: `linear-gradient(to top, ${bodyBg}, transparent)`, pointerEvents: 'none' }} />
       </section>
-
       <section style={{ padding: '100px 24px', position: 'relative', background: featBg }}>
-        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 700, height: 1, background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.45), transparent)' }} />
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 700, height: 1, background: 'linear-gradient(90deg, transparent, rgba(168,199,250,0.45), transparent)' }} />
         <div style={{ maxWidth: 1120, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 58 }}>
-            <h2 style={{ fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 700, color: text1, marginBottom: 12, fontFamily: '"Space Grotesk", sans-serif' }}>Everything you need</h2>
+            <h2 style={{ fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 700, color: text1, marginBottom: 12, fontFamily: '"Roboto", Arial, sans-serif' }}>Everything you need</h2>
             <p style={{ color: text2, fontSize: 16 }}>Professional writing tools powered by Claude AI</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
             {features.map((f) => (
               <div key={f.title} style={{ position: 'relative', background: cardBg, backdropFilter: 'blur(14px)', border: `1px solid ${cardBdr}`, borderRadius: 20, padding: 28, overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, right: 0, width: 110, height: 110, background: 'radial-gradient(circle at top right, rgba(99,102,241,0.28), transparent 68%)', borderRadius: '0 20px 0 0', pointerEvents: 'none' }} />
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(99,102,241,0.14)', border: '1px solid rgba(99,102,241,0.32)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, color: '#818cf8', boxShadow: '0 0 18px rgba(99,102,241,0.28)' }}>
+                <div style={{ position: 'absolute', top: 0, right: 0, width: 110, height: 110, background: 'radial-gradient(circle at top right, rgba(168,199,250,0.28), transparent 68%)', borderRadius: '0 20px 0 0', pointerEvents: 'none' }} />
+                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(168,199,250,0.14)', border: '1px solid rgba(168,199,250,0.32)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, color: '#a8c7fa', boxShadow: '0 2px 8px rgba(0,0,0,0.24)' }}>
                   <Ic d={f.icon} s={22} />
                 </div>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: text1, marginBottom: 10 }}>{f.title}</h3>
@@ -819,14 +895,14 @@ function Landing({ onStart, onSignIn }) {
         </div>
       </section>
 
-      <section style={{ padding: '100px 24px', background: stepsBg, borderTop: `1px solid ${isDark ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.12)'}`, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 800, height: 350, background: 'radial-gradient(ellipse, rgba(99,102,241,0.1) 0%, transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+      <section style={{ padding: '100px 24px', background: stepsBg, borderTop: `1px solid ${isDark ? 'rgba(168,199,250,0.08)' : 'rgba(168,199,250,0.12)'}`, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 800, height: 350, background: 'radial-gradient(ellipse, rgba(168,199,250,0.1) 0%, transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 880, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ textAlign: 'center', fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 700, color: text1, marginBottom: 64, fontFamily: '"Space Grotesk", sans-serif' }}>Three steps to better writing</h2>
+          <h2 style={{ textAlign: 'center', fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 700, color: text1, marginBottom: 64, fontFamily: '"Roboto", Arial, sans-serif' }}>Three steps to better writing</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 44 }}>
             {steps.map((s) => (
               <div key={s.n} style={{ textAlign: 'center' }}>
-                <div style={{ width: 62, height: 62, borderRadius: '50%', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', fontSize: 19, fontWeight: 800, color: '#fff', boxShadow: '0 0 26px rgba(99,102,241,0.55), 0 0 65px rgba(99,102,241,0.22)', fontFamily: '"Space Grotesk", sans-serif' }}>
+                <div style={{ width: 62, height: 62, borderRadius: '50%', background: 'linear-gradient(135deg,#0b57d0,#1a73e8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', fontSize: 19, fontWeight: 800, color: '#fff', boxShadow: '0 8px 18px rgba(0,0,0,0.24)', fontFamily: '"Roboto", Arial, sans-serif' }}>
                   {s.n}
                 </div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: text1, marginBottom: 10 }}>{s.title}</h3>
@@ -839,18 +915,18 @@ function Landing({ onStart, onSignIn }) {
 
       <section style={{ padding: '130px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden', background: bodyBg }}>
         <ParticleCanvas count={45} isDark={isDark} />
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 900, height: 400, background: 'radial-gradient(ellipse, rgba(99,102,241,0.2) 0%, transparent 70%)', filter: 'blur(70px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.16) 1px, transparent 1px)', backgroundSize: '38px 38px', pointerEvents: 'none', opacity: isDark ? 0.75 : 0.5 }} />
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 900, height: 400, background: 'radial-gradient(ellipse, rgba(168,199,250,0.2) 0%, transparent 70%)', filter: 'blur(70px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(168,199,250,0.16) 1px, transparent 1px)', backgroundSize: '38px 38px', pointerEvents: 'none', opacity: isDark ? 0.75 : 0.5 }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontSize: 'clamp(28px, 5vw, 58px)', fontWeight: 700, color: text1, marginBottom: 16, fontFamily: '"Space Grotesk", sans-serif' }}>Ready to get started?</h2>
+          <h2 style={{ fontSize: 'clamp(28px, 5vw, 58px)', fontWeight: 700, color: text1, marginBottom: 16, fontFamily: '"Roboto", Arial, sans-serif' }}>Ready to get started?</h2>
           <p style={{ color: text2, marginBottom: 40, fontSize: 17, maxWidth: 400, margin: '0 auto 42px' }}>Join writers and students who use HumanClarity every day.</p>
-          <button onClick={onStart} style={{ padding: '18px 52px', borderRadius: 16, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 700, fontSize: 18, border: 'none', cursor: 'pointer', animation: 'pulse-glow 3s ease-in-out infinite', letterSpacing: '0.01em', fontFamily: '"Space Grotesk", sans-serif' }}>
+          <button onClick={onStart} style={{ padding: '18px 52px', borderRadius: 16, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 18, border: 'none', cursor: 'pointer', animation: 'none', letterSpacing: '0.01em', fontFamily: '"Roboto", Arial, sans-serif', boxShadow: '0 16px 34px rgba(73,104,255,0.24)' }}>
             Launch the App
           </button>
         </div>
       </section>
 
-      <footer style={{ padding: '22px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 12, borderTop: `1px solid ${isDark ? 'rgba(99,102,241,0.1)' : 'rgba(99,102,241,0.15)'}`, background: bodyBg, fontSize: 13, color: text3 }}>
+      <footer style={{ padding: '22px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 12, borderTop: `1px solid ${isDark ? 'rgba(168,199,250,0.1)' : 'rgba(168,199,250,0.15)'}`, background: bodyBg, fontSize: 13, color: text3 }}>
         <button onClick={onStart} style={{ color: text3, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: 13 }}>
           Enter App
         </button>
@@ -875,40 +951,35 @@ function Sidebar({ page, onNav, open, onClose, subscription }) {
       <button
         onClick={() => onNav(id)}
         style={{
-          display: 'flex', width: '100%', alignItems: 'center', gap: 10,
-          padding: '10px 12px', borderRadius: 11, marginBottom: 3,
-          background: active ? 'rgba(99,102,241,0.18)' : 'transparent',
-          color: active ? '#a5b4fc' : 'rgba(148,163,184,0.65)',
-          border: 'none', cursor: 'pointer', fontSize: 13.5, fontWeight: active ? 600 : 400,
-          borderLeft: active ? '2px solid #6366f1' : '2px solid transparent',
-          paddingLeft: active ? '10px' : '12px',
-          boxShadow: active ? 'inset 0 0 20px rgba(99,102,241,0.07), 0 0 12px rgba(99,102,241,0.1)' : 'none',
-          transition: 'all 0.18s', textAlign: 'left', fontFamily: 'inherit',
-          transform: active ? 'translateX(0)' : 'translateX(0)',
+          display: 'flex', width: '100%', alignItems: 'center', gap: 16,
+          minHeight: 58, padding: '0 18px', borderRadius: 12, marginBottom: 14,
+          background: active ? 'linear-gradient(135deg, rgba(91,111,255,0.22), rgba(124,82,255,0.12))' : 'transparent',
+          color: active ? '#f1f4ff' : '#98a2b8',
+          border: active ? '1px solid rgba(112,127,255,0.65)' : '1px solid transparent',
+          cursor: 'pointer', fontSize: 15.5, fontWeight: active ? 700 : 500,
+          boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.03)' : 'none',
+          transition: 'background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease',
+          textAlign: 'left', fontFamily: 'inherit',
         }}
         title={label}
         onMouseEnter={e => {
           if (!active) {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-            e.currentTarget.style.color = '#cbd5e1';
-            e.currentTarget.style.transform = 'translateX(4px)';
-            e.currentTarget.style.boxShadow = '0 0 16px rgba(99,102,241,0.08)';
+            e.currentTarget.style.background = 'rgba(255,255,255,0.035)';
+            e.currentTarget.style.color = '#c6cce0';
           }
         }}
         onMouseLeave={e => {
           if (!active) {
             e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = 'rgba(148,163,184,0.65)';
-            e.currentTarget.style.transform = 'translateX(0)';
-            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.color = '#98a2b8';
           }
         }}
       >
-        <span style={{ opacity: active ? 1 : 0.7, flexShrink: 0 }}>
-          <Ic d={P[icon]} s={17} />
+        <span style={{ color: active ? '#8d76ff' : '#8d96ad', flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+          <Ic d={P[icon]} s={22} />
         </span>
         <span style={{ flex: 1 }}>{label}</span>
-        {active && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 8px rgba(99,102,241,0.9)', flexShrink: 0 }} />}
+        {active && <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#835cff', boxShadow: '0 0 14px rgba(131,92,255,0.82)', flexShrink: 0 }} />}
       </button>
     );
   }
@@ -917,72 +988,50 @@ function Sidebar({ page, onNav, open, onClose, subscription }) {
     <>
       {open && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 20, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 20, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(6px)' }}
           onClick={onClose}
           className="lg:hidden"
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex w-52 flex-col transition-transform duration-200 lg:relative lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{ background: '#06090f', borderRight: '1px solid rgba(99,102,241,0.12)', width: 210 }}
+        className={`fixed inset-y-0 left-0 z-30 flex flex-col transition-transform duration-200 lg:relative lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: 'rgba(6,10,18,0.82)', borderRight: '1px solid rgba(91,104,132,0.28)', width: 294 }}
       >
-        {/* subtle grid overlay */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.06) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
-
-        {/* ambient glow at top */}
-        <div style={{ position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.15), transparent 70%)', filter: 'blur(30px)', pointerEvents: 'none' }} />
-
-        {/* logo */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '20px 18px 16px', borderBottom: '1px solid rgba(99,102,241,0.1)' }}>
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <img src="/HumanClarity AI icon.png" alt="" style={{ width: 38, height: 38, objectFit: 'contain', filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.7))' }} />
-          </div>
-          <div>
-            <p style={{ color: '#f1f5f9', fontWeight: 700, fontSize: 13.5, fontFamily: '"Space Grotesk", sans-serif', margin: 0, lineHeight: 1.2 }}>HumanClarity</p>
-            <p style={{ color: '#4f46e5', fontSize: 9.5, fontWeight: 700, letterSpacing: '0.07em', margin: 0, marginTop: 2 }}>AI WRITING TOOL</p>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(79,70,229,0.04), transparent 38%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 14, padding: '24px 26px 24px', borderBottom: '1px solid rgba(91,104,132,0.22)' }}>
+          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 50, height: 50, objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(124,82,255,0.28))' }} />
+          <div style={{ minWidth: 0 }}>
+            <p style={{ color: '#ffffff', fontWeight: 800, fontSize: 20, fontFamily: 'inherit', margin: 0, lineHeight: 1.1 }}>HumanClarity</p>
+            <p style={{ color: '#6380ff', fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', margin: '8px 0 0', textTransform: 'uppercase' }}>Natural Writing, Fast</p>
           </div>
         </div>
 
-        {/* nav */}
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '14px 10px', position: 'relative', zIndex: 1 }}>
+        <nav style={{ flex: 1, overflowY: 'auto', padding: '18px 14px', position: 'relative', zIndex: 1 }}>
           {NAV.map(({ id, label, icon }) => (
             <NavBtn key={id} id={id} label={label} icon={icon} />
           ))}
         </nav>
 
-        {/* bottom */}
-        <div style={{ padding: '10px 10px 14px', borderTop: '1px solid rgba(99,102,241,0.1)', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '0 16px 18px', position: 'relative', zIndex: 1 }}>
           <button
             onClick={() => onNav('pricing')}
             style={{
-              width: '100%',
-              padding: '12px 12px',
-              borderRadius: 14,
-              marginBottom: 10,
-              background: subscription.tier === 'pro'
-                ? 'rgba(52,211,153,0.1)'
-                : 'linear-gradient(135deg, rgba(79,70,229,0.98), rgba(124,58,237,0.98))',
-              color: '#fff',
-              border: subscription.tier === 'pro'
-                ? '1px solid rgba(52,211,153,0.24)'
-                : '1px solid rgba(99,102,241,0.28)',
-              cursor: 'pointer',
-              textAlign: 'left',
-              boxShadow: subscription.tier === 'pro'
-                ? '0 0 18px rgba(52,211,153,0.14)'
-                : '0 0 22px rgba(99,102,241,0.28)',
-              fontFamily: 'inherit',
+              width: '100%', padding: '20px 18px', borderRadius: 14, marginBottom: 18,
+              background: 'linear-gradient(145deg, rgba(21,25,48,0.92), rgba(15,19,34,0.92))',
+              color: '#fff', border: '1px solid rgba(112,127,255,0.25)', cursor: 'pointer',
+              textAlign: 'left', boxShadow: '0 18px 34px rgba(0,0,0,0.28)', fontFamily: 'inherit',
             }}
             title={subscription.tier === 'pro' ? 'View pricing' : 'Upgrade to Premium'}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 13, fontWeight: 700 }}>
-                {subscription.tier === 'pro' ? 'Premium Active' : 'Upgrade to Premium'}
-              </span>
-              <Ic d={P.zap} s={14} />
+            <div style={{ color: '#835cff', marginBottom: 14 }}><Ic d="workspace_premium" s={25} fill /></div>
+            <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
+              {subscription.tier === 'pro' ? 'Premium Active' : 'Upgrade to Premium'}
             </div>
-            <div style={{ fontSize: 11, lineHeight: 1.45, color: subscription.tier === 'pro' ? '#86efac' : 'rgba(255,255,255,0.82)' }}>
-              Unlock unlimited use and more
+            <div style={{ fontSize: 13, lineHeight: 1.55, color: '#aeb7cb', marginBottom: 18 }}>
+              Unlock unlimited use and powerful capabilities.
+            </div>
+            <div style={{ minHeight: 46, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', fontSize: 15, fontWeight: 800 }}>
+              Upgrade Now <Ic d={P.zap} s={17} />
             </div>
           </button>
           <NavBtn id="settings" label="Settings" icon="gear" />
@@ -991,73 +1040,54 @@ function Sidebar({ page, onNav, open, onClose, subscription }) {
     </>
   );
 }
-
 // ─── header ───────────────────────────────────────────────────────────────────
 
 function Header({ profile, onSignOut, onSignIn, onMenuOpen }) {
   const isSignedIn = Boolean(profile.name.trim() || profile.email.trim());
 
   return (
-    <header style={{ minHeight: 62, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 14px 10px 16px', background: 'rgba(6,9,15,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(99,102,241,0.12)', position: 'relative', zIndex: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: '1 1 auto' }}>
-        <button className="lg:hidden" onClick={onMenuOpen} aria-label="Open menu" style={{ color: '#94a3b8', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(99,102,241,0.16)', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, flexShrink: 0 }}>
-          <Ic d={P.menu} s={20} />
+    <header style={{ minHeight: 88, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '20px 26px', background: 'transparent', borderBottom: 'none', position: 'relative', zIndex: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+        <button onClick={onMenuOpen} aria-label="Open menu" style={{ color: '#d6dcf0', background: 'rgba(10,14,25,0.72)', border: '1px solid rgba(140,152,181,0.22)', borderRadius: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 46, height: 46, flexShrink: 0, backdropFilter: 'blur(14px)' }}>
+          <Ic d={P.menu} s={23} />
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 30, height: 30, objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.4))' }} />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#f8fafc', lineHeight: 1.05, letterSpacing: '-0.01em', fontFamily: '"Space Grotesk", sans-serif', whiteSpace: 'nowrap' }}>
-              HumanClarity
-            </div>
-            <div className="hidden sm:block" style={{ fontSize: 10, fontWeight: 600, color: '#818cf8', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3, whiteSpace: 'nowrap' }}>
-              Natural Writing, Fast
-            </div>
-          </div>
-        </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end', minWidth: 0 }}>
-        {isSignedIn ? (
-          <>
-            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', boxShadow: '0 0 14px rgba(99,102,241,0.5)', cursor: 'default', userSelect: 'none', flexShrink: 0 }}>
-              {initials(profile.name)}
-            </div>
-            <span className="hidden md:block" style={{ fontSize: 13, fontWeight: 500, color: '#94a3b8', maxWidth: 148, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.name || profile.email}</span>
-            <button onClick={onSignOut}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(99,102,241,0.22)', color: '#94a3b8', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', fontSize: 13, transition: 'all 0.15s', flexShrink: 0 }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.42)'; e.currentTarget.style.color = '#cbd5e1'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.22)'; e.currentTarget.style.color = '#94a3b8'; }}>
-              <Ic d={P.signout} s={15} />
-              <span className="hidden sm:inline">Sign Out</span>
-            </button>
-          </>
-        ) : (
-          <button onClick={onSignIn}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 0 18px rgba(99,102,241,0.38)', flexShrink: 0 }}>
-            <Ic d={P.user} s={14} />
-            <span className="hidden sm:inline">Sign In</span>
+      {isSignedIn ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff', cursor: 'default', userSelect: 'none', flexShrink: 0 }}>
+            {initials(profile.name)}
+          </div>
+          <span className="hidden md:block" style={{ fontSize: 14, fontWeight: 600, color: '#c7cde0', maxWidth: 170, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.name || profile.email}</span>
+          <button onClick={onSignOut}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 46, padding: '0 16px', borderRadius: 11, border: '1px solid rgba(126,151,255,0.34)', color: '#e8edff', background: 'linear-gradient(135deg, rgba(30,43,80,0.74), rgba(17,24,39,0.74))', cursor: 'pointer', fontSize: 14, fontWeight: 700, flexShrink: 0, boxShadow: '0 10px 24px rgba(0,0,0,0.2)' }}>
+            <Ic d={P.signout} s={18} />
+            <span className="hidden sm:inline">Sign Out</span>
           </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <button onClick={onSignIn}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 46, padding: '0 20px', borderRadius: 11, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 800, fontSize: 15, border: 'none', cursor: 'pointer', boxShadow: '0 14px 28px rgba(73,104,255,0.24)', flexShrink: 0 }}>
+          <Ic d={P.user} s={19} />
+          <span className="hidden sm:inline">Sign In</span>
+        </button>
+      )}
     </header>
   );
 }
-
 // ─── app background ───────────────────────────────────────────────────────────
 
 function AppBg() {
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-      <div style={{ position: 'absolute', top: '8%', right: '-8%', width: 550, height: 550, borderRadius: '50%', background: 'radial-gradient(circle,rgba(99,102,241,0.07) 0%,transparent 70%)', filter: 'blur(90px)', animation: 'drift1 25s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', bottom: '5%', left: '-5%', width: 450, height: 450, borderRadius: '50%', background: 'radial-gradient(circle,rgba(139,92,246,0.06) 0%,transparent 70%)', filter: 'blur(80px)', animation: 'drift3 32s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.055) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%, rgba(73,104,255,0.12), transparent 50%), radial-gradient(ellipse at 88% 65%, rgba(124,60,255,0.07), transparent 40%), #0e0f11' }} />
     </div>
   );
 }
 
 // ─── humanizer tool ───────────────────────────────────────────────────────────
 
-function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequireAuth, onUsageAdd }) {
+function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequireAuth, onUsageAdd, onNav }) {
   const [input,   setInput]   = useState(() => {
     if (typeof window === 'undefined') return '';
     try {
@@ -1087,9 +1117,14 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
       return '';
     }
   });
+  const [railOpen, setRailOpen] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1200 : window.innerWidth));
   const fileRef   = useRef(null);
   const wordCount = useMemo(() => wc(input), [input]);
   const remaining = wordsRemaining(subscription);
+  const isNarrowWorkbench = viewportWidth <= 860;
+  const showRailLabels = railOpen && viewportWidth > 760;
+  const railWidth = showRailLabels ? 292 : 76;
   const toolActions = [
     { id: 'summarize', label: 'Summarize', icon: P.doc },
     { id: 'expand', label: 'Expand', icon: P.zap },
@@ -1271,212 +1306,323 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
     } catch {}
   }, [selectedAction]);
 
-  const glass = { background: 'var(--glass)', backdropFilter: 'blur(20px)', border: '1px solid var(--glass-b)' };
+  useEffect(() => {
+    function handleResize() {
+      setViewportWidth(window.innerWidth);
+    }
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const outputPlaceholder = 'Your humanized text will appear here once processing is complete.';
+  const outputText = output?.text || outputPlaceholder;
+  const outputWords = output?.wordCount || 0;
+  const panelStyle = {
+    borderRadius: 15,
+    border: '1px solid rgba(145,158,191,0.22)',
+    background: 'linear-gradient(145deg, rgba(15,23,38,0.84), rgba(8,13,24,0.72))',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+  };
+  const actionButton = {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+    minHeight: 52, padding: '0 22px', borderRadius: 12,
+    border: '1px solid rgba(145,158,191,0.24)', background: 'rgba(17,24,39,0.78)',
+    color: '#d8deef', cursor: 'pointer', fontSize: 15, fontWeight: 500,
+    fontFamily: 'inherit', whiteSpace: 'nowrap',
+  };
+
+  function RailItem({ id, label, icon }) {
+    const active = id === 'tool';
+    return (
+      <button
+        onClick={() => {
+          if (id === 'tool') {
+            setRailOpen(false);
+            return;
+          }
+          onNav?.(id);
+        }}
+        title={label}
+        style={{
+          width: '100%',
+          minHeight: 48,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          borderRadius: 13,
+          padding: showRailLabels ? '0 14px' : 0,
+          justifyContent: showRailLabels ? 'flex-start' : 'center',
+          border: active ? '1px solid rgba(113,131,255,0.55)' : '1px solid transparent',
+          background: active ? 'rgba(76,88,180,0.2)' : 'transparent',
+          color: active ? '#eef2ff' : '#9ca8bd',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          fontSize: 15,
+          fontWeight: active ? 800 : 600,
+        }}
+      >
+        <span style={{ color: active ? '#8f7cff' : '#9ca8bd', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+          <Ic d={P[icon]} s={22} />
+        </span>
+        {showRailLabels && <span>{label}</span>}
+        {showRailLabels && active && <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#8f5cff' }} />}
+      </button>
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100%' }}>
+    <div style={{ height: '100dvh', position: 'relative', overflow: 'hidden', background: '#0e0f11', color: '#f8fafc', viewTransitionName: 'humanizer-page' }}>
+      <ParticleCanvas count={48} isDark speed={0.52} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 22%, rgba(66,133,244,0.2), transparent 35%), radial-gradient(ellipse at 50% 46%, rgba(37,99,235,0.12), transparent 48%), linear-gradient(180deg, rgba(14,15,17,0.7), #0e0f11 96%)', pointerEvents: 'none' }} />
 
-      {/* header */}
-      <div style={{ textAlign: 'center', marginBottom: 36, maxWidth: 600 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 40, height: 40, objectFit: 'contain', filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.7))' }} />
+      <aside style={{ position: 'absolute', zIndex: 5, top: 0, left: 0, bottom: 0, width: railWidth, transition: 'width 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderRight: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.72)', backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', padding: 12, boxSizing: 'border-box' }}>
+        <button onClick={() => setRailOpen(v => !v)} aria-label={railOpen ? 'Collapse navigation' : 'Expand navigation'} style={{ minHeight: 50, border: 'none', background: 'transparent', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: 12, padding: showRailLabels ? '0 8px' : 0, cursor: 'pointer', fontFamily: 'inherit' }}>
+          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 31, height: 31, objectFit: 'contain' }} />
+          {showRailLabels && (
+            <span style={{ textAlign: 'left' }}>
+              <span style={{ display: 'block', fontSize: 18, fontWeight: 900 }}>HumanClarity</span>
+              <span style={{ display: 'block', marginTop: 4, color: '#6d87ff', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural Writing, Fast</span>
+            </span>
+          )}
+        </button>
+        <nav style={{ display: 'grid', gap: 8, marginTop: 18 }}>
+          {NAV.map(item => <RailItem key={item.id} {...item} />)}
+        </nav>
+        <div style={{ marginTop: 'auto', display: 'grid', gap: 8 }}>
+          <button
+            onClick={() => onNav?.('pricing')}
+            title="Upgrade to Premium"
+            style={{ width: '100%', minHeight: showRailLabels ? 172 : 50, borderRadius: 15, border: '1px solid rgba(113,131,255,0.25)', background: showRailLabels ? 'linear-gradient(145deg, rgba(23,30,58,0.92), rgba(13,18,32,0.92))' : 'transparent', color: '#fff', padding: showRailLabels ? 16 : 0, display: 'flex', flexDirection: showRailLabels ? 'column' : 'row', alignItems: showRailLabels ? 'flex-start' : 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: showRailLabels ? 8 : 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+          >
+            <span style={{ color: '#8f5cff', display: 'grid', placeItems: 'center' }}><Ic d="workspace_premium" s={showRailLabels ? 25 : 22} fill /></span>
+            {showRailLabels && (
+              <>
+                <span style={{ fontSize: 15, fontWeight: 900 }}>Upgrade to Premium</span>
+                <span style={{ color: '#aeb8ce', fontSize: 12.5, lineHeight: 1.45 }}>Unlock unlimited use and powerful capabilities.</span>
+                <span style={{ width: '100%', minHeight: 40, marginTop: 8, borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 900 }}>
+                  Upgrade Now <Ic d={P.zap} s={16} />
+                </span>
+              </>
+            )}
+          </button>
+          <RailItem id="settings" label="Settings" icon="gear" />
         </div>
-        <h1 style={{ fontSize: 'clamp(22px, 4vw, 38px)', fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', margin: '0 0 10px' }}>
-          <span style={{ color: 'var(--text1)' }}>Humanize Your </span>
-          <span style={{ background: 'linear-gradient(135deg, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>AI Text</span>
-        </h1>
-        <p style={{ color: 'var(--text2)', fontSize: 15, margin: 0 }}>Make AI-generated content undetectable.</p>
-      </div>
+      </aside>
 
-      <div style={{ width: '100%', maxWidth: 740 }}>
-        <div style={{ marginBottom: 14, padding: '12px 16px', borderRadius: 16, background: subscription.tier === 'pro' ? 'rgba(52,211,153,0.08)' : 'rgba(99,102,241,0.08)', border: subscription.tier === 'pro' ? '1px solid rgba(52,211,153,0.2)' : '1px solid rgba(99,102,241,0.18)', color: subscription.tier === 'pro' ? '#86efac' : '#c4b5fd', fontSize: 13 }}>
-          {subscription.tier === 'pro'
-            ? `Pro plan active. Unlimited processing unlocked.`
-            : isSignedIn
-              ? `Free plan: ${remaining} of ${FREE_WORD_LIMIT} words remaining.`
-              : `Guest mode: ${remaining} of ${FREE_WORD_LIMIT} free words remaining. Sign in to save your usage and unlock upgrades.`}
+      <header style={{ position: 'relative', zIndex: 3, height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px clamp(16px, 3vw, 32px)', paddingLeft: `calc(${railWidth}px + clamp(16px, 3vw, 32px))`, transition: 'padding-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderBottom: 'none', background: 'transparent', boxSizing: 'border-box' }}>
+        <div style={{ color: '#fff', fontSize: 'clamp(13px, 3.6vw, 18px)', fontWeight: 800, whiteSpace: 'nowrap' }}>
+          {viewportWidth <= 520 ? 'HC AI' : 'HumanClarity AI'}
         </div>
-
-        {/* input card */}
-        <div style={{ ...glass, borderRadius: 20, overflow: 'hidden', boxShadow: '0 0 0 1px rgba(99,102,241,0.05), 0 20px 50px rgba(0,0,0,0.25)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 18px', borderBottom: '1px solid var(--glass-b)' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text3)' }}>Input</span>
-            <span style={{ fontSize: 11, color: 'var(--text3)', fontWeight: 500 }}>{wordCount} words</span>
-          </div>
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Paste your AI text here or upload a document to begin..."
-            style={{ minHeight: 200, width: '100%', resize: 'none', background: 'transparent', padding: '16px 18px', color: 'var(--text1)', fontSize: 14, outline: 'none', boxSizing: 'border-box', lineHeight: 1.7, fontFamily: 'inherit' }}
-            disabled={loading || uploading}
-          />
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, padding: '12px 18px', borderTop: '1px solid var(--glass-b)' }}>
-            <input ref={fileRef} type="file" accept={UPLOAD_ACCEPT} style={{ display: 'none' }} onChange={handleFile} />
-            <button onClick={() => fileRef.current?.click()}
-              disabled={loading || uploading}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 9, border: '1px solid var(--glass-b)', color: 'var(--text2)', background: 'transparent', cursor: (loading || uploading) ? 'not-allowed' : 'pointer', fontSize: 12, fontFamily: 'inherit', transition: 'border-color 0.15s', opacity: (loading || uploading) ? 0.5 : 1 }}>
-              <Ic d={P.upload} s={13} /> {uploading ? 'Uploading…' : 'Upload'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {!isSignedIn && viewportWidth > 520 && (
+            <button onClick={() => onRequireAuth('signin', 'tool')} style={{ minHeight: 38, padding: '0 clamp(10px, 2.4vw, 18px)', borderRadius: 9, border: '1px solid rgba(126,151,255,0.34)', color: '#e8edff', background: 'linear-gradient(135deg, rgba(30,43,80,0.78), rgba(17,24,39,0.74))', boxShadow: '0 10px 22px rgba(0,0,0,0.18)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+              Sign In
             </button>
-            <span style={{ fontSize: 11, color: 'var(--text3)' }}>PDF, DOCX, TXT</span>
-            <div style={{ flex: 1 }} />
-            {toolActions.map(action => (
-              <button key={action.id} onClick={() => toggleAction(action.id)}
-                disabled={loading || uploading}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 9, border: selectedAction === action.id ? '1px solid rgba(129,140,248,0.55)' : '1px solid var(--glass-b)', color: selectedAction === action.id ? '#e9d5ff' : 'var(--text2)', background: selectedAction === action.id ? 'rgba(99,102,241,0.18)' : 'rgba(99,102,241,0.06)', cursor: 'pointer', fontSize: 12, opacity: (loading || uploading) ? 0.4 : 1, fontFamily: 'inherit', transition: 'all 0.15s', boxShadow: selectedAction === action.id ? '0 0 16px rgba(99,102,241,0.2)' : 'none' }}>
-                <Ic d={action.icon} s={13} />
-                {action.label}
-              </button>
-            ))}
-            <button onClick={runHumanizeFlow}
-              disabled={!input.trim() || loading || uploading}
-              style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 20px', borderRadius: 11, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: (!input.trim() || loading || uploading) ? 'none' : '0 0 22px rgba(99,102,241,0.45)', opacity: (!input.trim() || loading || uploading) ? 0.5 : 1, animation: (!input.trim() || loading || uploading) ? 'none' : 'pulse-glow 3s ease-in-out infinite', fontFamily: 'inherit' }}>
-              <Ic d={P.spark} s={14} />
-              {loading ? 'Processing…' : 'Humanize Now'}
-            </button>
-          </div>
+          )}
+          <button onClick={() => onRequireAuth(isSignedIn ? 'signin' : 'signup', 'tool')} style={{ minHeight: 38, padding: '0 clamp(12px, 2.8vw, 22px)', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+            {isSignedIn ? 'Dashboard' : viewportWidth <= 520 ? 'Start' : 'Get Started Free'}
+          </button>
         </div>
+      </header>
 
-        {/* error */}
-        {error && (
-          <div style={{ marginTop: 14, padding: '12px 16px', borderRadius: 14, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171', fontSize: 13 }}>
-            {error}
-          </div>
-        )}
+      <main style={{ position: 'relative', zIndex: 2, height: 'calc(100dvh - 62px)', marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: 'clamp(12px, 2vh, 22px) clamp(18px, 4vw, 44px) clamp(12px, 2vh, 22px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <section style={{ textAlign: 'center', maxWidth: 900, margin: '0 auto clamp(14px, 2.4vh, 24px)', flex: '0 0 auto' }}>
+          <img src="/HumanClarity AI icon.png" alt="" style={{ width: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', height: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', objectFit: 'contain', margin: '0 auto clamp(8px, 1.4vh, 14px)', display: 'block', filter: 'drop-shadow(0 0 6px rgba(124,82,255,0.28))' }} />
+          <h1 style={{ margin: '0 0 clamp(6px, 1vh, 10px)', fontSize: isNarrowWorkbench ? 'clamp(28px, 8vw, 38px)' : 'clamp(30px, 5.2vh, 52px)', lineHeight: 1.06, fontWeight: 800, letterSpacing: 0 }}>
+            Your writing, <span style={{ background: 'linear-gradient(135deg,#e9edf7 0%, #7fb1ff 62%, #6f8cff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>clearer.</span>
+          </h1>
+          <p style={{ margin: 0, color: '#b8c2d8', fontSize: isNarrowWorkbench ? 13 : 'clamp(14px, 2vh, 18px)', lineHeight: 1.45 }}>AI that makes your ideas sound natural, authentic, and undetectable.</p>
+        </section>
 
-        {/* output */}
-        {output && (
-          <div style={{ marginTop: 18, ...glass, borderRadius: 20, overflow: 'hidden', borderColor: 'rgba(52,211,153,0.25)', boxShadow: '0 0 30px rgba(52,211,153,0.07), 0 20px 50px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 18px', borderBottom: '1px solid rgba(52,211,153,0.15)', background: 'linear-gradient(90deg, rgba(52,211,153,0.07), transparent)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#34d399' }}>
-                <Ic d={P.check} s={16} />
-                <span style={{ fontSize: 13, fontWeight: 600 }}>Generation Complete</span>
+        <section style={{ width: 'min(100%, 1120px)', margin: '0 auto', borderRadius: 20, border: '1px solid rgba(70,103,178,0.55)', background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))', boxShadow: '0 24px 70px rgba(0,0,0,0.35), 0 0 70px rgba(37,99,235,0.12)', overflow: 'hidden', viewTransitionName: 'humanizer-composer', flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <div className="humanizer-workbench-grid" style={{ display: 'grid', gridTemplateColumns: isNarrowWorkbench ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 1px minmax(0, 1fr)', gap: 0, flex: '1 1 auto', minHeight: 0 }}>
+            <div style={{ padding: 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
+                <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.doc} s={21} /></span>
+                <span style={{ fontSize: 15, fontWeight: 800 }}>Input</span>
+                <span style={{ marginLeft: 'auto', color: '#aeb8ce', fontSize: 13 }}>{wordCount} words</span>
+                <button onClick={() => { setInput(''); setOutput(null); setError(''); }} style={{ minHeight: 30, padding: '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>Clear</button>
               </div>
-              <button onClick={copyOutput}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, color: copied ? '#34d399' : '#818cf8', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit' }}>
-                <Ic d={P.copy} s={13} />{copied ? 'Copied!' : 'Copy Text'}
-              </button>
+              <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ position: 'relative', flex: '1 1 auto', minHeight: 0, overflow: 'hidden' }}>
+                  <textarea
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder="Paste your AI text here or upload a document to begin..."
+                    aria-label="Input text"
+                    style={{ width: '100%', height: '100%', resize: 'none', border: 'none', outline: 'none', background: 'transparent', color: '#eef2ff', padding: '24px 28px 18px 24px', fontFamily: 'inherit', fontSize: 16, lineHeight: 1.7, boxSizing: 'border-box', overflow: 'auto' }}
+                    disabled={loading || uploading}
+                  />
+                  {!input.trim() && !isNarrowWorkbench && (
+                    <div style={{ position: 'absolute', inset: '88px 0 auto 0', display: 'grid', gridTemplateColumns: '1fr 1px 1fr', alignItems: 'center', pointerEvents: 'none' }}>
+                      <div style={{ display: 'grid', justifyItems: 'center', gap: 6, color: '#d7def0' }}>
+                        <Ic d={P.upload} s={28} />
+                        <span style={{ fontSize: 14, fontWeight: 700 }}>Upload a file</span>
+                        <span style={{ fontSize: 12, color: '#98a4bb' }}>or drag and drop here</span>
+                      </div>
+                      <div style={{ height: 96, background: 'rgba(145,158,191,0.12)' }} />
+                      <div style={{ display: 'grid', justifyItems: 'center', gap: 6, color: '#d7def0' }}>
+                        <Ic d={P.pen} s={28} />
+                        <span style={{ fontSize: 14, fontWeight: 700 }}>Start writing</span>
+                        <span style={{ fontSize: 12, color: '#98a4bb' }}>Begin with a blank canvas</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {!isNarrowWorkbench && (
+                  <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 20px 16px', color: '#94a0b7', fontSize: 12, pointerEvents: 'none' }}>
+                    <span>{wordCount} words</span>
+                    <span>Max 25,000 words</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div style={{ padding: '18px', color: 'var(--text1)', fontSize: 14, lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>
-              {output.text}
+
+            <div className="humanizer-workbench-divider" style={{ display: isNarrowWorkbench ? 'none' : 'block', background: 'rgba(145,158,191,0.13)', margin: 'clamp(12px, 1.8vh, 20px) 0 clamp(12px, 1.8vh, 20px)', height: 'auto', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 38, height: 38, borderRadius: '50%', background: 'rgba(17,24,39,0.92)', border: '1px solid rgba(145,158,191,0.18)', display: 'grid', placeItems: 'center', color: '#a9c5ff' }}><Ic d="sync_alt" s={21} /></div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 18px', borderTop: '1px solid rgba(52,211,153,0.12)' }}>
-              <span style={{ fontSize: 12, color: 'var(--text3)' }}>{output.wordCount} words</span>
-              <span style={{ fontSize: 12, color: 'var(--text3)' }}>{ACTION_LABEL[output.action]}</span>
+
+            <div style={{ padding: 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: isNarrowWorkbench ? 'none' : 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
+                <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.shield} s={22} /></span>
+                <span style={{ fontSize: 15, fontWeight: 800 }}>Output</span>
+                <span style={{ marginLeft: 'auto', color: '#aeb8ce', fontSize: 13 }}>{outputWords} words</span>
+                <button onClick={() => {
+                  navigator.clipboard.writeText(outputText);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }} style={{ minHeight: 30, padding: '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center', fontFamily: 'inherit' }}><Ic d={P.copy} s={15} />{copied ? 'Copied' : 'Copy'}</button>
+              </div>
+              <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', padding: 'clamp(16px, 2vh, 24px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <p style={{ margin: 0, color: output?.text ? '#f4f7fb' : '#98a4bb', fontSize: 'clamp(13px, 1.8vh, 16px)', lineHeight: 1.65, whiteSpace: 'pre-wrap', overflow: 'hidden' }}>{outputText}</p>
+                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 28, padding: '0 12px', borderRadius: 7, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(148,163,184,0.08)', color: '#b9c4da', fontSize: 13 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: output?.text ? '#6ee7b7' : '#70809e', boxShadow: output?.text ? '0 0 10px rgba(110,231,183,0.5)' : 'none' }} /> {output?.text ? 'AI-Humanized' : 'Ready for output'}</span>
+                  {output?.text && (
+                    <>
+                      <span style={{ marginLeft: 'auto', color: '#b2bdd2', fontSize: 12 }}>Rate this result</span>
+                      <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d="thumb_up" s={20} /></button>
+                      <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d="thumb_down" s={20} /></button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        )}
-      </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isNarrowWorkbench ? 8 : 'clamp(8px, 1.4vw, 16px)', padding: isNarrowWorkbench ? '10px 20px 12px' : 'clamp(10px, 1.4vh, 14px) 20px clamp(10px, 1.8vh, 18px)', borderTop: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.22)', flex: '0 0 auto' }}>
+            <input ref={fileRef} type="file" accept={UPLOAD_ACCEPT} style={{ display: 'none' }} onChange={handleFile} />
+            <button onClick={() => fileRef.current?.click()} disabled={loading || uploading} style={{ ...actionButton, minWidth: 132, background: 'rgba(35,45,65,0.88)', opacity: (loading || uploading) ? 0.55 : 1 }}><Ic d={P.upload} s={24} /> {uploading ? 'Uploading...' : 'Upload'}</button>
+            <span style={{ color: '#b2bdd2', fontSize: 13, marginRight: isNarrowWorkbench ? 0 : 'auto' }}>PDF, DOCX, TXT</span>
+            {toolActions.map(action => (
+              <button key={action.id} onClick={() => toggleAction(action.id)} disabled={loading || uploading} style={{ ...actionButton, background: selectedAction === action.id ? 'rgba(77,100,190,0.28)' : actionButton.background, border: selectedAction === action.id ? '1px solid rgba(126,151,255,0.54)' : actionButton.border, opacity: (loading || uploading) ? 0.5 : 1 }}><Ic d={action.icon} s={19} /> {action.label}</button>
+            ))}
+            <button
+              className={`hc-loading-button${loading ? ' is-loading' : ''}`}
+              onClick={runHumanizeFlow}
+              disabled={!input.trim() || loading || uploading}
+              aria-busy={loading}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 11, minHeight: 52, minWidth: 196, padding: '0 25px', borderRadius: 12, background: 'linear-gradient(135deg,#0b64f4,#0874ff)', color: '#fff', fontWeight: 900, fontSize: 16, border: 'none', cursor: (!input.trim() || loading || uploading) ? 'not-allowed' : 'pointer', opacity: (!input.trim() || loading || uploading) && !loading ? 0.84 : 1, boxShadow: loading ? '0 18px 36px rgba(73,104,255,0.28)' : (!input.trim() || loading || uploading) ? 'none' : '0 16px 30px rgba(8,116,255,0.24)', fontFamily: 'inherit' }}
+            >
+              {loading ? <span className="spin-soft" style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.38)', borderTopColor: '#fff', flexShrink: 0 }} /> : <Ic d={P.spark} s={20} />}
+              {loading ? 'Humanizing...' : 'Humanize Now'}
+            </button>
+          </div>
+        </section>
+
+        {error && <div style={{ width: 'min(100%, 1120px)', margin: '16px auto 0', padding: '12px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', fontSize: 13 }}>{error}</div>}
+
+        <div style={{ margin: 'clamp(8px, 1.4vh, 14px) auto 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, color: '#9ca8bd', fontSize: 13, flex: '0 0 auto' }}>
+          <Ic d={P.shield} s={18} /> Your content is encrypted and never stored.
+        </div>
+      </main>
     </div>
   );
 }
-
 // ─── dashboard ────────────────────────────────────────────────────────────────
 
 const STAT_META = [
-  { bg: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(79,70,229,0.08))',  bdr: 'rgba(99,102,241,0.28)',  glow: 'rgba(99,102,241,0.15)',  ic: '#818cf8' },
-  { bg: 'linear-gradient(135deg, rgba(139,92,246,0.18), rgba(109,40,217,0.08))', bdr: 'rgba(139,92,246,0.28)', glow: 'rgba(139,92,246,0.12)', ic: '#a78bfa' },
+  { bg: 'linear-gradient(135deg, rgba(168,199,250,0.18), rgba(66,133,244,0.08))',  bdr: 'rgba(168,199,250,0.28)',  glow: 'rgba(168,199,250,0.15)',  ic: '#a8c7fa' },
+  { bg: 'linear-gradient(135deg, rgba(66,133,244,0.18), rgba(109,40,217,0.08))', bdr: 'rgba(66,133,244,0.28)', glow: 'rgba(66,133,244,0.12)', ic: '#a78bfa' },
   { bg: 'linear-gradient(135deg, rgba(52,211,153,0.15), rgba(16,185,129,0.06))', bdr: 'rgba(52,211,153,0.25)', glow: 'rgba(52,211,153,0.1)',  ic: '#34d399' },
 ];
 
 function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessage }) {
-  const cardStyle = {
-    background: 'var(--glass)',
-    backdropFilter: 'blur(16px)',
-    border: '1px solid var(--glass-b)',
-    borderRadius: 20,
-    padding: '22px',
-  };
-
+  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94' };
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 18 }}>
-        <div style={{ ...cardStyle, boxShadow: subscription.tier !== 'pro' ? '0 0 26px rgba(99,102,241,0.12)' : 'none' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 16 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '20px 20px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#a5b4fc' }}>Free</span>
-            {subscription.tier !== 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: '#34d399', background: 'rgba(52,211,153,0.14)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 999, padding: '2px 9px' }}>Current</span>}
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.t3 }}>Free</span>
+            {subscription.tier !== 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: '#4ade80', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 999, padding: '2px 8px' }}>Current</span>}
           </div>
-          <p style={{ fontSize: 30, fontWeight: 700, margin: '0 0 6px', color: 'var(--text1)', fontFamily: '"Space Grotesk", sans-serif' }}>0 GHS</p>
-          <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 0 14px' }}>Signed-in access to the Humanizer with a limited quota.</p>
-          <div style={{ display: 'grid', gap: 10, fontSize: 13, color: 'var(--text2)' }}>
-            <span>• {wordsRemaining(subscription)} of {FREE_WORD_LIMIT} words remaining</span>
-            <span>• Humanizer access only</span>
-            <span>• Dashboard, Profile, History, and Saved Docs locked</span>
-            <span>• Account required before processing text</span>
+          <p style={{ fontSize: 28, fontWeight: 800, margin: '0 0 4px', color: C.t1, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>0 GHS</p>
+          <p style={{ fontSize: 12, color: C.t2, margin: '0 0 14px', lineHeight: 1.5 }}>Limited quota for the Humanizer.</p>
+          <div style={{ display: 'grid', gap: 8, fontSize: 12, color: C.t2 }}>
+            <span>· {wordsRemaining(subscription)} of {FREE_WORD_LIMIT} words remaining</span>
+            <span>· Humanizer access only</span>
+            <span>· Dashboard and workspace locked</span>
           </div>
         </div>
 
-        <div style={{ ...cardStyle, border: '1px solid rgba(99,102,241,0.28)', boxShadow: '0 0 34px rgba(99,102,241,0.16)' }}>
+        <div style={{ background: 'rgba(73,104,255,0.07)', border: '1px solid rgba(73,104,255,0.24)', borderRadius: 14, padding: '20px 20px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#c4b5fd' }}>Premium</span>
-            {subscription.tier === 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: '#34d399', background: 'rgba(52,211,153,0.14)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 999, padding: '2px 9px' }}>Active</span>}
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#a8c7fa' }}>Premium</span>
+            {subscription.tier === 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: '#4ade80', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 999, padding: '2px 8px' }}>Active</span>}
           </div>
-          <p style={{ fontSize: 30, fontWeight: 700, margin: '0 0 6px', color: 'var(--text1)', fontFamily: '"Space Grotesk", sans-serif' }}>
+          <p style={{ fontSize: 28, fontWeight: 800, margin: '0 0 4px', color: C.t1, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>
             {PRO_PRICE_GHS} GHS
-            <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text2)', marginLeft: 8 }}>~ ${PRO_PRICE_USD_ESTIMATE.toFixed(2)} / month</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: C.t2, marginLeft: 6 }}>/ month</span>
           </p>
-          <p style={{ fontSize: 13, color: 'var(--text2)', margin: '0 0 14px' }}>Full workspace access and unlimited processing, paid through Paystack.</p>
-          <div style={{ display: 'grid', gap: 10, fontSize: 13, color: 'var(--text2)', marginBottom: 18 }}>
-            <span>• Unlimited words</span>
-            <span>• Full Dashboard access</span>
-            <span>• Profile, History, and Saved Docs unlocked</span>
-            <span>• Payment status saved to your account</span>
+          <p style={{ fontSize: 12, color: C.t2, margin: '0 0 14px', lineHeight: 1.5 }}>Full workspace access via Paystack.</p>
+          <div style={{ display: 'grid', gap: 8, fontSize: 12, color: C.t2, marginBottom: 16 }}>
+            <span>· Unlimited words</span>
+            <span>· Full dashboard and all pages</span>
+            <span>· History, saved docs, profile</span>
           </div>
           {subscription.tier === 'pro' ? (
-            <button disabled style={{ padding: '11px 18px', borderRadius: 12, border: '1px solid rgba(52,211,153,0.24)', color: '#86efac', background: 'rgba(52,211,153,0.08)', cursor: 'default', fontSize: 13, fontFamily: 'inherit', width: '100%' }}>
-              Premium Active
-            </button>
+            <div style={{ padding: '9px 16px', borderRadius: 9, border: '1px solid rgba(74,222,128,0.22)', color: '#4ade80', background: 'rgba(74,222,128,0.07)', fontSize: 12, fontWeight: 700, textAlign: 'center' }}>Premium Active</div>
           ) : (
-            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '11px 18px', borderRadius: 12, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', cursor: upgradeLoading ? 'wait' : 'pointer', fontSize: 13, fontFamily: 'inherit', width: '100%', boxShadow: '0 0 20px rgba(99,102,241,0.34)', opacity: upgradeLoading ? 0.72 : 1 }}>
+            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ width: '100%', padding: '10px 16px', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', cursor: upgradeLoading ? 'wait' : 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', opacity: upgradeLoading ? 0.72 : 1 }}>
               {upgradeLoading ? 'Redirecting to Paystack…' : 'Pay with Paystack'}
             </button>
           )}
         </div>
       </div>
-
-      {upgradeMessage && (
-        <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#34d399' : '#94a3b8', margin: 0 }}>
-          {upgradeMessage}
-        </p>
-      )}
+      {upgradeMessage && <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#4ade80' : '#8e918f', margin: 0 }}>{upgradeMessage}</p>}
     </div>
   );
 }
 
 function PricingPage({ subscription, onUpgrade, upgradeLoading, upgradeMessage, isSignedIn, onSignIn, notice = '' }) {
+  const C = { t1: '#e3e3e3', t2: '#8e918f', accent: '#a8c7fa' };
   return (
-    <div style={{ padding: '32px 24px 40px', maxWidth: 1040 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 26 }}>
+    <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px', maxWidth: 760 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', color: 'var(--text1)', margin: '0 0 6px' }}>Plans & Pricing</h1>
-          <p style={{ color: 'var(--text2)', fontSize: 14, margin: 0 }}>
-            {isSignedIn
-              ? `Current plan: ${planLabel(subscription)}.`
-              : 'Sign in to connect a plan to your account and unlock the full workspace.'}
+          <h1 style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 800, color: C.t1, margin: '0 0 5px' }}>Plans & Pricing</h1>
+          <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>
+            {isSignedIn ? `Current plan: ${planLabel(subscription)}.` : 'Sign in to connect a plan to your account.'}
           </p>
         </div>
         {!isSignedIn ? (
-          <button onClick={onSignIn} style={{ padding: '10px 18px', borderRadius: 11, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 0 20px rgba(99,102,241,0.35)', fontFamily: 'inherit' }}>
-            Sign In to Continue
+          <button onClick={onSignIn} style={{ padding: '9px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', fontFamily: 'inherit' }}>
+            Sign In
           </button>
         ) : subscription.tier !== 'pro' ? (
-          <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '10px 18px', borderRadius: 11, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', boxShadow: '0 0 20px rgba(99,102,241,0.35)', fontFamily: 'inherit', opacity: upgradeLoading ? 0.72 : 1 }}>
-            {upgradeLoading ? 'Opening Paystack...' : 'Upgrade to Premium'}
+          <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '9px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', fontFamily: 'inherit', opacity: upgradeLoading ? 0.72 : 1 }}>
+            {upgradeLoading ? 'Opening Paystack…' : 'Upgrade to Premium'}
           </button>
         ) : null}
       </div>
-
       {notice && (
-        <div style={{ marginBottom: 18, padding: '12px 16px', borderRadius: 16, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.18)', color: '#c4b5fd', fontSize: 13 }}>
+        <div style={{ marginBottom: 16, padding: '12px 16px', borderRadius: 12, background: 'rgba(168,199,250,0.06)', border: '1px solid rgba(168,199,250,0.14)', color: C.accent, fontSize: 13 }}>
           {notice}
         </div>
       )}
-
-      <PlanComparison
-        subscription={subscription}
-        onUpgrade={onUpgrade}
-        upgradeLoading={upgradeLoading}
-        upgradeMessage={upgradeMessage}
-      />
+      <PlanComparison subscription={subscription} onUpgrade={onUpgrade} upgradeLoading={upgradeLoading} upgradeMessage={upgradeMessage} />
     </div>
   );
 }
@@ -1487,96 +1633,77 @@ function Dashboard({ history, saved, onNav, subscription, profile, onUpgrade, up
   const todayItems = useMemo(() => history.filter(h => new Date(h.timestamp).toDateString() === today).length, [history]);
   const savedToday = useMemo(() => saved.filter(d => new Date(d.savedAt).toDateString() === today).length, [saved]);
   const recent     = history.slice(0, 5);
-  const remaining = wordsRemaining(subscription);
+  const remaining  = wordsRemaining(subscription);
+
+  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
 
   const stats = [
-    { label: 'Words Processed', value: fmtNum(totalWords), sub: `${todayItems} today`, icon: P.pen },
-    { label: 'Saved Documents', value: String(saved.length), sub: `${savedToday} today`, icon: P.bookmark },
-    {
-      label: 'Current Plan',
-      value: planLabel(subscription),
-      sub: subscription.tier === 'pro' ? 'Unlimited processing' : `${remaining} words remaining`,
-      icon: P.zap,
-      special: true,
-    },
+    { label: 'Words Processed', value: fmtNum(totalWords), sub: `${todayItems} session${todayItems !== 1 ? 's' : ''} today`, icon: P.pen, color: '#a8c7fa' },
+    { label: 'Saved Documents', value: String(saved.length), sub: `${savedToday} saved today`, icon: P.bookmark, color: '#c4b5fd' },
+    { label: 'Plan', value: planLabel(subscription), sub: subscription.tier === 'pro' ? 'Unlimited words' : `${remaining} words left`, icon: P.zap, color: '#4ade80' },
   ];
 
   return (
-    <div style={{ padding: '32px 24px 40px' }}>
-
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 32 }}>
+    <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px', maxWidth: 1100 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, marginBottom: 28 }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', color: 'var(--text1)', margin: '0 0 6px' }}>Dashboard</h1>
-          <p style={{ color: 'var(--text2)', fontSize: 14, margin: 0 }}>
-            {profile.name ? `Welcome back, ${profile.name}. ` : ''}Here's your activity.
-          </p>
+          <h1 style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 800, color: C.t1, margin: '0 0 5px' }}>
+            {profile.name ? `Hey, ${profile.name.split(' ')[0]} 👋` : 'Dashboard'}
+          </h1>
+          <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>Here's an overview of your activity.</p>
         </div>
-        <button onClick={() => onNav('tool')}
-          style={{ padding: '10px 20px', borderRadius: 11, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 0 20px rgba(99,102,241,0.38)', fontFamily: 'inherit' }}>
-          + New Document
+        <button onClick={() => onNav('tool')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', fontFamily: 'inherit' }}>
+          <Ic d="add" s={17} /> New Document
         </button>
       </div>
 
       {subscription.tier !== 'pro' && (
-        <div style={{ marginBottom: 24, background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 20, padding: '20px 22px' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
-            <div>
-              <p style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, color: 'var(--text1)' }}>Free plan active</p>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--text2)' }}>
-                {remaining} of {FREE_WORD_LIMIT} words left. Upgrade to Premium for unlimited use and more.
-              </p>
-            </div>
-            <button onClick={() => onNav('pricing')} style={{ padding: '10px 18px', borderRadius: 11, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 0 20px rgba(99,102,241,0.32)', fontFamily: 'inherit' }}>
-              View Premium Pricing
-            </button>
+        <div style={{ marginBottom: 22, background: 'rgba(73,104,255,0.07)', border: '1px solid rgba(73,104,255,0.2)', borderRadius: 14, padding: '16px 20px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div>
+            <p style={{ margin: '0 0 3px', fontSize: 14, fontWeight: 700, color: C.t1 }}>Free plan — {remaining} words remaining</p>
+            <p style={{ margin: 0, fontSize: 12, color: C.t2 }}>Upgrade to Premium for unlimited processing.</p>
           </div>
-          {upgradeMessage && (
-            <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#34d399' : '#94a3b8', margin: 0 }}>
-              {upgradeMessage}
-            </p>
-          )}
+          <button onClick={() => onNav('pricing')} style={{ padding: '8px 16px', borderRadius: 9, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+            Upgrade
+          </button>
         </div>
       )}
 
-      {/* stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
-        {stats.map((s, i) => {
-          const m = STAT_META[i];
-          return (
-            <div key={s.label} style={{ background: m.bg, border: `1px solid ${m.bdr}`, borderRadius: 18, padding: '22px 20px', boxShadow: `0 0 24px ${m.glow}`, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, width: 80, height: 80, background: `radial-gradient(circle at top right, ${m.glow}, transparent)`, borderRadius: '0 18px 0 0', pointerEvents: 'none' }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text3)' }}>{s.label}</span>
-                <span style={{ color: m.ic }}><Ic d={s.icon} s={16} /></span>
-              </div>
-              <p style={{ fontSize: 28, fontWeight: 700, color: s.special ? m.ic : 'var(--text1)', margin: '0 0 4px', fontFamily: '"Space Grotesk", sans-serif' }}>{s.value}</p>
-              <p style={{ fontSize: 12, color: 'var(--text2)', margin: 0 }}>{s.sub}</p>
-              {s.special && <span style={{ position: 'absolute', top: 20, right: 18, width: 8, height: 8, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px rgba(52,211,153,0.8)', display: 'inline-block' }} />}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
+        {stats.map(s => (
+          <div key={s.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '18px 18px 16px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.t3 }}>{s.label}</span>
+              <span style={{ color: s.color, opacity: 0.8 }}><Ic d={s.icon} s={15} /></span>
             </div>
-          );
-        })}
+            <p style={{ fontSize: 26, fontWeight: 800, color: s.color, margin: '0 0 3px', fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>{s.value}</p>
+            <p style={{ fontSize: 11, color: C.t2, margin: 0 }}>{s.sub}</p>
+          </div>
+        ))}
       </div>
 
-      {/* recent activity */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text1)', marginBottom: 14 }}>Recent Activity</h2>
+      <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2 style={{ fontSize: 13, fontWeight: 700, color: C.t3, textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>Recent Activity</h2>
+        {history.length > 5 && (
+          <button onClick={() => onNav('history')} style={{ fontSize: 12, color: C.accent, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>View all →</button>
+        )}
+      </div>
       {recent.length === 0 ? (
         <Empty icon={P.clock} text="No activity yet. Start by humanizing some text." action="Go to Humanizer" onAction={() => onNav('tool')} />
       ) : (
-        <div style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 18, overflow: 'hidden' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           {recent.map((item, i) => (
-            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderBottom: i < recent.length - 1 ? '1px solid var(--glass-b)' : 'none' }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#818cf8', flexShrink: 0 }}>
-                <Ic d={P.doc} s={16} />
+            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: i < recent.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(168,199,250,0.08)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.accent, flexShrink: 0 }}>
+                <Ic d={P.doc} s={15} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text1)', margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: C.t1, margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {item.inputText.slice(0, 65)}{item.inputText.length > 65 ? '…' : ''}
                 </p>
-                <p style={{ fontSize: 11, color: 'var(--text3)', margin: 0 }}>
-                  {ACTION_LABEL[item.action]} · {item.wordCount} words
-                </p>
+                <p style={{ fontSize: 11, color: C.t3, margin: 0 }}>{ACTION_LABEL[item.action]} · {item.wordCount} words</p>
               </div>
-              <span style={{ fontSize: 11, color: 'var(--text3)', flexShrink: 0 }}>{reltime(item.timestamp)}</span>
+              <span style={{ fontSize: 11, color: C.t3, flexShrink: 0, whiteSpace: 'nowrap' }}>{reltime(item.timestamp)}</span>
             </div>
           ))}
         </div>
@@ -1586,27 +1713,20 @@ function Dashboard({ history, saved, onNav, subscription, profile, onUpgrade, up
 }
 
 function PremiumLockedPage({ title, description, subscription, onUpgrade, upgradeLoading, upgradeMessage }) {
+  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f' };
   return (
-    <div style={{ padding: '32px 24px 40px', maxWidth: 980 }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', color: 'var(--text1)', margin: '0 0 6px' }}>{title}</h1>
-        <p style={{ color: 'var(--text2)', fontSize: 14, margin: 0 }}>{description}</p>
+    <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px', maxWidth: 760 }}>
+      <div style={{ marginBottom: 22 }}>
+        <h1 style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 800, color: C.t1, margin: '0 0 5px' }}>{title}</h1>
+        <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>{description}</p>
       </div>
-
-      <div style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 20, padding: '22px 24px', marginBottom: 18 }}>
-        <p style={{ margin: '0 0 8px', fontSize: 15, color: 'var(--text1)', fontWeight: 600 }}>Premium required</p>
-        <p style={{ margin: '0 0 4px', fontSize: 24, color: '#c4b5fd', fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif' }}>Upgrade to unlock this page</p>
-        <p style={{ margin: 0, fontSize: 13, color: 'var(--text2)' }}>
-          Current plan: {planLabel(subscription)}. {subscription.tier === 'pro' ? 'Your access is already active.' : `${wordsRemaining(subscription)} free words remain in Humanizer.`}
+      <div style={{ background: 'rgba(73,104,255,0.07)', border: '1px solid rgba(73,104,255,0.22)', borderRadius: 14, padding: '20px 22px', marginBottom: 20 }}>
+        <p style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 800, color: C.t1 }}>Premium required</p>
+        <p style={{ margin: '0 0 4px', fontSize: 13, color: C.t2 }}>
+          {subscription.tier === 'pro' ? 'Your access is already active.' : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remain in Humanizer.`}
         </p>
       </div>
-
-      <PlanComparison
-        subscription={subscription}
-        onUpgrade={onUpgrade}
-        upgradeLoading={upgradeLoading}
-        upgradeMessage={upgradeMessage}
-      />
+      <PlanComparison subscription={subscription} onUpgrade={onUpgrade} upgradeLoading={upgradeLoading} upgradeMessage={upgradeMessage} />
     </div>
   );
 }
@@ -1614,10 +1734,7 @@ function PremiumLockedPage({ title, description, subscription, onUpgrade, upgrad
 function ProfilePage({ profile, subscription, history, saved, onSaveProfile }) {
   const [form, setForm] = useState({ name: profile.name, email: profile.email });
   const [saveOk, setSaveOk] = useState(false);
-
-  useEffect(() => {
-    setForm({ name: profile.name, email: profile.email });
-  }, [profile.name, profile.email]);
+  useEffect(() => { setForm({ name: profile.name, email: profile.email }); }, [profile.name, profile.email]);
 
   function handleSave() {
     onSaveProfile({ ...form, name: form.name.trim() });
@@ -1625,92 +1742,74 @@ function ProfilePage({ profile, subscription, history, saved, onSaveProfile }) {
     setTimeout(() => setSaveOk(false), 2000);
   }
 
-  const inputStyle = {
-    width: '100%',
-    padding: '12px 14px',
-    borderRadius: 12,
-    background: 'var(--glass)',
-    backdropFilter: 'blur(12px)',
-    border: '1px solid var(--glass-b)',
-    color: 'var(--text1)',
-    fontSize: 14,
-    outline: 'none',
-    boxSizing: 'border-box',
-    fontFamily: 'inherit',
-  };
+  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
+  const inp = { width: '100%', padding: '11px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(168,199,250,0.14)', color: C.t1, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.15s' };
 
-  const cards = [
-    { label: 'Plan', value: planLabel(subscription), sub: subscription.tier === 'pro' ? 'Unlimited words' : `${wordsRemaining(subscription)} words left`, icon: P.zap },
-    { label: 'Processed', value: fmtNum(history.reduce((sum, item) => sum + (item.wordCount || 0), 0)), sub: 'Total words processed', icon: P.pen },
-    { label: 'Saved Docs', value: String(saved.length), sub: 'Files saved in dashboard', icon: P.bookmark },
+  const totalWords = history.reduce((s, h) => s + (h.wordCount || 0), 0);
+  const remaining = wordsRemaining(subscription);
+  const stats = [
+    { label: 'Plan', value: planLabel(subscription), sub: subscription.tier === 'pro' ? 'Unlimited words' : `${remaining} words left`, color: '#4ade80' },
+    { label: 'Processed', value: fmtNum(totalWords), sub: 'Total words', color: '#a8c7fa' },
+    { label: 'Saved', value: String(saved.length), sub: 'Documents saved', color: '#c4b5fd' },
   ];
 
+  const initials = profile.name ? profile.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : 'HC';
+
   return (
-    <div style={{ padding: '32px 24px 40px', maxWidth: 940 }}>
+    <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px', maxWidth: 860 }}>
       <div style={{ marginBottom: 26 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', color: 'var(--text1)', margin: '0 0 6px' }}>Profile</h1>
-        <p style={{ color: 'var(--text2)', fontSize: 14, margin: 0 }}>Manage your account details and usage overview.</p>
+        <h1 style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 800, color: C.t1, margin: '0 0 5px' }}>Profile</h1>
+        <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>Your account details and usage overview.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 22 }}>
-        {cards.map(card => (
-          <div key={card.label} style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 18, padding: '18px 18px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text3)' }}>{card.label}</span>
-              <span style={{ color: '#a5b4fc' }}><Ic d={card.icon} s={15} /></span>
-            </div>
-            <p style={{ fontSize: 24, fontWeight: 700, color: 'var(--text1)', margin: '0 0 4px', fontFamily: '"Space Grotesk", sans-serif' }}>{card.value}</p>
-            <p style={{ fontSize: 12, color: 'var(--text2)', margin: 0 }}>{card.sub}</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, marginBottom: 24, background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '18px 20px' }}>
+        <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18, color: '#fff', flexShrink: 0 }}>{initials}</div>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: 15, color: C.t1 }}>{profile.name || 'No name set'}</p>
+          <p style={{ margin: 0, fontSize: 12, color: C.t2 }}>{profile.email}</p>
+        </div>
+        <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, background: subscription.tier === 'pro' ? 'rgba(74,222,128,0.1)' : 'rgba(168,199,250,0.08)', border: `1px solid ${subscription.tier === 'pro' ? 'rgba(74,222,128,0.22)' : 'rgba(168,199,250,0.16)'}`, color: subscription.tier === 'pro' ? '#4ade80' : C.accent, fontSize: 11, fontWeight: 700 }}>
+          {planLabel(subscription)}
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 22 }}>
+        {stats.map(s => (
+          <div key={s.label} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '14px 16px' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.t3, margin: '0 0 8px' }}>{s.label}</p>
+            <p style={{ fontSize: 22, fontWeight: 800, color: s.color, margin: '0 0 2px', fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>{s.value}</p>
+            <p style={{ fontSize: 11, color: C.t2, margin: 0 }}>{s.sub}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 20, padding: '24px', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text3)', marginBottom: 16 }}>Account Form</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '20px 20px 18px', marginBottom: 16 }}>
+        <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.t3, margin: '0 0 14px' }}>Account Details</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginBottom: 6 }}>Full Name</label>
-            <input
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              placeholder="Your full name"
-              style={inputStyle}
-            />
+            <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Full Name</label>
+            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your full name" style={inp}
+              onFocus={e => e.target.style.borderColor = 'rgba(168,199,250,0.4)'}
+              onBlur={e => e.target.style.borderColor = 'rgba(168,199,250,0.14)'} />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginBottom: 6 }}>Email Address</label>
-            <input
-              value={form.email}
-              readOnly
-              placeholder="your@email.com"
-              style={{ ...inputStyle, opacity: 0.72, cursor: 'not-allowed' }}
-            />
+            <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Email</label>
+            <input value={form.email} readOnly placeholder="your@email.com" style={{ ...inp, opacity: 0.6, cursor: 'not-allowed' }} />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginBottom: 6 }}>Current Plan</label>
-            <input
-              value={subscription.tier === 'pro' ? 'Pro - Unlimited' : `Free - ${wordsRemaining(subscription)} words left`}
-              readOnly
-              style={{ ...inputStyle, opacity: 0.72, cursor: 'default' }}
-            />
+            <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Plan</label>
+            <input value={subscription.tier === 'pro' ? 'Pro — Unlimited' : `Free — ${remaining} words left`} readOnly style={{ ...inp, opacity: 0.6, cursor: 'default' }} />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginBottom: 6 }}>Processed Sessions</label>
-            <input
-              value={String(history.length)}
-              readOnly
-              style={{ ...inputStyle, opacity: 0.72, cursor: 'default' }}
-            />
+            <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Sessions</label>
+            <input value={String(history.length)} readOnly style={{ ...inp, opacity: 0.6, cursor: 'default' }} />
           </div>
         </div>
-        <p style={{ margin: '14px 0 0', fontSize: 12, color: 'var(--text3)' }}>
-          Your email and billing state come from your signed-in account.
-        </p>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button onClick={handleSave} style={{ padding: '11px 28px', borderRadius: 12, background: saveOk ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: saveOk ? '0 0 20px rgba(16,185,129,0.4)' : '0 0 20px rgba(99,102,241,0.35)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-          {saveOk ? 'Saved' : 'Save Profile'}
+        <button onClick={handleSave} style={{ padding: '10px 26px', borderRadius: 10, background: saveOk ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 18px rgba(73,104,255,0.22)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+          {saveOk ? '✓ Saved' : 'Save Profile'}
         </button>
       </div>
     </div>
@@ -1721,7 +1820,8 @@ function ProfilePage({ profile, subscription, history, saved, onSaveProfile }) {
 
 function HistoryPage({ history, setHistory, onNav }) {
   const [expanded, setExpanded] = useState(null);
-  const DOTS = ['#6366f1', '#38bdf8', '#a78bfa', '#34d399'];
+  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
+  const actionColors = { humanize: '#a8c7fa', summarize: '#c4b5fd', expand: '#6ee7b7', fix_grammar: '#fcd34d' };
 
   function remove(id) {
     setHistory(prev => prev.filter(h => h.id !== id));
@@ -1729,51 +1829,55 @@ function HistoryPage({ history, setHistory, onNav }) {
   }
 
   return (
-    <div style={{ padding: '32px 24px 40px' }}>
-      <h1 style={{ fontSize: 26, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', color: 'var(--text1)', marginBottom: 28 }}>Processing History</h1>
+    <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px' }}>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 800, color: C.t1, margin: '0 0 5px' }}>Processing History</h1>
+        <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>{history.length} session{history.length !== 1 ? 's' : ''} total</p>
+      </div>
       {history.length === 0 ? (
         <Empty icon={P.clock} text="No history yet. Start processing text to see results here." action="Go to Humanizer" onAction={() => onNav('tool')} />
       ) : (
-        <div style={{ position: 'relative' }}>
-          <div style={{ position: 'absolute', left: 5, top: 8, bottom: 8, width: 1, background: 'linear-gradient(to bottom, rgba(99,102,241,0.4), rgba(99,102,241,0.1))' }} />
-          {history.map((item, i) => (
-            <div key={item.id} style={{ display: 'flex', gap: 18, paddingLeft: 28, position: 'relative', marginBottom: 16 }}>
-              <span style={{ position: 'absolute', left: 0, top: 16, width: 11, height: 11, borderRadius: '50%', background: DOTS[i % DOTS.length], boxShadow: `0 0 10px ${DOTS[i % DOTS.length]}90` }} />
-              <div style={{ flex: 1, background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 16, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, padding: '14px 16px', borderBottom: '1px solid var(--glass-b)' }}>
-                  <div>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text1)', margin: '0 0 3px' }}>{ACTION_LABEL[item.action]}</p>
-                    <p style={{ fontSize: 11, color: 'var(--text3)', margin: 0 }}>{reltime(item.timestamp)}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {history.map((item) => {
+            const color = actionColors[item.action] || C.accent;
+            const isOpen = expanded === item.id;
+            return (
+              <div key={item.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, padding: '13px 16px' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}80`, flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: C.t1 }}>{ACTION_LABEL[item.action]}</span>
+                      <span style={{ fontSize: 11, color: C.t3 }}>·</span>
+                      <span style={{ fontSize: 11, color: C.t3 }}>{item.wordCount} words</span>
+                      <span style={{ fontSize: 11, color: C.t3 }}>·</span>
+                      <span style={{ fontSize: 11, color: C.t3 }}>{reltime(item.timestamp)}</span>
+                    </div>
+                    <p style={{ fontSize: 12, color: C.t2, margin: '3px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      "{item.outputText.slice(0, 90)}{item.outputText.length > 90 ? '…' : ''}"
+                    </p>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 11, color: 'var(--text3)' }}>{item.wordCount} words</span>
-                    <button onClick={() => remove(item.id)} style={{ color: 'var(--text3)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', transition: 'color 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
-                      onMouseLeave={e => e.currentTarget.style.color = 'var(--text3)'}>
-                      <Ic d={P.trash} s={15} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                    <button onClick={() => setExpanded(isOpen ? null : item.id)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: C.accent, background: 'rgba(168,199,250,0.07)', border: `1px solid rgba(168,199,250,0.14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                      {isOpen ? 'Collapse' : 'View'}
+                    </button>
+                    <button onClick={() => remove(item.id)}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.16)', borderRadius: 7, color: '#f87171', cursor: 'pointer' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.14)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}>
+                      <Ic d={P.trash} s={14} />
                     </button>
                   </div>
                 </div>
-                <div style={{ padding: '12px 16px' }}>
-                  <p style={{ fontSize: 13, fontStyle: 'italic', color: 'var(--text2)', margin: 0 }}>
-                    "{item.outputText.slice(0, 120)}{item.outputText.length > 120 ? '…' : ''}"
-                  </p>
-                </div>
-                <div style={{ padding: '0 16px 14px' }}>
-                  <button onClick={() => setExpanded(expanded === item.id ? null : item.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#818cf8', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
-                    {expanded === item.id ? 'Collapse' : 'View full result'}
-                    <Ic d={P.arrow} s={12} />
-                  </button>
-                  {expanded === item.id && (
-                    <div style={{ marginTop: 10, padding: 14, background: 'rgba(99,102,241,0.05)', border: '1px solid var(--glass-b)', borderRadius: 12, fontSize: 13, lineHeight: 1.7, color: 'var(--text1)', whiteSpace: 'pre-wrap' }}>
-                      {item.outputText}
-                    </div>
-                  )}
-                </div>
+                {isOpen && (
+                  <div style={{ borderTop: `1px solid ${C.border}`, padding: '14px 16px', background: 'rgba(255,255,255,0.02)' }}>
+                    <p style={{ fontSize: 13, lineHeight: 1.7, color: C.t1, margin: 0, whiteSpace: 'pre-wrap' }}>{item.outputText}</p>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -1786,69 +1890,60 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
   const [query,    setQuery]    = useState('');
   const [saveName, setSaveName] = useState('');
   const [savingId, setSavingId] = useState(null);
+  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
 
   const filtered = useMemo(() =>
-    saved.filter(d => !query ||
-      d.name.toLowerCase().includes(query.toLowerCase()) ||
-      d.content.toLowerCase().includes(query.toLowerCase())
-    ), [saved, query]);
+    saved.filter(d => !query || d.name.toLowerCase().includes(query.toLowerCase()) || d.content.toLowerCase().includes(query.toLowerCase())),
+    [saved, query]
+  );
 
   function saveFromHistory(item) {
     const name = saveName.trim() || `${ACTION_LABEL[item.action]} – ${new Date(item.timestamp).toLocaleDateString()}`;
-    setSaved(prev => [{
-      id: `d_${Date.now()}`, name, content: item.outputText,
-      wordCount: item.wordCount,
-      sizeBytes: new TextEncoder().encode(item.outputText).length,
-      savedAt: new Date().toISOString(),
-    }, ...prev]);
+    setSaved(prev => [{ id: `d_${Date.now()}`, name, content: item.outputText, wordCount: item.wordCount, sizeBytes: new TextEncoder().encode(item.outputText).length, savedAt: new Date().toISOString() }, ...prev]);
     setSavingId(null); setSaveName('');
   }
 
   function remove(id) { setSaved(prev => prev.filter(d => d.id !== id)); }
 
   return (
-    <div style={{ padding: '32px 24px 40px' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14, marginBottom: 24 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', color: 'var(--text1)', margin: 0 }}>Saved Documents</h1>
+    <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 24 }}>
+        <div>
+          <h1 style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 800, color: C.t1, margin: '0 0 5px' }}>Saved Documents</h1>
+          <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>{saved.length} document{saved.length !== 1 ? 's' : ''}</p>
+        </div>
         <div style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text3)' }}>
-            <Ic d={P.search} s={15} />
-          </span>
+          <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.t3 }}><Ic d={P.search} s={14} /></span>
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…"
-            style={{ paddingLeft: 36, paddingRight: 14, paddingTop: 9, paddingBottom: 9, borderRadius: 11, background: 'var(--glass)', backdropFilter: 'blur(12px)', border: '1px solid var(--glass-b)', color: 'var(--text1)', fontSize: 13, outline: 'none', width: 200, fontFamily: 'inherit' }} />
+            style={{ paddingLeft: 34, paddingRight: 12, paddingTop: 8, paddingBottom: 8, borderRadius: 9, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.border}`, color: C.t1, fontSize: 13, outline: 'none', width: 'clamp(140px,25vw,200px)', fontFamily: 'inherit' }} />
         </div>
       </div>
 
       {saved.length === 0 ? (
         <Empty icon={P.bookmark} text="No saved documents yet. Process text and save the result." action="Go to Humanizer" onAction={() => onNav('tool')} />
       ) : filtered.length === 0 ? (
-        <p style={{ fontSize: 13, color: 'var(--text3)' }}>No documents match "{query}".</p>
+        <p style={{ fontSize: 13, color: C.t3 }}>No documents match "{query}".</p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(clamp(240px,30vw,280px), 1fr))', gap: 14, marginBottom: 32 }}>
           {filtered.map(doc => (
-            <div key={doc.id} style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 18, padding: 20, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, width: 70, height: 70, background: 'radial-gradient(circle at top right, rgba(99,102,241,0.18), transparent 70%)', borderRadius: '0 18px 0 0', pointerEvents: 'none' }} />
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#818cf8', flexShrink: 0 }}>
-                  <Ic d={P.doc} s={18} />
+            <div key={doc.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 11, marginBottom: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(168,199,250,0.08)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.accent, flexShrink: 0 }}>
+                  <Ic d={P.doc} s={17} />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text1)', margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</p>
-                  <p style={{ fontSize: 11, color: 'var(--text3)', margin: 0 }}>{reltime(doc.savedAt)} · {fmtBytes(doc.sizeBytes)}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: C.t1, margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.name}</p>
+                  <p style={{ fontSize: 11, color: C.t3, margin: 0 }}>{reltime(doc.savedAt)} · {fmtBytes(doc.sizeBytes)}</p>
                 </div>
               </div>
-              <p style={{ fontSize: 12, lineHeight: 1.6, flex: 1, marginBottom: 14, color: 'var(--text2)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              <p style={{ fontSize: 12, lineHeight: 1.6, flex: 1, marginBottom: 12, color: C.t2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {doc.content.slice(0, 120)}
               </p>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                 <button onClick={() => navigator.clipboard.writeText(doc.content)}
-                  style={{ fontSize: 12, color: 'var(--text3)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#818cf8'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text3)'}>Copy</button>
+                  style={{ fontSize: 12, color: C.accent, background: 'rgba(168,199,250,0.07)', border: `1px solid rgba(168,199,250,0.14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>Copy</button>
                 <button onClick={() => remove(doc.id)}
-                  style={{ fontSize: 12, color: 'var(--text3)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text3)'}>Delete</button>
+                  style={{ fontSize: 12, color: '#f87171', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.16)', borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>
               </div>
             </div>
           ))}
@@ -1856,34 +1951,30 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
       )}
 
       {history.length > 0 && (
-        <div style={{ marginTop: 36 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text1)', marginBottom: 14 }}>Save from History</h2>
-          <div style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 18, overflow: 'hidden' }}>
-            {history.slice(0, 10).map((item, i) => (
-              <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 18px', borderBottom: i < Math.min(history.length, 10) - 1 ? '1px solid var(--glass-b)' : 'none' }}>
+        <div>
+          <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.t3, margin: '0 0 12px' }}>Save from History</p>
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
+            {history.slice(0, 8).map((item, i) => (
+              <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px', borderBottom: i < Math.min(history.length, 8) - 1 ? `1px solid ${C.border}` : 'none' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text1)', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: C.t1, margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {ACTION_LABEL[item.action]} · {reltime(item.timestamp)}
                   </p>
-                  <p style={{ fontSize: 11, color: 'var(--text3)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <p style={{ fontSize: 11, color: C.t3, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {item.outputText.slice(0, 60)}…
                   </p>
                 </div>
                 {savingId === item.id ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <input value={saveName} onChange={e => setSaveName(e.target.value)}
-                      placeholder="Document name…" autoFocus
-                      style={{ padding: '6px 10px', borderRadius: 8, background: 'rgba(99,102,241,0.08)', border: '1px solid var(--glass-b)', color: 'var(--text1)', fontSize: 12, outline: 'none', width: 140, fontFamily: 'inherit' }}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') saveFromHistory(item);
-                        if (e.key === 'Escape') { setSavingId(null); setSaveName(''); }
-                      }} />
-                    <button onClick={() => saveFromHistory(item)} style={{ fontSize: 12, color: '#34d399', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Save</button>
-                    <button onClick={() => { setSavingId(null); setSaveName(''); }} style={{ fontSize: 12, color: 'var(--text3)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
+                    <input value={saveName} onChange={e => setSaveName(e.target.value)} placeholder="Document name…" autoFocus
+                      style={{ padding: '5px 9px', borderRadius: 7, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.border}`, color: C.t1, fontSize: 12, outline: 'none', width: 130, fontFamily: 'inherit' }}
+                      onKeyDown={e => { if (e.key === 'Enter') saveFromHistory(item); if (e.key === 'Escape') { setSavingId(null); setSaveName(''); } }} />
+                    <button onClick={() => saveFromHistory(item)} style={{ fontSize: 12, color: '#4ade80', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Save</button>
+                    <button onClick={() => { setSavingId(null); setSaveName(''); }} style={{ fontSize: 12, color: C.t3, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>✕</button>
                   </div>
                 ) : (
                   <button onClick={() => setSavingId(item.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#818cf8', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: C.accent, background: 'rgba(168,199,250,0.07)', border: `1px solid rgba(168,199,250,0.14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
                     <Ic d={P.save} s={13} /> Save
                   </button>
                 )}
@@ -1898,21 +1989,10 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
 
 // ─── settings ─────────────────────────────────────────────────────────────────
 
-function SettingsPage({
-  profile,
-  subscription,
-  onSignIn,
-  onSaveProfile,
-  onUpgrade,
-  upgradeLoading,
-  upgradeMessage,
-}) {
+function SettingsPage({ profile, subscription, onSignIn, onSaveProfile, onUpgrade, upgradeLoading, upgradeMessage }) {
   const [form,   setForm]   = useState({ name: profile.name, email: profile.email });
   const [saveOk, setSaveOk] = useState(false);
-
-  useEffect(() => {
-    setForm({ name: profile.name, email: profile.email });
-  }, [profile.name, profile.email]);
+  useEffect(() => { setForm({ name: profile.name, email: profile.email }); }, [profile.name, profile.email]);
 
   function handleSave() {
     onSaveProfile({ ...form, name: form.name.trim() });
@@ -1920,85 +2000,85 @@ function SettingsPage({
     setTimeout(() => setSaveOk(false), 2000);
   }
 
-  const inp = { width: '100%', padding: '11px 14px', borderRadius: 11, background: 'var(--glass)', backdropFilter: 'blur(12px)', border: '1px solid var(--glass-b)', color: 'var(--text1)', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.15s' };
+  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
+  const inp = { width: '100%', padding: '11px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(168,199,250,0.14)', color: C.t1, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.15s' };
+  const sectionLabel = { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.t3, margin: '0 0 14px' };
 
   return (
-    <div style={{ padding: '32px 24px 40px', maxWidth: 620 }}>
-      <h1 style={{ fontSize: 26, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif', color: 'var(--text1)', marginBottom: 28 }}>Account Settings</h1>
-
-      <div style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 20, padding: '20px 24px', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text3)', marginBottom: 12 }}>Quick Status</h2>
-        <p style={{ margin: '0 0 6px', fontSize: 14, color: 'var(--text1)' }}>
-          Signed in as {profile.name || profile.email || 'Guest'}
-        </p>
-        <p style={{ margin: 0, fontSize: 12, color: 'var(--text2)' }}>
-          Use the new `Profile` page for the full account form and overview cards.
-        </p>
+    <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px', maxWidth: 680 }}>
+      <div style={{ marginBottom: 26 }}>
+        <h1 style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 800, color: C.t1, margin: '0 0 5px' }}>Settings</h1>
+        <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>Manage your account and subscription.</p>
       </div>
 
-      {/* profile section */}
-      <div style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 20, padding: '24px', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text3)', marginBottom: 16 }}>Profile</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '20px 20px 18px', marginBottom: 14 }}>
+        <p style={sectionLabel}>Profile</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 12 }}>
           <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginBottom: 6 }}>Name</label>
+            <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Full Name</label>
             <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name" style={inp}
-              onFocus={e => e.target.style.borderColor = 'rgba(99,102,241,0.5)'}
-              onBlur={e => e.target.style.borderColor = 'var(--glass-b)'} />
+              onFocus={e => e.target.style.borderColor = 'rgba(168,199,250,0.4)'}
+              onBlur={e => e.target.style.borderColor = 'rgba(168,199,250,0.14)'} />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 12, color: 'var(--text2)', marginBottom: 6 }}>Email</label>
-            <input type="email" value={form.email} readOnly placeholder="your@email.com" style={{ ...inp, opacity: 0.72, cursor: 'not-allowed' }} />
+            <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Email</label>
+            <input type="email" value={form.email} readOnly placeholder="your@email.com" style={{ ...inp, opacity: 0.6, cursor: 'not-allowed' }} />
           </div>
         </div>
-        <p style={{ marginTop: 12, fontSize: 12, color: 'var(--text3)', marginBottom: 0 }}>
-          Email is managed by your login account.
-        </p>
         {profile.email.trim() === '' && (
-          <p style={{ marginTop: 12, fontSize: 12, color: '#818cf8', margin: '12px 0 0' }}>
-            <button onClick={onSignIn} style={{ color: '#818cf8', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, textDecoration: 'underline', fontFamily: 'inherit' }}>Sign in</button> to set your profile.
+          <p style={{ fontSize: 12, color: C.accent, margin: 0 }}>
+            <button onClick={onSignIn} style={{ color: C.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, textDecoration: 'underline', fontFamily: 'inherit' }}>Sign in</button> to set your profile.
           </p>
         )}
       </div>
 
-      {/* subscription */}
-      <div style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', border: '1px solid var(--glass-b)', borderRadius: 20, padding: '20px 24px', marginBottom: 16 }}>
-        <h2 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text3)', marginBottom: 14 }}>Subscription</h2>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '20px 20px 18px', marginBottom: 14 }}>
+        <p style={sectionLabel}>Subscription</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text1)' }}>{subscription.tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</span>
-              <span style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 999, padding: '2px 10px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#34d399' }}>Active</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>{subscription.tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</span>
+              <span style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 999, padding: '2px 8px', fontSize: 10, fontWeight: 700, color: '#4ade80' }}>Active</span>
             </div>
-            <p style={{ fontSize: 13, color: 'var(--text2)', margin: 0 }}>
-              {subscription.tier === 'pro'
-                ? `${PRO_PRICE_GHS} GHS / month · Unlimited processing`
-                : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remaining`}
+            <p style={{ fontSize: 12, color: C.t2, margin: 0 }}>
+              {subscription.tier === 'pro' ? `${PRO_PRICE_GHS} GHS / month · Unlimited processing` : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remaining`}
             </p>
           </div>
           {subscription.tier === 'pro' ? (
-            <button disabled style={{ padding: '9px 18px', borderRadius: 10, border: '1px solid rgba(52,211,153,0.24)', color: '#86efac', background: 'rgba(52,211,153,0.08)', cursor: 'default', fontSize: 13, fontFamily: 'inherit' }}>
-              Pro Active
-            </button>
+            <div style={{ padding: '8px 16px', borderRadius: 9, border: '1px solid rgba(74,222,128,0.22)', color: '#4ade80', background: 'rgba(74,222,128,0.07)', fontSize: 12, fontWeight: 700 }}>Pro Active</div>
           ) : (
-            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '9px 18px', borderRadius: 10, border: '1px solid var(--glass-b)', color: '#f8fafc', background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', cursor: upgradeLoading ? 'wait' : 'pointer', fontSize: 13, fontFamily: 'inherit', boxShadow: '0 0 18px rgba(99,102,241,0.28)', opacity: upgradeLoading ? 0.72 : 1 }}>
-              {upgradeLoading ? 'Redirecting…' : `Upgrade to Pro · ${PRO_PRICE_GHS} GHS`}
+            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '8px 16px', borderRadius: 9, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 12, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: upgradeLoading ? 0.7 : 1, whiteSpace: 'nowrap' }}>
+              {upgradeLoading ? 'Redirecting…' : `Upgrade · ${PRO_PRICE_GHS} GHS`}
             </button>
           )}
         </div>
-        {upgradeMessage && (
-          <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#34d399' : '#94a3b8', margin: '12px 0 0' }}>
-            {upgradeMessage}
-          </p>
-        )}
+        {upgradeMessage && <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#4ade80' : C.t2, margin: '10px 0 0' }}>{upgradeMessage}</p>}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button onClick={handleSave}
-          style={{ padding: '11px 28px', borderRadius: 12, background: saveOk ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: saveOk ? '0 0 20px rgba(16,185,129,0.4)' : '0 0 20px rgba(99,102,241,0.35)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+        <button onClick={handleSave} style={{ padding: '10px 26px', borderRadius: 10, background: saveOk ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 18px rgba(73,104,255,0.22)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
           {saveOk ? '✓ Saved' : 'Save Changes'}
         </button>
       </div>
+    </div>
+  );
+}
+
+// ─── auth wall ────────────────────────────────────────────────────────────────
+
+function AuthWall({ onSignIn, pageName = 'this page' }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '40px 24px', textAlign: 'center' }}>
+      <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(73,104,255,0.12)', border: '1px solid rgba(73,104,255,0.24)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a8c7fa', marginBottom: 20 }}>
+        <span className="material-symbols-outlined" style={{ fontSize: 26, fontVariationSettings: '"FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24' }}>lock</span>
+      </div>
+      <h2 style={{ fontSize: 20, fontWeight: 800, color: '#e3e3e3', margin: '0 0 8px' }}>Sign in required</h2>
+      <p style={{ fontSize: 14, color: '#8e918f', margin: '0 0 28px', maxWidth: 300, lineHeight: 1.6 }}>
+        You need to be signed in to access {pageName}.
+      </p>
+      <button onClick={onSignIn} style={{ padding: '12px 32px', borderRadius: 12, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer', boxShadow: '0 12px 28px rgba(73,104,255,0.28)', fontFamily: 'inherit' }}>
+        Sign In
+      </button>
     </div>
   );
 }
@@ -2007,14 +2087,13 @@ function SettingsPage({
 
 function Empty({ icon, text, action, onAction }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '64px 24px', textAlign: 'center' }}>
-      <div style={{ width: 52, height: 52, borderRadius: 16, background: 'var(--glass)', backdropFilter: 'blur(12px)', border: '1px solid var(--glass-b)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text3)', marginBottom: 18, boxShadow: '0 0 16px rgba(99,102,241,0.08)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '72px 24px', textAlign: 'center' }}>
+      <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(168,199,250,0.06)', border: '1px solid rgba(168,199,250,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7a94', marginBottom: 16 }}>
         <Ic d={icon} s={22} />
       </div>
-      <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 20, maxWidth: 280 }}>{text}</p>
+      <p style={{ fontSize: 14, color: '#8e918f', marginBottom: 22, maxWidth: 280, lineHeight: 1.6 }}>{text}</p>
       {action && (
-        <button onClick={onAction}
-          style={{ padding: '10px 22px', borderRadius: 11, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', color: '#fff', fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 0 18px rgba(99,102,241,0.35)', fontFamily: 'inherit' }}>
+        <button onClick={onAction} style={{ padding: '10px 24px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 10px 22px rgba(73,104,255,0.24)', fontFamily: 'inherit' }}>
           {action}
         </button>
       )}
@@ -2090,6 +2169,17 @@ export default function App() {
       await new Promise(resolve => setTimeout(resolve, remaining));
     }
     setBusyMessage('');
+  }
+
+  function navigateWithMorph(nextView) {
+    if (typeof document !== 'undefined' && typeof document.startViewTransition === 'function') {
+      document.startViewTransition(() => {
+        setView(nextView);
+      });
+      return;
+    }
+
+    setView(nextView);
   }
 
   function applyUserState(user) {
@@ -2417,9 +2507,16 @@ export default function App() {
           applyUserState(data.session.user);
           setShowSignIn(false);
           setView(pendingView || 'tool');
+          // fire-and-forget welcome email
+          fetch('/api/welcome', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: payload.name, email: payload.email }),
+          }).catch(() => {});
         } else {
+          // email confirmation still enabled in Supabase — ask user to confirm
           setAuthMode('signin');
-          setAuthMessage('Account created. Check your email for the confirmation link, then sign in. If it does not arrive, use "Resend confirmation email".');
+          setAuthMessage('Account created! Check your inbox for a confirmation link, then sign in.');
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -2435,12 +2532,7 @@ export default function App() {
         setView(pendingView || 'tool');
       }
     } catch (error) {
-      const msg = error.message || 'Authentication failed.';
-      if (/confirm|verified|verification/i.test(msg)) {
-        setAuthError('Your email is not confirmed yet. Use "Resend confirmation email" if needed.');
-      } else {
-        setAuthError(msg);
-      }
+      setAuthError(normalizeAuthErrorMessage(error));
     } finally {
       setAuthLoading(false);
       await endBusy(startedAt);
@@ -2468,18 +2560,18 @@ export default function App() {
     setMenuOpen(false);
 
     if (nextView === 'landing') {
-      setView('landing');
+      navigateWithMorph('landing');
       return;
     }
 
     if (nextView === 'pricing') {
       setPricingNotice('');
-      setView('pricing');
+      navigateWithMorph('pricing');
       return;
     }
 
     if (nextView === 'tool') {
-      setView('tool');
+      navigateWithMorph('tool');
       return;
     }
 
@@ -2493,7 +2585,7 @@ export default function App() {
       return;
     }
 
-    setView(nextView);
+    navigateWithMorph(nextView);
   }
 
   function handleEnterDashboard(mode = 'signup') {
@@ -2504,7 +2596,7 @@ export default function App() {
     triggerPulse();
     setMenuOpen(false);
     setShowSignIn(false);
-    setView('tool');
+    navigateWithMorph('tool');
   }
 
   function handleEnterTool(mode = 'signup') {
@@ -2587,8 +2679,36 @@ export default function App() {
     );
   }
 
+  if (view === 'tool') {
+    return (
+      <>
+        <TopProgress active={pulseActive || Boolean(busyMessage)} />
+        <LoadingOverlay open={Boolean(busyMessage)} message={busyMessage} />
+        {showSignIn && (
+          <SignInModal
+            onClose={() => setShowSignIn(false)}
+            onAuth={handleAuth}
+            mode={authMode}
+            onModeChange={setAuthMode}
+            loading={authLoading}
+            error={authError}
+            message={authMessage}
+          />
+        )}
+        <HumanizerTool
+          history={history}
+          setHistory={setHistory}
+          subscription={toolSubscription}
+          isSignedIn={Boolean(session?.user)}
+          onRequireAuth={openAuth}
+          onUsageAdd={isSignedIn ? handleUsageAdd : handleGuestUsageAdd}
+        />
+      </>
+    );
+  }
+
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg)', color: 'var(--text1)' }}>
+    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#0e0f11', color: '#e3e3e3' }}>
       <TopProgress active={pulseActive || Boolean(busyMessage)} />
       <LoadingOverlay open={Boolean(busyMessage)} message={busyMessage} />
 
@@ -2606,7 +2726,7 @@ export default function App() {
 
       <Sidebar page={view} onNav={requestNavigation} open={menuOpen} onClose={() => setMenuOpen(false)} subscription={subscription} />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', position: 'relative' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', position: 'relative', borderLeft: '1px solid rgba(113,126,157,0.08)' }}>
         <AppBg />
 
         <Header
@@ -2620,18 +2740,16 @@ export default function App() {
           <div key={`${view}-${isSignedIn ? 'auth' : 'guest'}`} className="page-fade surface-fade">
             {view === 'tool'      && <HumanizerTool history={history} setHistory={setHistory} subscription={toolSubscription} isSignedIn={Boolean(session?.user)} onRequireAuth={openAuth} onUsageAdd={isSignedIn ? handleUsageAdd : handleGuestUsageAdd} />}
             {view === 'pricing'   && <PricingPage subscription={subscription} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} isSignedIn={isSignedIn} onSignIn={() => openAuth('signin', 'pricing')} notice={pricingNotice} />}
-            {view === 'dashboard' && <Dashboard history={history} saved={saved} onNav={requestNavigation} subscription={subscription} profile={profile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />}
-            {view === 'profile'   && <ProfilePage profile={profile} subscription={subscription} history={history} saved={saved} onSaveProfile={handleSaveProfile} />}
-            {view === 'history'   && <HistoryPage history={history} setHistory={setHistory} onNav={requestNavigation} />}
-            {view === 'saved'     && <SavedDocsPage history={history} saved={saved} setSaved={setSaved} onNav={requestNavigation} />}
-            {view === 'settings'  && <SettingsPage profile={profile} subscription={subscription} onSignIn={() => openAuth('signin', 'settings')} onSaveProfile={handleSaveProfile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />}
+            {view === 'dashboard' && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'dashboard')} pageName="the Dashboard" /> : <Dashboard history={history} saved={saved} onNav={requestNavigation} subscription={subscription} profile={profile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />)}
+            {view === 'profile'   && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'profile')} pageName="your Profile" /> : <ProfilePage profile={profile} subscription={subscription} history={history} saved={saved} onSaveProfile={handleSaveProfile} />)}
+            {view === 'history'   && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'history')} pageName="your History" /> : <HistoryPage history={history} setHistory={setHistory} onNav={requestNavigation} />)}
+            {view === 'saved'     && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'saved')} pageName="Saved Documents" /> : <SavedDocsPage history={history} saved={saved} setSaved={setSaved} onNav={requestNavigation} />)}
+            {view === 'settings'  && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'settings')} pageName="Settings" /> : <SettingsPage profile={profile} subscription={subscription} onSignIn={() => openAuth('signin', 'settings')} onSaveProfile={handleSaveProfile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />)}
           </div>
         </main>
 
-        <footer style={{ flexShrink: 0, padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontSize: 12, color: 'var(--text3)', borderTop: '1px solid rgba(99,102,241,0.1)', background: 'rgba(6,9,15,0.6)', backdropFilter: 'blur(12px)', position: 'relative', zIndex: 2 }}>
-          <button onClick={() => setView(isSignedIn ? 'tool' : 'landing')} style={{ color: 'var(--text3)', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 12, textDecoration: 'underline', fontFamily: 'inherit' }}>
-            ← Home
-          </button>
+        <footer style={{ flexShrink: 0, padding: '10px 26px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontSize: 12, color: '#6b7a94', borderTop: '1px solid rgba(168,199,250,0.08)', background: 'transparent', position: 'relative', zIndex: 2 }}>
+          <span>© HumanClarity</span>
         </footer>
       </div>
     </div>
