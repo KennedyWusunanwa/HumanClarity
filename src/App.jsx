@@ -187,6 +187,8 @@ const P = {
   close:    'M6 18L18 6M6 6l12 12',
   eye:      'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z',
   eyeOff:   'M13.875 18.825A10.05 10.05 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22',
+  premium:  'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
+  swap:     'M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5',
 };
 // ─── particle canvas ──────────────────────────────────────────────────────────
 
@@ -1023,7 +1025,7 @@ function Sidebar({ page, onNav, open, onClose, subscription }) {
             }}
             title={subscription.tier === 'pro' ? 'View pricing' : 'Upgrade to Premium'}
           >
-            <div style={{ color: '#835cff', marginBottom: 14 }}><Ic d="workspace_premium" s={25} fill /></div>
+            <div style={{ color: '#835cff', marginBottom: 14 }}><Ic d={P.premium} s={25} /></div>
             <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
               {subscription.tier === 'pro' ? 'Premium Active' : 'Upgrade to Premium'}
             </div>
@@ -1396,7 +1398,7 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
             title="Upgrade to Premium"
             style={{ width: '100%', minHeight: showRailLabels ? 172 : 50, borderRadius: 15, border: '1px solid rgba(113,131,255,0.25)', background: showRailLabels ? 'linear-gradient(145deg, rgba(23,30,58,0.92), rgba(13,18,32,0.92))' : 'transparent', color: '#fff', padding: showRailLabels ? 16 : 0, display: 'flex', flexDirection: showRailLabels ? 'column' : 'row', alignItems: showRailLabels ? 'flex-start' : 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: showRailLabels ? 8 : 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
           >
-            <span style={{ color: '#8f5cff', display: 'grid', placeItems: 'center' }}><Ic d="workspace_premium" s={showRailLabels ? 25 : 22} fill /></span>
+            <span style={{ color: '#8f5cff', display: 'grid', placeItems: 'center' }}><Ic d={P.premium} s={showRailLabels ? 25 : 22} /></span>
             {showRailLabels && (
               <>
                 <span style={{ fontSize: 15, fontWeight: 900 }}>Upgrade to Premium</span>
@@ -1481,7 +1483,7 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
             </div>
 
             <div className="humanizer-workbench-divider" style={{ display: isNarrowWorkbench ? 'none' : 'block', background: 'rgba(145,158,191,0.13)', margin: 'clamp(12px, 1.8vh, 20px) 0 clamp(12px, 1.8vh, 20px)', height: 'auto', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 38, height: 38, borderRadius: '50%', background: 'rgba(17,24,39,0.92)', border: '1px solid rgba(145,158,191,0.18)', display: 'grid', placeItems: 'center', color: '#a9c5ff' }}><Ic d="sync_alt" s={21} /></div>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 38, height: 38, borderRadius: '50%', background: 'rgba(17,24,39,0.92)', border: '1px solid rgba(145,158,191,0.18)', display: 'grid', placeItems: 'center', color: '#a9c5ff' }}><Ic d={P.swap} s={21} /></div>
             </div>
 
             <div style={{ padding: 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: isNarrowWorkbench ? 'none' : 'flex', flexDirection: 'column' }}>
@@ -2702,6 +2704,7 @@ export default function App() {
           isSignedIn={Boolean(session?.user)}
           onRequireAuth={openAuth}
           onUsageAdd={isSignedIn ? handleUsageAdd : handleGuestUsageAdd}
+          onNav={requestNavigation}
         />
       </>
     );
@@ -2738,7 +2741,7 @@ export default function App() {
 
         <main style={{ flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
           <div key={`${view}-${isSignedIn ? 'auth' : 'guest'}`} className="page-fade surface-fade">
-            {view === 'tool'      && <HumanizerTool history={history} setHistory={setHistory} subscription={toolSubscription} isSignedIn={Boolean(session?.user)} onRequireAuth={openAuth} onUsageAdd={isSignedIn ? handleUsageAdd : handleGuestUsageAdd} />}
+            {view === 'tool'      && <HumanizerTool history={history} setHistory={setHistory} subscription={toolSubscription} isSignedIn={Boolean(session?.user)} onRequireAuth={openAuth} onUsageAdd={isSignedIn ? handleUsageAdd : handleGuestUsageAdd} onNav={requestNavigation} />}
             {view === 'pricing'   && <PricingPage subscription={subscription} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} isSignedIn={isSignedIn} onSignIn={() => openAuth('signin', 'pricing')} notice={pricingNotice} />}
             {view === 'dashboard' && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'dashboard')} pageName="the Dashboard" /> : <Dashboard history={history} saved={saved} onNav={requestNavigation} subscription={subscription} profile={profile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />)}
             {view === 'profile'   && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'profile')} pageName="your Profile" /> : <ProfilePage profile={profile} subscription={subscription} history={history} saved={saved} onSaveProfile={handleSaveProfile} />)}
