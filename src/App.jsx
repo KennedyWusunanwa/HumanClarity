@@ -189,6 +189,9 @@ const P = {
   eyeOff:   'M13.875 18.825A10.05 10.05 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22',
   premium:  'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
   swap:     'M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5',
+  thumbUp:  'M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3',
+  thumbDown:'M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3zm7-13h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17',
+  add:      'M12 5v14m-7-7h14',
 };
 // ─── particle canvas ──────────────────────────────────────────────────────────
 
@@ -1121,7 +1124,8 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
   });
   const [railOpen, setRailOpen] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1200 : window.innerWidth));
-  const fileRef   = useRef(null);
+  const fileRef     = useRef(null);
+  const textareaRef = useRef(null);
   const wordCount = useMemo(() => wc(input), [input]);
   const remaining = wordsRemaining(subscription);
   const isNarrowWorkbench = viewportWidth <= 860;
@@ -1318,6 +1322,13 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Restore textarea focus after loading/uploading finishes so Ctrl+V keeps working
+  useEffect(() => {
+    if (!loading && !uploading) {
+      textareaRef.current?.focus();
+    }
+  }, [loading, uploading]);
+
   const outputPlaceholder = 'Your humanized text will appear here once processing is complete.';
   const outputText = output?.text || outputPlaceholder;
   const outputWords = output?.wordCount || 0;
@@ -1450,6 +1461,7 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
               <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ position: 'relative', flex: '1 1 auto', minHeight: 0, overflow: 'hidden' }}>
                   <textarea
+                    ref={textareaRef}
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     placeholder="Paste your AI text here or upload a document to begin..."
@@ -1504,8 +1516,8 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
                   {output?.text && (
                     <>
                       <span style={{ marginLeft: 'auto', color: '#b2bdd2', fontSize: 12 }}>Rate this result</span>
-                      <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d="thumb_up" s={20} /></button>
-                      <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d="thumb_down" s={20} /></button>
+                      <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d={P.thumbUp} s={20} /></button>
+                      <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d={P.thumbDown} s={20} /></button>
                     </>
                   )}
                 </div>
@@ -1655,7 +1667,7 @@ function Dashboard({ history, saved, onNav, subscription, profile, onUpgrade, up
           <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>Here's an overview of your activity.</p>
         </div>
         <button onClick={() => onNav('tool')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', fontFamily: 'inherit' }}>
-          <Ic d="add" s={17} /> New Document
+          <Ic d={P.add} s={17} /> New Document
         </button>
       </div>
 
