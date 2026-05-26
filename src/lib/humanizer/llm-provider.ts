@@ -1,11 +1,3 @@
-// ─── HumanClarity Humanizer — LLM Provider Abstraction ───────────────────────
-// Supports Groq (OpenAI-compatible), Google Gemini, any OpenAI-compatible API,
-// and fully custom async provider functions.
-//
-// Recommended providers:
-//   Groq  → model: 'llama-3.3-70b-versatile' (fast, cheap, excellent quality)
-//   Gemini → model: 'gemini-2.0-flash' (fast, cheap, strong reasoning)
-
 import { LLMProvider } from './types';
 
 export interface LLMCallOptions {
@@ -15,123 +7,16 @@ export interface LLMCallOptions {
   maxTokens?: number;
 }
 
-/**
- * Dispatches an LLM call to the configured provider.
- * Throws on API errors with a clear message.
- */
 export async function callLLM(
   provider: LLMProvider,
   options: LLMCallOptions,
 ): Promise<string> {
-  const { systemPrompt, userText, temperature, maxTokens = 4096 } = options;
-
-  if (provider.callFn) {
-    return provider.callFn(systemPrompt, userText, temperature);
-  }
-
-  switch (provider.type) {
-    case 'groq':
-      return callGroq(provider, systemPrompt, userText, temperature, maxTokens);
-    case 'gemini':
-      return callGemini(provider, systemPrompt, userText, temperature, maxTokens);
-    case 'openai':
-      return callOpenAICompat(provider, systemPrompt, userText, temperature, maxTokens);
-    case 'custom':
-      throw new Error('Provider type "custom" requires a callFn to be provided.');
-    default:
-      throw new Error(`Unknown provider type: "${(provider as LLMProvider).type}"`);
-  }
+  const { systemPrompt, userText, temperature, maxTokens = 2048 } = options;
+  return callOpenAICompat(provider, systemPrompt, userText, temperature, maxTokens);
 }
 
-// ── Groq (OpenAI-compatible) ──────────────────────────────────────────────────
-
-async function callGroq(
-  provider: LLMProvider,
-  systemPrompt: string,
-  userText: string,
-  temperature: number,
-  maxTokens: number,
-): Promise<string> {
-  const model = provider.model ?? 'llama-3.3-70b-versatile';
-  const baseUrl = provider.baseUrl ?? 'https://api.groq.com/openai/v1';
-
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${provider.apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      temperature,
-      max_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userText },
-      ],
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`Groq API error ${res.status}: ${body}`);
-  }
-
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error('Groq returned an empty response');
-  return content.trim();
-}
-
-// ── Google Gemini ─────────────────────────────────────────────────────────────
-
-async function callGemini(
-  provider: LLMProvider,
-  systemPrompt: string,
-  userText: string,
-  temperature: number,
-  maxTokens: number,
-): Promise<string> {
-  const model = provider.model ?? 'gemini-2.0-flash';
-  const baseUrl = provider.baseUrl ?? 'https://generativelanguage.googleapis.com/v1beta';
-  const url = `${baseUrl}/models/${model}:generateContent?key=${provider.apiKey}`;
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      system_instruction: {
-        parts: [{ text: systemPrompt }],
-      },
-      contents: [
-        {
-          role: 'user',
-          parts: [{ text: userText }],
-        },
-      ],
-      generationConfig: {
-        temperature,
-        maxOutputTokens: maxTokens,
-        candidateCount: 1,
-      },
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`Gemini API error ${res.status}: ${body}`);
-  }
-
-  const data = await res.json();
-  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!content) {
-    const reason = data?.candidates?.[0]?.finishReason;
-    throw new Error(`Gemini returned empty content. Finish reason: ${reason ?? 'unknown'}`);
-  }
-  return content.trim();
-}
-
-// ── OpenAI-compatible (also works for Together AI, Fireworks, etc.) ───────────
+const REQUEST_TIMEOUT_MS = 30_000;
+const MAX_TRANSIENT_RETRIES = 1;
 
 async function callOpenAICompat(
   provider: LLMProvider,
@@ -140,37 +25,85 @@ async function callOpenAICompat(
   temperature: number,
   maxTokens: number,
 ): Promise<string> {
-  const model = provider.model ?? 'gpt-4o-mini';
-  const baseUrl = provider.baseUrl ?? 'https://api.openai.com/v1';
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const model = provider.model ?? 'openai';
+  const baseUrl = provider.baseUrl ?? 'https://gen.pollinations.ai/v1';
+  const providerName = provider.name ?? 'OpenAI-compatible provider';
+  const maxAttempts = MAX_TRANSIENT_RETRIES + 1;
 
-  if (provider.apiKey) {
-    headers.Authorization = `Bearer ${provider.apiKey}`;
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${provider.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          temperature,
+          // Generous ceiling so reasoning-style models don't burn the budget on chain-of-thought
+          // before they emit the actual reply.
+          max_tokens: Math.max(4096, maxTokens),
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userText },
+          ],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        const transient = res.status === 429 || res.status >= 500;
+        lastError = new Error(`${providerName} API error ${res.status}: ${body}`);
+        if (transient && attempt < maxAttempts) {
+          await sleep(250);
+          continue;
+        }
+        throw lastError;
+      }
+
+      const data = await res.json();
+      const message = data?.choices?.[0]?.message;
+      const content = Array.isArray(message?.content)
+        ? message.content.map((part: any) => part?.text ?? '').join('')
+        : message?.content;
+
+      if (typeof content === 'string' && content.trim()) {
+        return content.trim();
+      }
+
+      // Empty content — most likely a content filter or the provider misbehaving.
+      // Fail fast so the outer fallback can try the next provider rather than spinning here.
+      const finishReason = data?.choices?.[0]?.finish_reason;
+      const modelName = data?.model ?? model;
+      throw new Error(
+        `${providerName} returned an empty response from ${modelName}. Finish reason: ${finishReason ?? 'unknown'}.`,
+      );
+    } catch (err: any) {
+      const isAbort = err?.name === 'AbortError';
+      lastError = isAbort
+        ? new Error(`${providerName} timed out after ${REQUEST_TIMEOUT_MS / 1000}s`)
+        : (err instanceof Error ? err : new Error(String(err)));
+      const isNetworkLevel = isAbort || err?.code === 'UND_ERR_SOCKET' || err?.code === 'ECONNRESET' || err?.code === 'ENOTFOUND';
+      if (attempt < maxAttempts && isNetworkLevel) {
+        await sleep(250);
+        continue;
+      }
+      throw lastError;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model,
-      temperature,
-      max_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userText },
-      ],
-    }),
-  });
+  throw lastError ?? new Error(`${providerName} request failed`);
+}
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`OpenAI-compatible API error ${res.status}: ${body}`);
-  }
-
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error('OpenAI-compatible provider returned an empty response');
-  return content.trim();
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

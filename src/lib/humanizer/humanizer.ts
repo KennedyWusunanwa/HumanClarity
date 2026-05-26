@@ -87,32 +87,37 @@ async function refineStiffSentences(
     isRehumanizationPass: true,
   });
 
-  let result = text;
+  const rewrites = await Promise.all(
+    flagged.map(async sentence => {
+      try {
+        const rewritten = await callLLM(options.provider, {
+          systemPrompt,
+          userText:
+            'Revise only this sentence so it reads more naturally, spartan, and fluently while adding slight human imperfections like hesitation or slight redundancy if it fits. Return only the revised sentence. Avoid all markdown, asterisks, semicolons, and em dashes.\n\n' +
+            sentence,
+          temperature,
+          maxTokens: 300,
+        });
 
-  for (const sentence of flagged) {
-    try {
-      const rewritten = await callLLM(options.provider, {
-        systemPrompt,
-        userText:
-          'Revise only this sentence so it reads more naturally, spartan, and fluently while adding slight human imperfections like hesitation or slight redundancy if it fits. Return only the revised sentence. Avoid all markdown, asterisks, semicolons, and em dashes.\n\n' +
-          sentence,
-        temperature,
-        maxTokens: 300,
-      });
+        const cleaned = rewritten
+          .trim()
+          .replace(/^["']|["']$/g, '')
+          .replace(/^Revised[:\s]+/i, '');
 
-      const cleaned = rewritten
-        .trim()
-        .replace(/^["']|["']$/g, '')
-        .replace(/^Revised[:\s]+/i, '');
-
-      if (cleaned && cleaned.length > 5 && cleaned.length < sentence.length * 1.75) {
-        result = result.replace(sentence, cleaned);
+        if (cleaned && cleaned.length > 5 && cleaned.length < sentence.length * 1.75) {
+          return { sentence, cleaned };
+        }
+      } catch {
+        // Skip a failed sentence-level rewrite and keep moving.
       }
-    } catch {
-      // Skip a failed sentence-level rewrite and keep moving.
-    }
-  }
+      return null;
+    }),
+  );
 
+  let result = text;
+  for (const rewrite of rewrites) {
+    if (rewrite) result = result.replace(rewrite.sentence, rewrite.cleaned);
+  }
   return result;
 }
 
@@ -126,7 +131,7 @@ export async function humanizeText(
 
   if (!options?.provider) {
     throw new Error(
-      'humanizeText: options.provider is required. Set a provider such as { type: "groq" | "gemini" | "openai", apiKey: "..." }.',
+      'humanizeText: options.provider is required. Set a Pollinations/OpenRouter OpenAI-compatible provider.',
     );
   }
 
@@ -144,10 +149,9 @@ export async function humanizeText(
   const originalText = text;
   const { text: protectedText, regions } = extractProtectedRegions(text);
   const chunks = chunkText(protectedText);
-  const processedChunks: string[] = [];
   let totalPassesRun = 0;
 
-  for (const chunk of chunks) {
+  const chunkResults = await Promise.all(chunks.map(async chunk => {
     let current = chunk;
     let localPasses = 0;
     let qualityScore = 0;
@@ -155,7 +159,6 @@ export async function humanizeText(
 
     const firstPass = await rewriteChunk(current, resolved, temperature, false);
     localPasses += 1;
-    totalPassesRun += 1;
 
     const firstGovernance = checkGovernance(chunk, firstPass);
     current = firstGovernance.passed ? firstPass.trim() : chunk;
@@ -165,7 +168,6 @@ export async function humanizeText(
     while (localPasses < resolved.passes && qualityScore < resolved.targetScore) {
       temperature = Math.min(0.98, temperature + 0.04);
       localPasses += 1;
-      totalPassesRun += 1;
 
       const refined =
         localPasses === 2
@@ -180,8 +182,11 @@ export async function humanizeText(
       qualityScore = scoreText(current).total;
     }
 
-    processedChunks.push(current);
-  }
+    return { text: current, passes: localPasses };
+  }));
+
+  const processedChunks = chunkResults.map(c => c.text);
+  totalPassesRun = chunkResults.reduce((sum, c) => sum + c.passes, 0);
 
   let finalText = processedChunks.join('\n\n');
   finalText = restoreProtectedRegions(finalText, regions);

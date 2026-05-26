@@ -790,7 +790,7 @@ function SignInModal({
   );
 }
 
-function Landing({ onStart, onSignIn }) {
+function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', email: '' }, onSignOut }) {
   const isDark = true;
 
   const features = [
@@ -833,12 +833,28 @@ function Landing({ onStart, onSignIn }) {
           <span style={{ fontFamily: '"Roboto", Arial, sans-serif', fontWeight: 700, fontSize: 'clamp(11px, 3.7vw, 17px)', background: 'linear-gradient(135deg, #a8c7fa 0%, #d3e3fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: 0, lineHeight: 1.1, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>HumanClarity AI</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'clamp(8px, 1.6vw, 10px)', flex: '0 0 auto', flexShrink: 0 }}>
-          <button onClick={onSignIn} style={{ padding: '8px clamp(10px, 2.8vw, 14px)', borderRadius: 10, background: 'linear-gradient(135deg, rgba(30,43,80,0.7), rgba(17,24,39,0.72))', color: '#e8edff', fontWeight: 700, fontSize: 'clamp(11px, 3vw, 13px)', border: '1px solid rgba(126,151,255,0.32)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', boxShadow: '0 10px 22px rgba(0,0,0,0.18)' }}>
-            Sign In
-          </button>
-          <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', whiteSpace: 'nowrap' }}>
-            Get Started Free
-          </button>
+          {isSignedIn ? (
+            <>
+              <span title={profile.name || profile.email} style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff', flexShrink: 0, userSelect: 'none' }}>
+                {initials(profile.name || profile.email)}
+              </span>
+              <button onClick={onSignOut} aria-label="Sign out" title="Sign out" style={{ width: 34, height: 34, padding: 0, borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Ic d={P.signout} s={16} />
+              </button>
+              <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', whiteSpace: 'nowrap' }}>
+                Open App
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={onSignIn} style={{ padding: '8px clamp(10px, 2.8vw, 14px)', borderRadius: 10, background: 'linear-gradient(135deg, rgba(30,43,80,0.7), rgba(17,24,39,0.72))', color: '#e8edff', fontWeight: 700, fontSize: 'clamp(11px, 3vw, 13px)', border: '1px solid rgba(126,151,255,0.32)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', boxShadow: '0 10px 22px rgba(0,0,0,0.18)' }}>
+                Sign In
+              </button>
+              <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', whiteSpace: 'nowrap' }}>
+                Get Started Free
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
@@ -878,40 +894,74 @@ function Landing({ onStart, onSignIn }) {
         </div>
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 96, background: `linear-gradient(to top, ${bodyBg}, transparent)`, pointerEvents: 'none' }} />
       </section>
-      <section style={{ padding: '100px 24px', position: 'relative', background: featBg }}>
-        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 700, height: 1, background: 'linear-gradient(90deg, transparent, rgba(168,199,250,0.45), transparent)' }} />
-        <div style={{ maxWidth: 1120, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 58 }}>
-            <h2 style={{ fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 700, color: text1, marginBottom: 12, fontFamily: '"Roboto", Arial, sans-serif' }}>Everything you need</h2>
-            <p style={{ color: text2, fontSize: 16 }}>Professional writing tools powered by Claude AI</p>
+      <section style={{ padding: 'clamp(70px, 11vh, 120px) clamp(16px, 4vw, 32px)', position: 'relative', background: featBg, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 640, height: 1, background: 'linear-gradient(90deg, transparent, rgba(126,151,255,0.4), transparent)' }} />
+        <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 720, height: 380, background: 'radial-gradient(ellipse, rgba(73,104,255,0.09), transparent 65%)', pointerEvents: 'none', filter: 'blur(60px)' }} />
+        <div style={{ maxWidth: 1120, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vh, 58px)' }}>
+            <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7e97ff', background: 'rgba(73,104,255,0.1)', border: '1px solid rgba(73,104,255,0.28)', marginBottom: 18 }}>
+              Features
+            </span>
+            <h2 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, color: text1, margin: '0 0 14px', fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1.08, letterSpacing: '-0.01em' }}>
+              Everything you need,{' '}
+              <span style={{ background: 'linear-gradient(135deg,#e9edf7 0%, #7fb1ff 55%, #8f5cff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>in one place</span>
+            </h2>
+            <p style={{ color: text2, fontSize: 'clamp(14px, 1.7vw, 16px)', maxWidth: 540, margin: '0 auto', lineHeight: 1.6 }}>
+              Professional writing tools powered by Claude AI — every action just a click away.
+            </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
             {features.map((f) => (
-              <div key={f.title} style={{ position: 'relative', background: cardBg, backdropFilter: 'blur(14px)', border: `1px solid ${cardBdr}`, borderRadius: 20, padding: 28, overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, right: 0, width: 110, height: 110, background: 'radial-gradient(circle at top right, rgba(168,199,250,0.28), transparent 68%)', borderRadius: '0 20px 0 0', pointerEvents: 'none' }} />
-                <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(168,199,250,0.14)', border: '1px solid rgba(168,199,250,0.32)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, color: '#a8c7fa', boxShadow: '0 2px 8px rgba(0,0,0,0.24)' }}>
+              <div key={f.title} style={{
+                position: 'relative',
+                background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))',
+                border: '1px solid rgba(70,103,178,0.45)',
+                borderRadius: 18,
+                padding: '28px 24px',
+                overflow: 'hidden',
+                boxShadow: '0 18px 40px rgba(0,0,0,0.32), 0 0 50px rgba(37,99,235,0.06)',
+              }}>
+                <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, background: 'radial-gradient(circle, rgba(126,151,255,0.2), transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, rgba(73,104,255,0.34), rgba(124,82,255,0.24))', border: '1px solid rgba(126,151,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, color: '#cdd9ff', boxShadow: '0 8px 18px rgba(73,104,255,0.2)' }}>
                   <Ic d={f.icon} s={22} />
                 </div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: text1, marginBottom: 10 }}>{f.title}</h3>
-                <p style={{ fontSize: 14, lineHeight: 1.65, color: text2 }}>{f.desc}</p>
+                <h3 style={{ fontSize: 17, fontWeight: 800, color: text1, margin: '0 0 10px' }}>{f.title}</h3>
+                <p style={{ fontSize: 14, lineHeight: 1.65, color: text2, margin: 0 }}>{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section style={{ padding: '100px 24px', background: stepsBg, borderTop: `1px solid ${isDark ? 'rgba(168,199,250,0.08)' : 'rgba(168,199,250,0.12)'}`, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 800, height: 350, background: 'radial-gradient(ellipse, rgba(168,199,250,0.1) 0%, transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 880, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ textAlign: 'center', fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 700, color: text1, marginBottom: 64, fontFamily: '"Roboto", Arial, sans-serif' }}>Three steps to better writing</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 44 }}>
+      <section style={{ padding: 'clamp(70px, 11vh, 120px) clamp(16px, 4vw, 32px)', background: stepsBg, borderTop: '1px solid rgba(70,103,178,0.18)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 820, height: 380, background: 'radial-gradient(ellipse, rgba(124,82,255,0.08), transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vh, 58px)' }}>
+            <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#a78bff', background: 'rgba(124,82,255,0.1)', border: '1px solid rgba(124,82,255,0.28)', marginBottom: 18 }}>
+              How it works
+            </span>
+            <h2 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, color: text1, margin: 0, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1.08, letterSpacing: '-0.01em' }}>
+              Three steps to{' '}
+              <span style={{ background: 'linear-gradient(135deg,#e9edf7 0%, #7fb1ff 55%, #8f5cff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>better writing</span>
+            </h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18 }}>
             {steps.map((s) => (
-              <div key={s.n} style={{ textAlign: 'center' }}>
-                <div style={{ width: 62, height: 62, borderRadius: '50%', background: 'linear-gradient(135deg,#0b57d0,#1a73e8)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 22px', fontSize: 19, fontWeight: 800, color: '#fff', boxShadow: '0 8px 18px rgba(0,0,0,0.24)', fontFamily: '"Roboto", Arial, sans-serif' }}>
+              <div key={s.n} style={{
+                position: 'relative',
+                background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))',
+                border: '1px solid rgba(70,103,178,0.45)',
+                borderRadius: 18,
+                padding: '28px 24px 24px',
+                overflow: 'hidden',
+                boxShadow: '0 18px 40px rgba(0,0,0,0.32), 0 0 50px rgba(37,99,235,0.06)',
+              }}>
+                <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, background: 'radial-gradient(circle, rgba(126,151,255,0.2), transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+                <div style={{ width: 54, height: 54, borderRadius: 14, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, fontSize: 17, fontWeight: 900, color: '#fff', boxShadow: '0 12px 24px rgba(73,104,255,0.32)', fontFamily: '"Roboto", Arial, sans-serif' }}>
                   {s.n}
                 </div>
-                <h3 style={{ fontSize: 17, fontWeight: 700, color: text1, marginBottom: 10 }}>{s.title}</h3>
-                <p style={{ fontSize: 14, lineHeight: 1.68, color: text2 }}>{s.desc}</p>
+                <h3 style={{ fontSize: 17, fontWeight: 800, color: text1, margin: '0 0 10px' }}>{s.title}</h3>
+                <p style={{ fontSize: 14, lineHeight: 1.68, color: text2, margin: 0 }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -931,8 +981,14 @@ function Landing({ onStart, onSignIn }) {
         </div>
       </section>
 
-      <footer style={{ padding: '22px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 12, borderTop: `1px solid ${isDark ? 'rgba(168,199,250,0.1)' : 'rgba(168,199,250,0.15)'}`, background: bodyBg, fontSize: 13, color: text3 }}>
-        <button onClick={onStart} style={{ color: text3, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: 13 }}>
+      <footer style={{ padding: '14px clamp(16px, 4vw, 32px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: `1px solid ${isDark ? 'rgba(168,199,250,0.1)' : 'rgba(168,199,250,0.15)'}`, background: bodyBg, fontSize: 13, color: text3 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          Made in Ghana © {new Date().getFullYear()}
+          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#c7d3ff', fontWeight: 600, textDecoration: 'none', textShadow: '0 0 10px rgba(126,151,255,0.55), 0 0 22px rgba(124,82,255,0.35)' }}>
+            Kennedy Abubakar
+          </a>
+        </span>
+        <button onClick={onStart} style={{ color: text3, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: 13, fontFamily: 'inherit', padding: 0 }}>
           Enter App
         </button>
       </footer>
@@ -949,143 +1005,150 @@ const NAV = [
 ];
 const SIGNIN_VIEWS = new Set(['dashboard', 'profile', 'history', 'saved', 'settings']);
 
-function Sidebar({ page, onNav, open, onClose, subscription }) {
-  function NavBtn({ id, label, icon }) {
-    const active = page === id;
+
+// ─── shared app shell ─────────────────────────────────────────────────────────
+
+function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '', email: '' }, onPrimaryClick, onSecondaryClick, onSignOut, scroll = false, mainPadding, children }) {
+  const isPro = subscription?.tier === 'pro';
+  const [railOpen, setRailOpen] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1200 : window.innerWidth));
+
+  useEffect(() => {
+    function handleResize() { setViewportWidth(window.innerWidth); }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isPhone = viewportWidth <= 560;
+  const showRailLabels = railOpen && viewportWidth > 760;
+  const railWidth = showRailLabels ? 292 : isPhone ? 54 : 76;
+
+  function RailItem({ id, label, icon, onClick }) {
+    const active = id === page;
     return (
       <button
-        onClick={() => onNav(id)}
-        style={{
-          display: 'flex', width: '100%', alignItems: 'center', gap: 16,
-          minHeight: 58, padding: '0 18px', borderRadius: 12, marginBottom: 14,
-          background: active ? 'linear-gradient(135deg, rgba(91,111,255,0.22), rgba(124,82,255,0.12))' : 'transparent',
-          color: active ? '#f1f4ff' : '#98a2b8',
-          border: active ? '1px solid rgba(112,127,255,0.65)' : '1px solid transparent',
-          cursor: 'pointer', fontSize: 15.5, fontWeight: active ? 700 : 500,
-          boxShadow: active ? 'inset 0 0 0 1px rgba(255,255,255,0.03)' : 'none',
-          transition: 'background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease',
-          textAlign: 'left', fontFamily: 'inherit',
+        onClick={() => {
+          if (onClick) { onClick(); return; }
+          if (id === page) { setRailOpen(false); return; }
+          onNav?.(id);
         }}
         title={label}
-        onMouseEnter={e => {
-          if (!active) {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.035)';
-            e.currentTarget.style.color = '#c6cce0';
-          }
-        }}
-        onMouseLeave={e => {
-          if (!active) {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = '#98a2b8';
-          }
+        style={{
+          width: '100%', minHeight: 48, display: 'flex', alignItems: 'center', gap: 14,
+          borderRadius: 13, padding: showRailLabels ? '0 14px' : 0,
+          justifyContent: showRailLabels ? 'flex-start' : 'center',
+          border: active ? '1px solid rgba(113,131,255,0.55)' : '1px solid transparent',
+          background: active ? 'rgba(76,88,180,0.2)' : 'transparent',
+          color: active ? '#eef2ff' : '#9ca8bd',
+          cursor: 'pointer', fontFamily: 'inherit',
+          fontSize: 15, fontWeight: active ? 800 : 600,
         }}
       >
-        <span style={{ color: active ? '#8d76ff' : '#8d96ad', flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+        <span style={{ color: active ? '#8f7cff' : '#9ca8bd', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
           <Ic d={P[icon]} s={22} />
         </span>
-        <span style={{ flex: 1 }}>{label}</span>
-        {active && <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#835cff', boxShadow: '0 0 14px rgba(131,92,255,0.82)', flexShrink: 0 }} />}
+        {showRailLabels && <span>{label}</span>}
+        {showRailLabels && active && <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#8f5cff' }} />}
       </button>
     );
   }
 
   return (
-    <>
-      {open && (
-        <div
-          style={{ position: 'fixed', inset: 0, zIndex: 20, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(6px)' }}
-          onClick={onClose}
-          className="lg:hidden"
-        />
-      )}
-      <aside
-        className={`fixed inset-y-0 left-0 z-30 flex flex-col transition-transform duration-200 lg:relative lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{ background: 'rgba(6,10,18,0.82)', borderRight: '1px solid rgba(91,104,132,0.28)', width: 294 }}
-      >
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(79,70,229,0.04), transparent 38%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 14, padding: '24px 26px 24px', borderBottom: '1px solid rgba(91,104,132,0.22)' }}>
-          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 50, height: 50, objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(124,82,255,0.28))' }} />
-          <div style={{ minWidth: 0 }}>
-            <p style={{ color: '#ffffff', fontWeight: 800, fontSize: 20, fontFamily: 'inherit', margin: 0, lineHeight: 1.1 }}>HumanClarity</p>
-            <p style={{ color: '#6380ff', fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', margin: '8px 0 0', textTransform: 'uppercase' }}>Natural Writing, Fast</p>
-          </div>
-        </div>
+    <div style={{ height: '100dvh', position: 'relative', overflow: 'hidden', background: '#0e0f11', color: '#f8fafc', viewTransitionName: page === 'tool' ? 'humanizer-page' : undefined }}>
+      <ParticleCanvas count={48} isDark speed={0.52} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 22%, rgba(66,133,244,0.2), transparent 35%), radial-gradient(ellipse at 50% 46%, rgba(37,99,235,0.12), transparent 48%), linear-gradient(180deg, rgba(14,15,17,0.7), #0e0f11 96%)', pointerEvents: 'none' }} />
 
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '18px 14px', position: 'relative', zIndex: 1 }}>
-          {NAV.map(({ id, label, icon }) => (
-            <NavBtn key={id} id={id} label={label} icon={icon} />
-          ))}
+      <aside style={{ position: 'absolute', zIndex: 5, top: 0, left: 0, bottom: 0, width: railWidth, transition: 'width 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderRight: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.72)', backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', padding: isPhone ? 8 : 12, boxSizing: 'border-box' }}>
+        <button onClick={() => setRailOpen(v => !v)} aria-label={railOpen ? 'Collapse navigation' : 'Expand navigation'} style={{ minHeight: 50, border: 'none', background: 'transparent', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: 12, padding: showRailLabels ? '0 8px' : 0, cursor: 'pointer', fontFamily: 'inherit' }}>
+          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 31, height: 31, objectFit: 'contain' }} />
+          {showRailLabels && (
+            <span style={{ textAlign: 'left' }}>
+              <span style={{ display: 'block', fontSize: 18, fontWeight: 900 }}>HumanClarity</span>
+              <span style={{ display: 'block', marginTop: 4, color: '#6d87ff', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural Writing, Fast</span>
+            </span>
+          )}
+        </button>
+        <nav style={{ display: 'grid', gap: 8, marginTop: 18 }}>
+          {NAV.map(item => <RailItem key={item.id} {...item} />)}
         </nav>
-
-        <div style={{ padding: '0 16px 18px', position: 'relative', zIndex: 1 }}>
-          <button
-            onClick={() => onNav('pricing')}
-            style={{
-              width: '100%', padding: '20px 18px', borderRadius: 14, marginBottom: 18,
-              background: 'linear-gradient(145deg, rgba(21,25,48,0.92), rgba(15,19,34,0.92))',
-              color: '#fff', border: '1px solid rgba(112,127,255,0.25)', cursor: 'pointer',
-              textAlign: 'left', boxShadow: '0 18px 34px rgba(0,0,0,0.28)', fontFamily: 'inherit',
-            }}
-            title={subscription.tier === 'pro' ? 'View pricing' : 'Upgrade to Premium'}
-          >
-            <div style={{ color: '#835cff', marginBottom: 14 }}><Ic d={P.premium} s={25} /></div>
-            <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 10 }}>
-              {subscription.tier === 'pro' ? 'Premium Active' : 'Upgrade to Premium'}
-            </div>
-            <div style={{ fontSize: 13, lineHeight: 1.55, color: '#aeb7cb', marginBottom: 18 }}>
-              Unlock unlimited use and powerful capabilities.
-            </div>
-            <div style={{ minHeight: 46, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', fontSize: 15, fontWeight: 800 }}>
-              Upgrade Now <Ic d={P.zap} s={17} />
-            </div>
-          </button>
-          <NavBtn id="settings" label="Settings" icon="gear" />
+        <div style={{ marginTop: 'auto', display: 'grid', gap: 8 }}>
+          {!isPro && (
+            <button
+              onClick={() => onNav?.('pricing')}
+              title="Upgrade to Premium"
+              style={{ width: '100%', minHeight: showRailLabels ? 172 : 50, borderRadius: 15, border: '1px solid rgba(113,131,255,0.25)', background: showRailLabels ? 'linear-gradient(145deg, rgba(23,30,58,0.92), rgba(13,18,32,0.92))' : 'transparent', color: '#fff', padding: showRailLabels ? 16 : 0, display: 'flex', flexDirection: showRailLabels ? 'column' : 'row', alignItems: showRailLabels ? 'flex-start' : 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: showRailLabels ? 8 : 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+            >
+              <span style={{ color: '#8f5cff', display: 'grid', placeItems: 'center' }}><Ic d={P.premium} s={showRailLabels ? 25 : 22} /></span>
+              {showRailLabels && (
+                <>
+                  <span style={{ fontSize: 15, fontWeight: 900 }}>Upgrade to Premium</span>
+                  <span style={{ color: '#aeb8ce', fontSize: 12.5, lineHeight: 1.45 }}>Unlock unlimited use and powerful capabilities.</span>
+                  <span style={{ width: '100%', minHeight: 40, marginTop: 8, borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 900 }}>
+                    Upgrade Now <Ic d={P.zap} s={16} />
+                  </span>
+                </>
+              )}
+            </button>
+          )}
+          <RailItem id="settings" label="Settings" icon="gear" />
         </div>
       </aside>
-    </>
-  );
-}
-// ─── header ───────────────────────────────────────────────────────────────────
 
-function Header({ profile, onSignOut, onSignIn, onMenuOpen }) {
-  const isSignedIn = Boolean(profile.name.trim() || profile.email.trim());
-
-  return (
-    <header style={{ minHeight: 88, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '20px 26px', background: 'transparent', borderBottom: 'none', position: 'relative', zIndex: 10 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-        <button onClick={onMenuOpen} aria-label="Open menu" style={{ color: '#d6dcf0', background: 'rgba(10,14,25,0.72)', border: '1px solid rgba(140,152,181,0.22)', borderRadius: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 46, height: 46, flexShrink: 0, backdropFilter: 'blur(14px)' }}>
-          <Ic d={P.menu} s={23} />
-        </button>
-      </div>
-
-      {isSignedIn ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff', cursor: 'default', userSelect: 'none', flexShrink: 0 }}>
-            {initials(profile.name)}
-          </div>
-          <span className="hidden md:block" style={{ fontSize: 14, fontWeight: 600, color: '#c7cde0', maxWidth: 170, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile.name || profile.email}</span>
-          <button onClick={onSignOut}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 46, padding: '0 16px', borderRadius: 11, border: '1px solid rgba(126,151,255,0.34)', color: '#e8edff', background: 'linear-gradient(135deg, rgba(30,43,80,0.74), rgba(17,24,39,0.74))', cursor: 'pointer', fontSize: 14, fontWeight: 700, flexShrink: 0, boxShadow: '0 10px 24px rgba(0,0,0,0.2)' }}>
-            <Ic d={P.signout} s={18} />
-            <span className="hidden sm:inline">Sign Out</span>
-          </button>
+      <header style={{ position: 'relative', zIndex: 3, height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: isPhone ? '12px 12px' : '12px clamp(16px, 3vw, 32px)', paddingLeft: `calc(${railWidth}px + ${isPhone ? '12px' : 'clamp(16px, 3vw, 32px)'})`, transition: 'padding-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderBottom: 'none', background: 'transparent', boxSizing: 'border-box' }}>
+        <div style={{ color: '#fff', fontSize: 'clamp(13px, 3.6vw, 18px)', fontWeight: 800, whiteSpace: 'nowrap' }}>
+          {viewportWidth <= 520 ? 'HC AI' : 'HumanClarity AI'}
         </div>
-      ) : (
-        <button onClick={onSignIn}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 46, padding: '0 20px', borderRadius: 11, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 800, fontSize: 15, border: 'none', cursor: 'pointer', boxShadow: '0 14px 28px rgba(73,104,255,0.24)', flexShrink: 0 }}>
-          <Ic d={P.user} s={19} />
-          <span className="hidden sm:inline">Sign In</span>
-        </button>
-      )}
-    </header>
-  );
-}
-// ─── app background ───────────────────────────────────────────────────────────
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {isSignedIn ? (
+            <>
+              <span title={profile.name || profile.email} style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff', flexShrink: 0, userSelect: 'none' }}>
+                {initials(profile.name || profile.email)}
+              </span>
+              {onSignOut && (
+                <button onClick={onSignOut} aria-label="Sign out" title="Sign out" style={{ width: 34, height: 34, padding: 0, borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Ic d={P.signout} s={16} />
+                </button>
+              )}
+              {onPrimaryClick && (
+                <button onClick={onPrimaryClick} style={{ minHeight: 38, padding: '0 clamp(12px, 2.8vw, 22px)', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                  {page === 'dashboard' ? 'Humanize' : 'Dashboard'}
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              {viewportWidth > 520 && onSecondaryClick && (
+                <button onClick={onSecondaryClick} style={{ minHeight: 38, padding: '0 clamp(10px, 2.4vw, 18px)', borderRadius: 9, border: '1px solid rgba(126,151,255,0.34)', color: '#e8edff', background: 'linear-gradient(135deg, rgba(30,43,80,0.78), rgba(17,24,39,0.74))', boxShadow: '0 10px 22px rgba(0,0,0,0.18)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                  Sign In
+                </button>
+              )}
+              {onPrimaryClick && (
+                <button onClick={onPrimaryClick} style={{ minHeight: 38, padding: '0 clamp(12px, 2.8vw, 22px)', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                  {viewportWidth <= 520 ? 'Start' : 'Get Started Free'}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </header>
 
-function AppBg() {
-  return (
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%, rgba(73,104,255,0.12), transparent 50%), radial-gradient(ellipse at 88% 65%, rgba(124,60,255,0.07), transparent 40%), #0e0f11' }} />
+      <main style={{ position: 'relative', zIndex: 2, height: 'calc(100dvh - 62px - 36px)', marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: mainPadding ?? (scroll ? 0 : (isPhone ? '10px 10px 8px' : 'clamp(12px, 2vh, 22px) clamp(18px, 4vw, 44px)')), boxSizing: 'border-box', display: 'flex', flexDirection: 'column', minHeight: 0, overflowY: scroll ? 'auto' : 'hidden' }}>
+        {children}
+      </main>
+
+      <footer style={{ position: 'relative', zIndex: 3, height: 36, marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: isPhone ? '0 12px' : '0 clamp(18px, 4vw, 44px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: '1px solid rgba(70,103,178,0.18)', background: 'transparent', boxSizing: 'border-box', color: '#8e918f', fontSize: 12 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+          {!isPhone && <>Made in Ghana © {new Date().getFullYear()}</>}
+          {isPhone && <>© {new Date().getFullYear()}</>}
+          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#c7d3ff', fontWeight: 600, textDecoration: 'none', textShadow: '0 0 10px rgba(126,151,255,0.55), 0 0 22px rgba(124,82,255,0.35)' }}>
+            Kennedy Abubakar
+          </a>
+        </span>
+        <button onClick={() => onNav?.('landing')} style={{ color: '#8e918f', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: 13, fontFamily: 'inherit', padding: 0, flexShrink: 0 }}>
+          Enter Home
+        </button>
+      </footer>
     </div>
   );
 }
@@ -1122,15 +1185,13 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
       return '';
     }
   });
-  const [railOpen, setRailOpen] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1200 : window.innerWidth));
   const fileRef     = useRef(null);
   const textareaRef = useRef(null);
   const wordCount = useMemo(() => wc(input), [input]);
   const remaining = wordsRemaining(subscription);
   const isNarrowWorkbench = viewportWidth <= 860;
-  const showRailLabels = railOpen && viewportWidth > 760;
-  const railWidth = showRailLabels ? 292 : 76;
+  const isPhone = viewportWidth <= 560;
   const toolActions = [
     { id: 'summarize', label: 'Summarize', icon: P.doc },
     { id: 'expand', label: 'Expand', icon: P.zap },
@@ -1346,117 +1407,28 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
     fontFamily: 'inherit', whiteSpace: 'nowrap',
   };
 
-  function RailItem({ id, label, icon }) {
-    const active = id === 'tool';
-    return (
-      <button
-        onClick={() => {
-          if (id === 'tool') {
-            setRailOpen(false);
-            return;
-          }
-          onNav?.(id);
-        }}
-        title={label}
-        style={{
-          width: '100%',
-          minHeight: 48,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 14,
-          borderRadius: 13,
-          padding: showRailLabels ? '0 14px' : 0,
-          justifyContent: showRailLabels ? 'flex-start' : 'center',
-          border: active ? '1px solid rgba(113,131,255,0.55)' : '1px solid transparent',
-          background: active ? 'rgba(76,88,180,0.2)' : 'transparent',
-          color: active ? '#eef2ff' : '#9ca8bd',
-          cursor: 'pointer',
-          fontFamily: 'inherit',
-          fontSize: 15,
-          fontWeight: active ? 800 : 600,
-        }}
-      >
-        <span style={{ color: active ? '#8f7cff' : '#9ca8bd', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-          <Ic d={P[icon]} s={22} />
-        </span>
-        {showRailLabels && <span>{label}</span>}
-        {showRailLabels && active && <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#8f5cff' }} />}
-      </button>
-    );
-  }
-
   return (
-    <div style={{ height: '100dvh', position: 'relative', overflow: 'hidden', background: '#0e0f11', color: '#f8fafc', viewTransitionName: 'humanizer-page' }}>
-      <ParticleCanvas count={48} isDark speed={0.52} />
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 22%, rgba(66,133,244,0.2), transparent 35%), radial-gradient(ellipse at 50% 46%, rgba(37,99,235,0.12), transparent 48%), linear-gradient(180deg, rgba(14,15,17,0.7), #0e0f11 96%)', pointerEvents: 'none' }} />
-
-      <aside style={{ position: 'absolute', zIndex: 5, top: 0, left: 0, bottom: 0, width: railWidth, transition: 'width 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderRight: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.72)', backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', padding: 12, boxSizing: 'border-box' }}>
-        <button onClick={() => setRailOpen(v => !v)} aria-label={railOpen ? 'Collapse navigation' : 'Expand navigation'} style={{ minHeight: 50, border: 'none', background: 'transparent', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: 12, padding: showRailLabels ? '0 8px' : 0, cursor: 'pointer', fontFamily: 'inherit' }}>
-          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 31, height: 31, objectFit: 'contain' }} />
-          {showRailLabels && (
-            <span style={{ textAlign: 'left' }}>
-              <span style={{ display: 'block', fontSize: 18, fontWeight: 900 }}>HumanClarity</span>
-              <span style={{ display: 'block', marginTop: 4, color: '#6d87ff', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural Writing, Fast</span>
-            </span>
+    <>
+      <section style={{ textAlign: 'center', maxWidth: 900, margin: isPhone ? '0 auto 10px' : '0 auto clamp(14px, 2.4vh, 24px)', flex: '0 0 auto' }}>
+          {!isPhone && (
+            <img src="/HumanClarity AI icon.png" alt="" style={{ width: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', height: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', objectFit: 'contain', margin: '0 auto clamp(8px, 1.4vh, 14px)', display: 'block', filter: 'drop-shadow(0 0 6px rgba(124,82,255,0.28))' }} />
           )}
-        </button>
-        <nav style={{ display: 'grid', gap: 8, marginTop: 18 }}>
-          {NAV.map(item => <RailItem key={item.id} {...item} />)}
-        </nav>
-        <div style={{ marginTop: 'auto', display: 'grid', gap: 8 }}>
-          <button
-            onClick={() => onNav?.('pricing')}
-            title="Upgrade to Premium"
-            style={{ width: '100%', minHeight: showRailLabels ? 172 : 50, borderRadius: 15, border: '1px solid rgba(113,131,255,0.25)', background: showRailLabels ? 'linear-gradient(145deg, rgba(23,30,58,0.92), rgba(13,18,32,0.92))' : 'transparent', color: '#fff', padding: showRailLabels ? 16 : 0, display: 'flex', flexDirection: showRailLabels ? 'column' : 'row', alignItems: showRailLabels ? 'flex-start' : 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: showRailLabels ? 8 : 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
-          >
-            <span style={{ color: '#8f5cff', display: 'grid', placeItems: 'center' }}><Ic d={P.premium} s={showRailLabels ? 25 : 22} /></span>
-            {showRailLabels && (
-              <>
-                <span style={{ fontSize: 15, fontWeight: 900 }}>Upgrade to Premium</span>
-                <span style={{ color: '#aeb8ce', fontSize: 12.5, lineHeight: 1.45 }}>Unlock unlimited use and powerful capabilities.</span>
-                <span style={{ width: '100%', minHeight: 40, marginTop: 8, borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 900 }}>
-                  Upgrade Now <Ic d={P.zap} s={16} />
-                </span>
-              </>
-            )}
-          </button>
-          <RailItem id="settings" label="Settings" icon="gear" />
-        </div>
-      </aside>
-
-      <header style={{ position: 'relative', zIndex: 3, height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px clamp(16px, 3vw, 32px)', paddingLeft: `calc(${railWidth}px + clamp(16px, 3vw, 32px))`, transition: 'padding-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderBottom: 'none', background: 'transparent', boxSizing: 'border-box' }}>
-        <div style={{ color: '#fff', fontSize: 'clamp(13px, 3.6vw, 18px)', fontWeight: 800, whiteSpace: 'nowrap' }}>
-          {viewportWidth <= 520 ? 'HC AI' : 'HumanClarity AI'}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {!isSignedIn && viewportWidth > 520 && (
-            <button onClick={() => onRequireAuth('signin', 'tool')} style={{ minHeight: 38, padding: '0 clamp(10px, 2.4vw, 18px)', borderRadius: 9, border: '1px solid rgba(126,151,255,0.34)', color: '#e8edff', background: 'linear-gradient(135deg, rgba(30,43,80,0.78), rgba(17,24,39,0.74))', boxShadow: '0 10px 22px rgba(0,0,0,0.18)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
-              Sign In
-            </button>
-          )}
-          <button onClick={() => onRequireAuth(isSignedIn ? 'signin' : 'signup', 'tool')} style={{ minHeight: 38, padding: '0 clamp(12px, 2.8vw, 22px)', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
-            {isSignedIn ? 'Dashboard' : viewportWidth <= 520 ? 'Start' : 'Get Started Free'}
-          </button>
-        </div>
-      </header>
-
-      <main style={{ position: 'relative', zIndex: 2, height: 'calc(100dvh - 62px)', marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: 'clamp(12px, 2vh, 22px) clamp(18px, 4vw, 44px) clamp(12px, 2vh, 22px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        <section style={{ textAlign: 'center', maxWidth: 900, margin: '0 auto clamp(14px, 2.4vh, 24px)', flex: '0 0 auto' }}>
-          <img src="/HumanClarity AI icon.png" alt="" style={{ width: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', height: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', objectFit: 'contain', margin: '0 auto clamp(8px, 1.4vh, 14px)', display: 'block', filter: 'drop-shadow(0 0 6px rgba(124,82,255,0.28))' }} />
-          <h1 style={{ margin: '0 0 clamp(6px, 1vh, 10px)', fontSize: isNarrowWorkbench ? 'clamp(28px, 8vw, 38px)' : 'clamp(30px, 5.2vh, 52px)', lineHeight: 1.06, fontWeight: 800, letterSpacing: 0 }}>
+          <h1 style={{ margin: isPhone ? '0 0 4px' : '0 0 clamp(6px, 1vh, 10px)', fontSize: isPhone ? 22 : isNarrowWorkbench ? 'clamp(28px, 8vw, 38px)' : 'clamp(30px, 5.2vh, 52px)', lineHeight: 1.1, fontWeight: 800, letterSpacing: 0 }}>
             Your writing, <span style={{ background: 'linear-gradient(135deg,#e9edf7 0%, #7fb1ff 62%, #6f8cff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>clearer.</span>
           </h1>
-          <p style={{ margin: 0, color: '#b8c2d8', fontSize: isNarrowWorkbench ? 13 : 'clamp(14px, 2vh, 18px)', lineHeight: 1.45 }}>AI that makes your ideas sound natural, authentic, and undetectable.</p>
+          {!isPhone && (
+            <p style={{ margin: 0, color: '#b8c2d8', fontSize: isNarrowWorkbench ? 13 : 'clamp(14px, 2vh, 18px)', lineHeight: 1.45 }}>AI that makes your ideas sound natural, authentic, and undetectable.</p>
+          )}
         </section>
 
-        <section style={{ width: 'min(100%, 1120px)', margin: '0 auto', borderRadius: 20, border: '1px solid rgba(70,103,178,0.55)', background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))', boxShadow: '0 24px 70px rgba(0,0,0,0.35), 0 0 70px rgba(37,99,235,0.12)', overflow: 'hidden', viewTransitionName: 'humanizer-composer', flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-          <div className="humanizer-workbench-grid" style={{ display: 'grid', gridTemplateColumns: isNarrowWorkbench ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 1px minmax(0, 1fr)', gap: 0, flex: '1 1 auto', minHeight: 0 }}>
-            <div style={{ padding: 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
-                <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.doc} s={21} /></span>
-                <span style={{ fontSize: 15, fontWeight: 800 }}>Input</span>
-                <span style={{ marginLeft: 'auto', color: '#aeb8ce', fontSize: 13 }}>{wordCount} words</span>
-                <button onClick={() => { setInput(''); setOutput(null); setError(''); }} style={{ minHeight: 30, padding: '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>Clear</button>
+        <section style={{ width: 'min(100%, 1120px)', margin: '0 auto', borderRadius: isPhone ? 14 : 20, border: '1px solid rgba(70,103,178,0.55)', background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))', boxShadow: '0 24px 70px rgba(0,0,0,0.35), 0 0 70px rgba(37,99,235,0.12)', overflow: 'hidden', viewTransitionName: 'humanizer-composer', flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <div className={`humanizer-workbench-grid${isNarrowWorkbench && !output?.text ? ' is-input-only' : ''}`} style={{ display: 'grid', gridTemplateColumns: isNarrowWorkbench ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 1px minmax(0, 1fr)', gap: 0, flex: '1 1 auto', minHeight: 0 }}>
+            <div style={{ padding: isPhone ? '12px 12px 10px' : 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isPhone ? 10 : 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
+                <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.doc} s={isPhone ? 18 : 21} /></span>
+                <span style={{ fontSize: isPhone ? 14 : 15, fontWeight: 800 }}>Input</span>
+                <span style={{ marginLeft: 'auto', color: '#aeb8ce', fontSize: isPhone ? 12 : 13 }}>{wordCount} words</span>
+                <button onClick={() => { setInput(''); setOutput(null); setError(''); }} style={{ minHeight: isPhone ? 28 : 30, padding: isPhone ? '0 10px' : '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>Clear</button>
               </div>
               <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ position: 'relative', flex: '1 1 auto', minHeight: 0, overflow: 'hidden' }}>
@@ -1464,9 +1436,9 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
                     ref={textareaRef}
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    placeholder="Paste your AI text here or upload a document to begin..."
+                    placeholder={isPhone ? 'Paste your AI text here...' : 'Paste your AI text here or upload a document to begin...'}
                     aria-label="Input text"
-                    style={{ width: '100%', height: '100%', resize: 'none', border: 'none', outline: 'none', background: 'transparent', color: '#eef2ff', padding: '24px 28px 18px 24px', fontFamily: 'inherit', fontSize: 16, lineHeight: 1.7, boxSizing: 'border-box', overflow: 'auto' }}
+                    style={{ width: '100%', height: '100%', resize: 'none', border: 'none', outline: 'none', background: 'transparent', color: '#eef2ff', padding: isPhone ? '14px 14px 12px' : '24px 28px 18px 24px', fontFamily: 'inherit', fontSize: isPhone ? 15 : 16, lineHeight: 1.6, boxSizing: 'border-box', overflow: 'auto' }}
                     disabled={loading || uploading}
                   />
                   {!input.trim() && !isNarrowWorkbench && (
@@ -1494,23 +1466,23 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
               </div>
             </div>
 
-            <div className="humanizer-workbench-divider" style={{ display: isNarrowWorkbench ? 'none' : 'block', background: 'rgba(145,158,191,0.13)', margin: 'clamp(12px, 1.8vh, 20px) 0 clamp(12px, 1.8vh, 20px)', height: 'auto', position: 'relative' }}>
+            <div className="humanizer-workbench-divider" style={{ display: isNarrowWorkbench && !output?.text ? 'none' : 'block', background: 'rgba(145,158,191,0.13)', margin: 'clamp(12px, 1.8vh, 20px) 0', height: 'auto', position: 'relative' }}>
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 38, height: 38, borderRadius: '50%', background: 'rgba(17,24,39,0.92)', border: '1px solid rgba(145,158,191,0.18)', display: 'grid', placeItems: 'center', color: '#a9c5ff' }}><Ic d={P.swap} s={21} /></div>
             </div>
 
-            <div style={{ padding: 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: isNarrowWorkbench ? 'none' : 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
-                <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.shield} s={22} /></span>
-                <span style={{ fontSize: 15, fontWeight: 800 }}>Output</span>
-                <span style={{ marginLeft: 'auto', color: '#aeb8ce', fontSize: 13 }}>{outputWords} words</span>
+            <div style={{ padding: isPhone ? '12px 12px 10px' : 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: isNarrowWorkbench && !output?.text ? 'none' : 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isPhone ? 10 : 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
+                <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.shield} s={isPhone ? 18 : 22} /></span>
+                <span style={{ fontSize: isPhone ? 14 : 15, fontWeight: 800 }}>Output</span>
+                <span style={{ marginLeft: 'auto', color: '#aeb8ce', fontSize: isPhone ? 12 : 13 }}>{outputWords} words</span>
                 <button onClick={() => {
                   navigator.clipboard.writeText(outputText);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
-                }} style={{ minHeight: 30, padding: '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center', fontFamily: 'inherit' }}><Ic d={P.copy} s={15} />{copied ? 'Copied' : 'Copy'}</button>
+                }} style={{ minHeight: isPhone ? 28 : 30, padding: isPhone ? '0 10px' : '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center', fontFamily: 'inherit' }}><Ic d={P.copy} s={15} />{copied ? 'Copied' : 'Copy'}</button>
               </div>
-              <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', padding: 'clamp(16px, 2vh, 24px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <p style={{ margin: 0, color: output?.text ? '#f4f7fb' : '#98a4bb', fontSize: 'clamp(13px, 1.8vh, 16px)', lineHeight: 1.65, whiteSpace: 'pre-wrap', overflow: 'hidden' }}>{outputText}</p>
+              <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', padding: isPhone ? 14 : 'clamp(16px, 2vh, 24px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <p style={{ margin: 0, color: output?.text ? '#f4f7fb' : '#98a4bb', fontSize: isPhone ? 14 : 'clamp(13px, 1.8vh, 16px)', lineHeight: 1.6, whiteSpace: 'pre-wrap', overflow: 'auto', flex: '1 1 auto' }}>{outputText}</p>
                 <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 28, padding: '0 12px', borderRadius: 7, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(148,163,184,0.08)', color: '#b9c4da', fontSize: 13 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: output?.text ? '#6ee7b7' : '#70809e', boxShadow: output?.text ? '0 0 10px rgba(110,231,183,0.5)' : 'none' }} /> {output?.text ? 'AI-Humanized' : 'Ready for output'}</span>
                   {output?.text && (
@@ -1525,19 +1497,19 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isNarrowWorkbench ? 8 : 'clamp(8px, 1.4vw, 16px)', padding: isNarrowWorkbench ? '10px 20px 12px' : 'clamp(10px, 1.4vh, 14px) 20px clamp(10px, 1.8vh, 18px)', borderTop: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.22)', flex: '0 0 auto' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isPhone ? 6 : isNarrowWorkbench ? 8 : 'clamp(8px, 1.4vw, 16px)', padding: isPhone ? '8px 10px 10px' : isNarrowWorkbench ? '10px 20px 12px' : 'clamp(10px, 1.4vh, 14px) 20px clamp(10px, 1.8vh, 18px)', borderTop: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.22)', flex: '0 0 auto' }}>
             <input ref={fileRef} type="file" accept={UPLOAD_ACCEPT} style={{ display: 'none' }} onChange={handleFile} />
-            <button onClick={() => fileRef.current?.click()} disabled={loading || uploading} style={{ ...actionButton, minWidth: 132, background: 'rgba(35,45,65,0.88)', opacity: (loading || uploading) ? 0.55 : 1 }}><Ic d={P.upload} s={24} /> {uploading ? 'Uploading...' : 'Upload'}</button>
-            <span style={{ color: '#b2bdd2', fontSize: 13, marginRight: isNarrowWorkbench ? 0 : 'auto' }}>PDF, DOCX, TXT</span>
+            <button onClick={() => fileRef.current?.click()} disabled={loading || uploading} aria-label={uploading ? 'Uploading' : 'Upload file'} style={{ ...actionButton, minHeight: isPhone ? 42 : 52, minWidth: isPhone ? 42 : 132, padding: isPhone ? 0 : '0 22px', background: 'rgba(35,45,65,0.88)', opacity: (loading || uploading) ? 0.55 : 1 }}><Ic d={P.upload} s={isPhone ? 20 : 24} /> {!isPhone && (uploading ? 'Uploading...' : 'Upload')}</button>
+            {!isPhone && <span style={{ color: '#b2bdd2', fontSize: 13, marginRight: isNarrowWorkbench ? 0 : 'auto' }}>PDF, DOCX, TXT</span>}
             {toolActions.map(action => (
-              <button key={action.id} onClick={() => toggleAction(action.id)} disabled={loading || uploading} style={{ ...actionButton, background: selectedAction === action.id ? 'rgba(77,100,190,0.28)' : actionButton.background, border: selectedAction === action.id ? '1px solid rgba(126,151,255,0.54)' : actionButton.border, opacity: (loading || uploading) ? 0.5 : 1 }}><Ic d={action.icon} s={19} /> {action.label}</button>
+              <button key={action.id} onClick={() => toggleAction(action.id)} disabled={loading || uploading} style={{ ...actionButton, minHeight: isPhone ? 42 : 52, padding: isPhone ? '0 12px' : '0 22px', fontSize: isPhone ? 13 : 15, gap: isPhone ? 6 : 10, background: selectedAction === action.id ? 'rgba(77,100,190,0.28)' : actionButton.background, border: selectedAction === action.id ? '1px solid rgba(126,151,255,0.54)' : actionButton.border, opacity: (loading || uploading) ? 0.5 : 1 }}><Ic d={action.icon} s={isPhone ? 16 : 19} /> {action.label}</button>
             ))}
             <button
               className={`hc-loading-button${loading ? ' is-loading' : ''}`}
               onClick={runHumanizeFlow}
               disabled={!input.trim() || loading || uploading}
               aria-busy={loading}
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 11, minHeight: 52, minWidth: 196, padding: '0 25px', borderRadius: 12, background: 'linear-gradient(135deg,#0b64f4,#0874ff)', color: '#fff', fontWeight: 900, fontSize: 16, border: 'none', cursor: (!input.trim() || loading || uploading) ? 'not-allowed' : 'pointer', opacity: (!input.trim() || loading || uploading) && !loading ? 0.84 : 1, boxShadow: loading ? '0 18px 36px rgba(73,104,255,0.28)' : (!input.trim() || loading || uploading) ? 'none' : '0 16px 30px rgba(8,116,255,0.24)', fontFamily: 'inherit' }}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 11, minHeight: isPhone ? 48 : 52, width: isPhone ? '100%' : 'auto', minWidth: isPhone ? 0 : 196, padding: isPhone ? '0 18px' : '0 25px', borderRadius: 12, background: 'linear-gradient(135deg,#0b64f4,#0874ff)', color: '#fff', fontWeight: 900, fontSize: isPhone ? 15 : 16, border: 'none', cursor: (!input.trim() || loading || uploading) ? 'not-allowed' : 'pointer', opacity: (!input.trim() || loading || uploading) && !loading ? 0.84 : 1, boxShadow: loading ? '0 18px 36px rgba(73,104,255,0.28)' : (!input.trim() || loading || uploading) ? 'none' : '0 16px 30px rgba(8,116,255,0.24)', fontFamily: 'inherit', marginLeft: isPhone ? 0 : undefined, order: isPhone ? 99 : 0 }}
             >
               {loading ? <span className="spin-soft" style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.38)', borderTopColor: '#fff', flexShrink: 0 }} /> : <Ic d={P.spark} s={20} />}
               {loading ? 'Humanizing...' : 'Humanize Now'}
@@ -1547,11 +1519,12 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
 
         {error && <div style={{ width: 'min(100%, 1120px)', margin: '16px auto 0', padding: '12px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', fontSize: 13 }}>{error}</div>}
 
+      {!isPhone && (
         <div style={{ margin: 'clamp(8px, 1.4vh, 14px) auto 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, color: '#9ca8bd', fontSize: 13, flex: '0 0 auto' }}>
           <Ic d={P.shield} s={18} /> Your content is encrypted and never stored.
         </div>
-      </main>
-    </div>
+      )}
+    </>
   );
 }
 // ─── dashboard ────────────────────────────────────────────────────────────────
@@ -2003,7 +1976,7 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
 
 // ─── settings ─────────────────────────────────────────────────────────────────
 
-function SettingsPage({ profile, subscription, onSignIn, onSaveProfile, onUpgrade, upgradeLoading, upgradeMessage }) {
+function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfile, onUpgrade, upgradeLoading, upgradeMessage }) {
   const [form,   setForm]   = useState({ name: profile.name, email: profile.email });
   const [saveOk, setSaveOk] = useState(false);
   useEffect(() => { setForm({ name: profile.name, email: profile.email }); }, [profile.name, profile.email]);
@@ -2069,7 +2042,12 @@ function SettingsPage({ profile, subscription, onSignIn, onSaveProfile, onUpgrad
         {upgradeMessage && <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#4ade80' : C.t2, margin: '10px 0 0' }}>{upgradeMessage}</p>}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+        {onSignOut && profile.email.trim() ? (
+          <button onClick={onSignOut} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+            <Ic d={P.signout} s={17} /> Sign Out
+          </button>
+        ) : <span />}
         <button onClick={handleSave} style={{ padding: '10px 26px', borderRadius: 10, background: saveOk ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 18px rgba(73,104,255,0.22)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
           {saveOk ? '✓ Saved' : 'Save Changes'}
         </button>
@@ -2126,7 +2104,6 @@ export default function App() {
       return 'landing';
     }
   });
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [authMode, setAuthMode] = useState('signin');
   const [pendingView, setPendingView] = useState('tool');
@@ -2571,7 +2548,6 @@ export default function App() {
 
   function requestNavigation(nextView, mode = 'signin') {
     triggerPulse();
-    setMenuOpen(false);
 
     if (nextView === 'landing') {
       navigateWithMorph('landing');
@@ -2608,7 +2584,6 @@ export default function App() {
 
   function handleLandingTool() {
     triggerPulse();
-    setMenuOpen(false);
     setShowSignIn(false);
     navigateWithMorph('tool');
   }
@@ -2688,10 +2663,22 @@ export default function App() {
         <Landing
           onStart={handleLandingTool}
           onSignIn={() => handleEnterDashboard('signin')}
+          isSignedIn={isSignedIn}
+          profile={profile}
+          onSignOut={handleSignOut}
         />
       </>
     );
   }
+
+  const shellPrimaryClick = () => {
+    if (isSignedIn) {
+      requestNavigation(view === 'dashboard' ? 'tool' : 'dashboard');
+    } else {
+      openAuth('signup', view === 'landing' ? 'tool' : view);
+    }
+  };
+  const shellSecondaryClick = () => openAuth('signin', view === 'landing' ? 'tool' : view);
 
   if (view === 'tool') {
     return (
@@ -2709,21 +2696,32 @@ export default function App() {
             message={authMessage}
           />
         )}
-        <HumanizerTool
-          history={history}
-          setHistory={setHistory}
-          subscription={toolSubscription}
-          isSignedIn={Boolean(session?.user)}
-          onRequireAuth={openAuth}
-          onUsageAdd={isSignedIn ? handleUsageAdd : handleGuestUsageAdd}
+        <AppShell
+          page="tool"
           onNav={requestNavigation}
-        />
+          isSignedIn={Boolean(session?.user)}
+          subscription={subscription}
+          profile={profile}
+          onPrimaryClick={shellPrimaryClick}
+          onSecondaryClick={shellSecondaryClick}
+          onSignOut={isSignedIn ? handleSignOut : undefined}
+        >
+          <HumanizerTool
+            history={history}
+            setHistory={setHistory}
+            subscription={toolSubscription}
+            isSignedIn={Boolean(session?.user)}
+            onRequireAuth={openAuth}
+            onUsageAdd={isSignedIn ? handleUsageAdd : handleGuestUsageAdd}
+            onNav={requestNavigation}
+          />
+        </AppShell>
       </>
     );
   }
 
   return (
-    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#0e0f11', color: '#e3e3e3' }}>
+    <>
       <TopProgress active={pulseActive || Boolean(busyMessage)} />
       <LoadingOverlay open={Boolean(busyMessage)} message={busyMessage} />
 
@@ -2739,34 +2737,26 @@ export default function App() {
         />
       )}
 
-      <Sidebar page={view} onNav={requestNavigation} open={menuOpen} onClose={() => setMenuOpen(false)} subscription={subscription} />
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden', position: 'relative', borderLeft: '1px solid rgba(113,126,157,0.08)' }}>
-        <AppBg />
-
-        <Header
-          profile={profile}
-          onSignOut={handleSignOut}
-          onSignIn={() => openAuth('signin', view)}
-          onMenuOpen={() => setMenuOpen(true)}
-        />
-
-        <main style={{ flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
-          <div key={`${view}-${isSignedIn ? 'auth' : 'guest'}`} className="page-fade surface-fade">
-            {view === 'tool'      && <HumanizerTool history={history} setHistory={setHistory} subscription={toolSubscription} isSignedIn={Boolean(session?.user)} onRequireAuth={openAuth} onUsageAdd={isSignedIn ? handleUsageAdd : handleGuestUsageAdd} onNav={requestNavigation} />}
-            {view === 'pricing'   && <PricingPage subscription={subscription} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} isSignedIn={isSignedIn} onSignIn={() => openAuth('signin', 'pricing')} notice={pricingNotice} />}
-            {view === 'dashboard' && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'dashboard')} pageName="the Dashboard" /> : <Dashboard history={history} saved={saved} onNav={requestNavigation} subscription={subscription} profile={profile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />)}
-            {view === 'profile'   && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'profile')} pageName="your Profile" /> : <ProfilePage profile={profile} subscription={subscription} history={history} saved={saved} onSaveProfile={handleSaveProfile} />)}
-            {view === 'history'   && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'history')} pageName="your History" /> : <HistoryPage history={history} setHistory={setHistory} onNav={requestNavigation} />)}
-            {view === 'saved'     && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'saved')} pageName="Saved Documents" /> : <SavedDocsPage history={history} saved={saved} setSaved={setSaved} onNav={requestNavigation} />)}
-            {view === 'settings'  && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'settings')} pageName="Settings" /> : <SettingsPage profile={profile} subscription={subscription} onSignIn={() => openAuth('signin', 'settings')} onSaveProfile={handleSaveProfile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />)}
-          </div>
-        </main>
-
-        <footer style={{ flexShrink: 0, padding: '10px 26px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontSize: 12, color: '#6b7a94', borderTop: '1px solid rgba(168,199,250,0.08)', background: 'transparent', position: 'relative', zIndex: 2 }}>
-          <span>© HumanClarity</span>
-        </footer>
-      </div>
-    </div>
+      <AppShell
+        page={view}
+        onNav={requestNavigation}
+        isSignedIn={isSignedIn}
+        subscription={subscription}
+        profile={profile}
+        onPrimaryClick={shellPrimaryClick}
+        onSecondaryClick={shellSecondaryClick}
+        onSignOut={isSignedIn ? handleSignOut : undefined}
+        scroll
+      >
+        <div key={`${view}-${isSignedIn ? 'auth' : 'guest'}`} className="page-fade surface-fade" style={{ flex: '1 1 auto', minHeight: 0 }}>
+          {view === 'pricing'   && <PricingPage subscription={subscription} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} isSignedIn={isSignedIn} onSignIn={() => openAuth('signin', 'pricing')} notice={pricingNotice} />}
+          {view === 'dashboard' && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'dashboard')} pageName="the Dashboard" /> : <Dashboard history={history} saved={saved} onNav={requestNavigation} subscription={subscription} profile={profile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />)}
+          {view === 'profile'   && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'profile')} pageName="your Profile" /> : <ProfilePage profile={profile} subscription={subscription} history={history} saved={saved} onSaveProfile={handleSaveProfile} />)}
+          {view === 'history'   && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'history')} pageName="your History" /> : <HistoryPage history={history} setHistory={setHistory} onNav={requestNavigation} />)}
+          {view === 'saved'     && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'saved')} pageName="Saved Documents" /> : <SavedDocsPage history={history} saved={saved} setSaved={setSaved} onNav={requestNavigation} />)}
+          {view === 'settings'  && (!isSignedIn ? <AuthWall onSignIn={() => openAuth('signin', 'settings')} pageName="Settings" onSignOut={handleSignOut} /> : <SettingsPage profile={profile} subscription={subscription} onSignIn={() => openAuth('signin', 'settings')} onSignOut={handleSignOut} onSaveProfile={handleSaveProfile} onUpgrade={handleUpgrade} upgradeLoading={paymentLoading} upgradeMessage={paymentMessage} />)}
+        </div>
+      </AppShell>
+    </>
   );
 }

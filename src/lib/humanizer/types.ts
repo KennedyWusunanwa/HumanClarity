@@ -3,11 +3,11 @@ export type HumanizePurpose = 'academic' | 'professional' | 'general' | 'creativ
 export type HumanizeStyle = 'academic' | 'casual' | 'professional' | 'creative' | 'technical';
 
 export interface LLMProvider {
-  type: 'groq' | 'gemini' | 'openai' | 'custom';
+  type: 'openai';
+  name?: string;
   apiKey: string;
   model?: string;
   baseUrl?: string;
-  callFn?: (systemPrompt: string, userText: string, temperature: number) => Promise<string>;
 }
 
 export interface HumanizeOptions {
