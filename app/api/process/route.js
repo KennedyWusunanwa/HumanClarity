@@ -16,27 +16,21 @@ const ACTION_PROMPTS = {
 function getProviders() {
   const providers = [];
 
-  if (process.env.POLLINATIONS_API_KEY) {
-    providers.push({
-      type: 'openai',
-      name: 'Pollinations AI',
-      apiKey: process.env.POLLINATIONS_API_KEY,
-      baseUrl: 'https://gen.pollinations.ai/v1',
-      model: process.env.POLLINATIONS_MODEL || 'openai',
-    });
-  }
-
+  // OpenRouter goes first. Free OpenRouter models on different upstream providers
+  // (OpenAI gpt-oss is hosted independently of the Venice/Crucible pool) are more
+  // reliable than Pollinations, which is on Azure OpenAI and aggressively content-filters
+  // anything resembling AI-detection-evasion prompts.
   if (process.env.OPENROUTER_API_KEY) {
-    // OpenRouter free models often hit upstream rate limits or get retired. Try the user's
-    // configured model first (if any), then fall through a small ladder of known-working
-    // non-reasoning free models so a 429/404 on one doesn't kill the whole request.
     const openRouterModels = [];
     if (process.env.OPENROUTER_MODEL) openRouterModels.push(process.env.OPENROUTER_MODEL);
+    // Diversified across upstream providers so a single 429 doesn't take the whole chain
+    // down. gpt-oss is fast + reliable; the rest are quality fallbacks.
     for (const m of [
+      'openai/gpt-oss-20b:free',
+      'openai/gpt-oss-120b:free',
       'meta-llama/llama-3.3-70b-instruct:free',
-      'meta-llama/llama-3.2-3b-instruct:free',
-      'qwen/qwen3-next-80b-a3b-instruct:free',
       'google/gemma-4-26b-a4b-it:free',
+      'qwen/qwen3-next-80b-a3b-instruct:free',
     ]) {
       if (!openRouterModels.includes(m)) openRouterModels.push(m);
     }
@@ -49,6 +43,16 @@ function getProviders() {
         model,
       });
     }
+  }
+
+  if (process.env.POLLINATIONS_API_KEY) {
+    providers.push({
+      type: 'openai',
+      name: 'Pollinations AI',
+      apiKey: process.env.POLLINATIONS_API_KEY,
+      baseUrl: 'https://gen.pollinations.ai/v1',
+      model: process.env.POLLINATIONS_MODEL || 'openai',
+    });
   }
 
   return providers;
@@ -136,7 +140,21 @@ export async function POST(request) {
       }
     }
 
-    return Response.json({ error: errors.join(' | ') || 'Processing failed.' }, { status: 502 });
+    // Classify the failures so the user gets a useful message instead of raw provider JSON.
+    const lowered = errors.join(' ').toLowerCase();
+    const allRateLimited = errors.length > 0 && errors.every(e => /429|rate.?limit/i.test(e));
+    const contentFiltered = /content_filter|content management policy|filtered due to/i.test(lowered);
+
+    let userMessage;
+    if (allRateLimited) {
+      userMessage = 'All free model endpoints are rate-limited right now. Please wait a minute and try again, or add your own OpenRouter API key in Settings for higher limits.';
+    } else if (contentFiltered) {
+      userMessage = 'The free tier blocked this text. Try shortening or rephrasing the input, or wait a moment and retry.';
+    } else {
+      userMessage = 'All providers failed. Please try again in a moment.';
+    }
+
+    return Response.json({ error: userMessage, debug: errors }, { status: 502 });
   } catch (err) {
     const status = err.status ?? 500;
     return Response.json({ error: err.message ?? 'Processing failed.' }, { status });

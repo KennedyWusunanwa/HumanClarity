@@ -62,8 +62,22 @@ async function callOpenAICompat(
         const transient = res.status === 429 || res.status >= 500;
         lastError = new Error(`${providerName} API error ${res.status}: ${body}`);
         if (transient && attempt < maxAttempts) {
-          await sleep(250);
-          continue;
+          // Respect Retry-After (header or JSON body) when it's short — gives the upstream
+          // a moment to recover before we fall through to the next provider.
+          const retryAfterHeader = parseInt(res.headers.get('retry-after') || '', 10);
+          let waitMs = 250;
+          if (Number.isFinite(retryAfterHeader) && retryAfterHeader > 0) {
+            waitMs = retryAfterHeader * 1000;
+          } else {
+            const match = body.match(/"retry_after_seconds(?:_raw)?"\s*:\s*([0-9.]+)/);
+            if (match) waitMs = Math.ceil(parseFloat(match[1]) * 1000);
+          }
+          // Only wait if it's quick — otherwise it's faster to fall through to next provider.
+          if (waitMs > 0 && waitMs <= 3500) {
+            await sleep(waitMs + 100);
+            continue;
+          }
+          throw lastError;
         }
         throw lastError;
       }
