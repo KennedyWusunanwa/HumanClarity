@@ -126,15 +126,7 @@ export default function OGImage() {
               }}
             >
               <span>Beat the World's</span>
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #a8c7fa 0%, #7c9fff 40%, #a78bff 100%)',
-                  WebkitBackgroundClip: 'text',
-                  color: 'transparent',
-                }}
-              >
-                Top AI Detectors.
-              </span>
+              <span style={{ color: '#9ec1ff' }}>Top AI Detectors.</span>
             </div>
 
             <p
@@ -147,13 +139,13 @@ export default function OGImage() {
               }}
             >
               Humanize AI text instantly. Bypass Turnitin, GPTZero, Originality.ai
-              and more — in seconds.
+              and more, in seconds.
             </p>
           </div>
 
           {/* Bottom row: badges */}
           <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginTop: 40 }}>
-            {['✓  Undetectable rewrites', '✓  Turnitin bypass', '✓  GPTZero bypass', '✓  Free to start'].map(label => (
+            {['Undetectable rewrites', 'Turnitin bypass', 'GPTZero bypass', 'Free to start'].map(label => (
               <div
                 key={label}
                 style={{
@@ -166,8 +158,10 @@ export default function OGImage() {
                   fontWeight: 600,
                   display: 'flex',
                   alignItems: 'center',
+                  gap: 8,
                 }}
               >
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#7c9fff', display: 'flex' }} />
                 {label}
               </div>
             ))}
@@ -214,7 +208,7 @@ export default function OGImage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
             <span style={{ fontSize: 15, color: '#a8c7fa', fontWeight: 600 }}>Human Score</span>
-            <span style={{ marginLeft: 'auto', fontSize: 15, color: '#22c55e', fontWeight: 800 }}>Passed ✓</span>
+            <span style={{ marginLeft: 'auto', fontSize: 15, color: '#22c55e', fontWeight: 800 }}>Passed</span>
           </div>
 
           {/* Text lines */}
@@ -247,10 +241,11 @@ export default function OGImage() {
               fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
+              gap: 8,
             }}
           >
-            ✦ Looks natural — passes all checks
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', display: 'flex' }} />
+            Looks natural, passes all checks
           </div>
         </div>
       </div>
