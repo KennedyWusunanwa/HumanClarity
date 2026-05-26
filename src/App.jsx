@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { quickEmailCheck, emailErrorMessage } from '@/lib/email-validation';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -2533,6 +2534,26 @@ export default function App() {
       const supabase = getSupabaseBrowserClient();
 
       if (payload.mode === 'signup') {
+        // Validate the email before paying the cost of a Supabase signup.
+        // Server-side check does format, disposable-domain, and DNS MX lookup.
+        const quick = quickEmailCheck(payload.email);
+        if (!quick.ok) throw new Error(emailErrorMessage(quick.reason));
+
+        try {
+          const validateRes = await fetch('/api/validate-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: payload.email }),
+          });
+          const validateData = await validateRes.json().catch(() => ({}));
+          if (!validateRes.ok || validateData?.ok === false) {
+            throw new Error(emailErrorMessage(validateData?.reason || 'unknown'));
+          }
+        } catch (validateErr) {
+          if (validateErr instanceof Error && validateErr.message) throw validateErr;
+          throw new Error(emailErrorMessage('lookup-failed'));
+        }
+
         const initialProfile = { name: payload.name, email: payload.email };
         const initialState = buildPersistedState(
           initialProfile,
