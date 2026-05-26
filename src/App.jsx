@@ -412,6 +412,66 @@ function TopProgress({ active = false }) {
   );
 }
 
+const HUMANIZER_STATUS_PHRASES = [
+  'Thinking',
+  'Reading your text',
+  'Reasoning through it',
+  'Putting things together',
+  'Polishing the prose',
+  'Smoothing rough edges',
+  'Adding a human touch',
+  'Refining word choices',
+  'Reviewing the result',
+  'Almost there',
+];
+
+function HumanizerOutputLoader({ isPhone = false }) {
+  const [phraseIndex, setPhraseIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setPhraseIndex(i => (i + 1) % HUMANIZER_STATUS_PHRASES.length);
+    }, 1800);
+    return () => clearInterval(id);
+  }, []);
+
+  const widths = [92, 78, 96, 64, 88, 72, 84, 56];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', minHeight: 0, gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#cdd9ff' }}>
+        <span
+          className="spin-soft"
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: '50%',
+            border: '2px solid rgba(126,151,255,0.25)',
+            borderTopColor: '#9ec1ff',
+            flexShrink: 0,
+          }}
+        />
+        <span
+          key={phraseIndex}
+          className="hc-status-phrase"
+          style={{ fontSize: isPhone ? 14 : 15, fontWeight: 700, letterSpacing: 0.1 }}
+        >
+          {HUMANIZER_STATUS_PHRASES[phraseIndex]}…
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, opacity: 0.95 }}>
+        {widths.map((w, i) => (
+          <span
+            key={i}
+            className="hc-skeleton-bar"
+            style={{ width: `${w}%`, animationDelay: `${i * 0.08}s` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function LoadingOverlay({ open = false, message = 'Loading...' }) {
   if (!open) return null;
 
@@ -1422,7 +1482,7 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
         </section>
 
         <section style={{ width: 'min(100%, 1120px)', margin: '0 auto', borderRadius: isPhone ? 14 : 20, border: '1px solid rgba(70,103,178,0.55)', background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))', boxShadow: '0 24px 70px rgba(0,0,0,0.35), 0 0 70px rgba(37,99,235,0.12)', overflow: 'hidden', viewTransitionName: 'humanizer-composer', flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-          <div className={`humanizer-workbench-grid${isNarrowWorkbench && !output?.text ? ' is-input-only' : ''}`} style={{ display: 'grid', gridTemplateColumns: isNarrowWorkbench ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 1px minmax(0, 1fr)', gap: 0, flex: '1 1 auto', minHeight: 0 }}>
+          <div className={`humanizer-workbench-grid${isNarrowWorkbench && !output?.text && !loading ? ' is-input-only' : ''}`} style={{ display: 'grid', gridTemplateColumns: isNarrowWorkbench ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 1px minmax(0, 1fr)', gap: 0, flex: '1 1 auto', minHeight: 0 }}>
             <div style={{ padding: isPhone ? '12px 12px 10px' : 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isPhone ? 10 : 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
                 <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.doc} s={isPhone ? 18 : 21} /></span>
@@ -1466,11 +1526,11 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
               </div>
             </div>
 
-            <div className="humanizer-workbench-divider" style={{ display: isNarrowWorkbench && !output?.text ? 'none' : 'block', background: 'rgba(145,158,191,0.13)', margin: 'clamp(12px, 1.8vh, 20px) 0', height: 'auto', position: 'relative' }}>
+            <div className="humanizer-workbench-divider" style={{ display: isNarrowWorkbench && !output?.text && !loading ? 'none' : 'block', background: 'rgba(145,158,191,0.13)', margin: 'clamp(12px, 1.8vh, 20px) 0', height: 'auto', position: 'relative' }}>
               <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 38, height: 38, borderRadius: '50%', background: 'rgba(17,24,39,0.92)', border: '1px solid rgba(145,158,191,0.18)', display: 'grid', placeItems: 'center', color: '#a9c5ff' }}><Ic d={P.swap} s={21} /></div>
             </div>
 
-            <div style={{ padding: isPhone ? '12px 12px 10px' : 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: isNarrowWorkbench && !output?.text ? 'none' : 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: isPhone ? '12px 12px 10px' : 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: isNarrowWorkbench && !output?.text && !loading ? 'none' : 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isPhone ? 10 : 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
                 <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.shield} s={isPhone ? 18 : 22} /></span>
                 <span style={{ fontSize: isPhone ? 14 : 15, fontWeight: 800 }}>Output</span>
@@ -1482,10 +1542,14 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
                 }} style={{ minHeight: isPhone ? 28 : 30, padding: isPhone ? '0 10px' : '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center', fontFamily: 'inherit' }}><Ic d={P.copy} s={15} />{copied ? 'Copied' : 'Copy'}</button>
               </div>
               <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', padding: isPhone ? 14 : 'clamp(16px, 2vh, 24px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <p style={{ margin: 0, color: output?.text ? '#f4f7fb' : '#98a4bb', fontSize: isPhone ? 14 : 'clamp(13px, 1.8vh, 16px)', lineHeight: 1.6, whiteSpace: 'pre-wrap', overflow: 'auto', flex: '1 1 auto' }}>{outputText}</p>
+                {loading ? (
+                  <HumanizerOutputLoader isPhone={isPhone} />
+                ) : (
+                  <p style={{ margin: 0, color: output?.text ? '#f4f7fb' : '#98a4bb', fontSize: isPhone ? 14 : 'clamp(13px, 1.8vh, 16px)', lineHeight: 1.6, whiteSpace: 'pre-wrap', overflow: 'auto', flex: '1 1 auto' }}>{outputText}</p>
+                )}
                 <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 28, padding: '0 12px', borderRadius: 7, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(148,163,184,0.08)', color: '#b9c4da', fontSize: 13 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: output?.text ? '#6ee7b7' : '#70809e', boxShadow: output?.text ? '0 0 10px rgba(110,231,183,0.5)' : 'none' }} /> {output?.text ? 'AI-Humanized' : 'Ready for output'}</span>
-                  {output?.text && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 28, padding: '0 12px', borderRadius: 7, border: '1px solid rgba(145,158,191,0.18)', background: loading ? 'rgba(126,151,255,0.1)' : 'rgba(148,163,184,0.08)', color: '#b9c4da', fontSize: 13 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: loading ? '#9ec1ff' : output?.text ? '#6ee7b7' : '#70809e', boxShadow: loading ? '0 0 10px rgba(158,193,255,0.55)' : output?.text ? '0 0 10px rgba(110,231,183,0.5)' : 'none', animation: loading ? 'pulse-glow 1.4s ease-in-out infinite' : 'none' }} /> {loading ? 'Humanizing' : output?.text ? 'AI-Humanized' : 'Ready for output'}</span>
+                  {output?.text && !loading && (
                     <>
                       <span style={{ marginLeft: 'auto', color: '#b2bdd2', fontSize: 12 }}>Rate this result</span>
                       <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d={P.thumbUp} s={20} /></button>
