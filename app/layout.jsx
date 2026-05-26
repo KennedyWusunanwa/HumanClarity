@@ -1,6 +1,15 @@
 import './globals.css';
 
-const APP_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://humanclarity.vercel.app';
+// metadataBase. Resolution order:
+// 1. NEXT_PUBLIC_SITE_URL — set this to the canonical production URL.
+// 2. VERCEL_PROJECT_PRODUCTION_URL — auto-set by Vercel to the prod alias.
+// 3. VERCEL_URL — the per-deployment URL (preview deploys, fallback).
+// 4. The actual Vercel project URL as a final fallback so OG scrapers never hit a dead host.
+const APP_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`) ||
+  (process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`) ||
+  'https://human-clarity.vercel.app';
 
 export const metadata = {
   metadataBase: new URL(APP_URL),
