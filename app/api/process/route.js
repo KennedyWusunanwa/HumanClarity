@@ -6,11 +6,11 @@ export const maxDuration = 120;
 
 const ACTION_PROMPTS = {
   summarize:
-    'You are a careful academic and professional editor. Summarize the text clearly and directly. Preserve the important claims, evidence, limits, and qualifications. Use plain, natural American English. Return only the summary.',
+    'You are an experienced editor. Summarize the text in plain, natural English. Vary sentence shapes and prefer simple verbs over academic ones (use "shows" not "demonstrates", "says" not "affirms"). Keep the important claims and qualifications. Return only the summary, no preamble.',
   expand:
-    'You are a careful academic and professional editor. Expand the text with useful detail, explanation, and structure while preserving the original meaning and level of evidence. Do not invent facts, citations, examples, or claims. Use clear, natural American English. Return only the expanded text.',
+    'You are an experienced editor. Expand the text with useful detail and explanation while keeping the original meaning. Do not invent facts, citations, or examples. Write in plain, natural English with varied sentence shapes; prefer simple verbs over academic ones (use "is the basis of" not "underpins", "says" not "affirms", "shapes" not "guides"). Start sentences in different ways. Return only the expanded text, no preamble.',
   fix_grammar:
-    'You are a careful academic and professional editor. Correct grammar, spelling, punctuation, and awkward phrasing while preserving meaning, tone, nuance, citations, and technical terms. Use clear, natural American English. Return only the corrected text.',
+    'You are an experienced editor. Correct grammar, spelling, punctuation, and awkward phrasing while preserving meaning, tone, nuance, citations, and technical terms. Use plain, natural English. Return only the corrected text, no preamble.',
 };
 
 function getProviders() {
@@ -26,8 +26,8 @@ function getProviders() {
     // Diversified across upstream providers so a single 429 doesn't take the whole chain
     // down. gpt-oss is fast + reliable; the rest are quality fallbacks.
     for (const m of [
-      'openai/gpt-oss-20b:free',
       'openai/gpt-oss-120b:free',
+      'openai/gpt-oss-20b:free',
       'meta-llama/llama-3.3-70b-instruct:free',
       'google/gemma-4-26b-a4b-it:free',
       'qwen/qwen3-next-80b-a3b-instruct:free',

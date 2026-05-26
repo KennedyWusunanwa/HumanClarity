@@ -141,7 +141,7 @@ export async function humanizeText(
     style: options.style ?? 'academic',
     purpose: options.purpose ?? 'academic',
     passes: options.passes ?? LEVEL_PASSES[level],
-    targetScore: options.targetScore ?? 72,
+    targetScore: options.targetScore ?? 95,
     preserveFormatting: options.preserveFormatting ?? true,
     provider: options.provider as LLMProvider,
   };

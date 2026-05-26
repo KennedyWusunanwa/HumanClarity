@@ -312,5 +312,14 @@ export function postProcess(
     result = swapSafeSynonyms(result, 0.1);
   }
 
+  // Tidy artifacts that earlier passes can leave behind (double-periods from `;` -> `.`,
+  // stray double spaces, orphaned punctuation).
+  result = result
+    .replace(/\s+([.,!?])/g, '$1')
+    .replace(/([.!?])\s*\.\s*\.?/g, '$1')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n[ \t]+/g, '\n')
+    .trim();
+
   return result;
 }

@@ -1346,7 +1346,7 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
       const secondRes = await fetch('/api/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: firstData.result, action: 'humanize' }),
+        body: JSON.stringify({ text: firstData.result, action: 'humanize', humanizeOptions: { level: 'aggressive' } }),
       });
       const secondData = await secondRes.json();
       if (!secondRes.ok) throw new Error(secondData.error || 'Processing failed.');
