@@ -8,6 +8,35 @@ import { callLLM } from './llm-provider';
 
 const CHUNK_SIZE = 2500;
 
+// Cap how many LLM calls run at once. A large document can produce dozens of chunks;
+// firing them all in parallel hammers a single free-tier provider into rate limits and
+// blows the route's 120s budget. A small pool keeps things fast without the stampede.
+const MAX_CONCURRENCY = 4;
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let cursor = 0;
+
+  const workers = Array.from(
+    { length: Math.min(Math.max(1, limit), items.length || 1) },
+    async () => {
+      while (true) {
+        const index = cursor;
+        cursor += 1;
+        if (index >= items.length) return;
+        results[index] = await fn(items[index], index);
+      }
+    },
+  );
+
+  await Promise.all(workers);
+  return results;
+}
+
 const LEVEL_PASSES: Record<HumanizeLevel, number> = {
   light: 1,
   medium: 1,
@@ -87,8 +116,10 @@ async function refineStiffSentences(
     isRehumanizationPass: true,
   });
 
-  const rewrites = await Promise.all(
-    flagged.map(async sentence => {
+  const rewrites = await mapWithConcurrency(
+    flagged,
+    MAX_CONCURRENCY,
+    async sentence => {
       try {
         const rewritten = await callLLM(options.provider, {
           systemPrompt,
@@ -111,12 +142,14 @@ async function refineStiffSentences(
         // Skip a failed sentence-level rewrite and keep moving.
       }
       return null;
-    }),
+    },
   );
 
   let result = text;
   for (const rewrite of rewrites) {
-    if (rewrite) result = result.replace(rewrite.sentence, rewrite.cleaned);
+    // Use a function replacer so `$` sequences in the rewrite (prices, math, regex)
+    // aren't interpreted as String.replace special patterns ($&, $1, …).
+    if (rewrite) result = result.replace(rewrite.sentence, () => rewrite.cleaned);
   }
   return result;
 }
@@ -151,7 +184,7 @@ export async function humanizeText(
   const chunks = chunkText(protectedText);
   let totalPassesRun = 0;
 
-  const chunkResults = await Promise.all(chunks.map(async chunk => {
+  const chunkResults = await mapWithConcurrency(chunks, MAX_CONCURRENCY, async chunk => {
     let current = chunk;
     let localPasses = 0;
     let qualityScore = 0;
@@ -183,7 +216,7 @@ export async function humanizeText(
     }
 
     return { text: current, passes: localPasses };
-  }));
+  });
 
   const processedChunks = chunkResults.map(c => c.text);
   totalPassesRun = chunkResults.reduce((sum, c) => sum + c.passes, 0);

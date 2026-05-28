@@ -215,9 +215,14 @@ button:not(:disabled):active {
   }
 }
 
-@keyframes hc-loading-ring {
-  to {
-    transform: rotate(360deg);
+@keyframes hc-loading-glow {
+  0%, 100% {
+    opacity: 0.65;
+    filter: drop-shadow(0 0 6px rgba(126,151,255,0.32));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(126,151,255,0.58));
   }
 }
 
@@ -254,6 +259,7 @@ button:not(:disabled):active {
 @media (prefers-reduced-motion: reduce) {
   .hc-skeleton-bar { animation: none; opacity: 0.6; }
   .hc-status-phrase { animation: none; }
+  .hc-loading-button.is-loading::before { animation: none; opacity: 0.85; }
 }
 
 .page-fade {
@@ -278,25 +284,17 @@ button:not(:disabled):active {
   overflow: visible;
 }
 
+/* A soft gradient halo that wraps the whole button while it works. It sits behind the
+   opaque button face (z-index -1), so only the 3px overhang ring + glow shows — it
+   breathes in/out instead of sweeping around like a clock hand. */
 .hc-loading-button.is-loading::before {
   content: "";
   position: absolute;
-  inset: -4px;
+  inset: -3px;
   z-index: -1;
-  border-radius: 16px;
-  background:
-    conic-gradient(from 0deg, transparent 0 16%, rgba(168,199,250,0.95) 20%, rgba(124,60,255,0.98) 34%, transparent 44% 100%);
-  animation: hc-loading-ring 0.85s linear infinite;
-  filter: drop-shadow(0 0 14px rgba(126,151,255,0.42));
-}
-
-.hc-loading-button.is-loading::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  border-radius: 13px;
-  background: linear-gradient(135deg,#4968ff,#7c3cff);
+  border-radius: 15px;
+  background: linear-gradient(135deg, #6f8cff, #a8c7fa 50%, #7c3cff);
+  animation: hc-loading-glow 1.6s ease-in-out infinite;
 }
 
 ::view-transition-old(humanizer-composer),

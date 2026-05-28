@@ -4,6 +4,12 @@ import { callLLM } from '@/lib/humanizer/llm-provider';
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 
+// Hard server-side ceilings. The UI caps input at 25,000 words, but the route is public,
+// so enforce a limit here too — otherwise a direct call could submit an enormous payload
+// and run up provider cost / blow the time budget.
+const MAX_INPUT_CHARS = 200_000;
+const MAX_INPUT_WORDS = 25_000;
+
 const ACTION_PROMPTS = {
   summarize:
     'You are an experienced editor. Summarize the text in plain, natural English. Vary sentence shapes and prefer simple verbs over academic ones (use "shows" not "demonstrates", "says" not "affirms"). Keep the important claims and qualifications. Return only the summary, no preamble.',
@@ -83,6 +89,13 @@ export async function POST(request) {
       return Response.json({ error: 'No text provided.' }, { status: 400 });
     }
 
+    if (typeof text !== 'string' || text.length > MAX_INPUT_CHARS || countWords(text) > MAX_INPUT_WORDS) {
+      return Response.json(
+        { error: `Text is too long. The limit is ${MAX_INPUT_WORDS.toLocaleString()} words.` },
+        { status: 413 },
+      );
+    }
+
     const providers = getProviders();
     if (!providers.length) {
       return Response.json(
@@ -154,7 +167,10 @@ export async function POST(request) {
       userMessage = 'All providers failed. Please try again in a moment.';
     }
 
-    return Response.json({ error: userMessage, debug: errors }, { status: 502 });
+    // Keep provider names / raw upstream error bodies server-side only — don't expose
+    // internal infrastructure details to the client.
+    console.error('[process] All providers failed:', errors);
+    return Response.json({ error: userMessage }, { status: 502 });
   } catch (err) {
     const status = err.status ?? 500;
     return Response.json({ error: err.message ?? 'Processing failed.' }, { status });

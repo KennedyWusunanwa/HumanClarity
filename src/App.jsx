@@ -2411,7 +2411,9 @@ export default function App() {
   useEffect(() => {
     if (!authReady || !session?.user || subscription.tier === 'pro') return;
 
-    const email = (profile.email || session.user.email || '').trim().toLowerCase();
+    // Use the verified account email — never the editable profile email — so a user
+    // can't restore Premium by typing in an address that paid on another account.
+    const email = (session.user.email || profile.email || '').trim().toLowerCase();
     if (!email || restoreAttemptRef.current === email) return;
 
     restoreAttemptRef.current = email;
@@ -2453,9 +2455,13 @@ export default function App() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Wait until auth has resolved. On a fresh redirect back from Paystack the session
+    // loads asynchronously, so acting before authReady would mark the payment "handled"
+    // before there is ever a user to apply the upgrade to — leaving a paid user on Free.
+    if (!authReady) return;
 
     const url = new URL(window.location.href);
-    const reference = url.searchParams.get('reference');
+    const reference = url.searchParams.get('reference') || url.searchParams.get('trxref');
     const paystackStatus = url.searchParams.get('paystack');
     const targetView = url.searchParams.get('view');
 
@@ -2463,13 +2469,14 @@ export default function App() {
       return;
     }
 
-    handledPaymentRef.current = reference;
-
+    // Don't mark as handled yet — once the user signs in, this effect re-runs with a
+    // session and finishes applying the upgrade.
     if (!session?.user) {
       setPaymentMessage('Sign in again to finish applying your upgrade.');
       return;
     }
 
+    handledPaymentRef.current = reference;
     setPaymentLoading(true);
     setPaymentMessage('');
 
@@ -2480,6 +2487,11 @@ export default function App() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Could not verify payment.');
         if (data.status !== 'success') throw new Error('Payment was not completed.');
+        // Confirm the transaction actually paid for Pro (50 GHS = 5000 pesewas) so a
+        // smaller/unrelated successful charge can't unlock Premium.
+        if (Number(data.amount) < 5000 || data.currency !== 'GHS') {
+          throw new Error('This payment did not match the Pro plan amount.');
+        }
 
         const nextSubscription = {
           ...subscription,
@@ -2513,7 +2525,7 @@ export default function App() {
         window.history.replaceState({}, '', url.pathname);
       }
     })();
-  }, [session?.user, profile, history, saved, subscription]);
+  }, [authReady, session?.user, profile, history, saved, subscription]);
 
   function openAuth(mode = 'signin', nextView = 'tool', nextMessage = '') {
     triggerPulse();
@@ -2720,6 +2732,7 @@ export default function App() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not start checkout.');
+      if (!data.authorization_url) throw new Error('Could not start checkout.');
       await endBusy(startedAt);
       window.location.href = data.authorization_url;
     } catch (error) {

@@ -11,6 +11,9 @@ const DOC_MIME = 'application/msword';
 const PDF_MIME = 'application/pdf';
 const TEXT_MIME = 'text/plain';
 
+// Reject oversized uploads before reading them into memory.
+const MAX_FILE_BYTES = 15 * 1024 * 1024; // 15 MB
+
 const FALLBACK_MIME_TYPES = new Set(['application/octet-stream', '']);
 const SUPPORTED_MIME_TYPES_BY_EXTENSION = {
   '.txt': new Set([TEXT_MIME, ...FALLBACK_MIME_TYPES]),
@@ -78,6 +81,13 @@ export async function POST(request) {
 
     if (!(file instanceof File)) {
       return Response.json({ error: 'No file provided.' }, { status: 400 });
+    }
+
+    if (file.size > MAX_FILE_BYTES) {
+      return Response.json(
+        { error: 'File is too large. The limit is 15 MB.' },
+        { status: 413 },
+      );
     }
 
     const extension = getExtension(file.name);
