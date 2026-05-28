@@ -1600,6 +1600,44 @@ const STAT_META = [
   { bg: 'linear-gradient(135deg, rgba(52,211,153,0.15), rgba(16,185,129,0.06))', bdr: 'rgba(52,211,153,0.25)', glow: 'rgba(52,211,153,0.1)',  ic: '#34d399' },
 ];
 
+const PAYMENT_METHODS = [
+  { label: 'MTN MoMo',     bg: '#ffcc00', color: '#1a1a1a' },
+  { label: 'Telecel Cash', bg: '#e2231a', color: '#ffffff' },
+  { label: 'AT Money',     bg: '#0a3d91', color: '#ffffff' },
+  { label: 'Card',         bg: 'rgba(255,255,255,0.1)', color: '#e8edff' },
+  { label: 'Bank',         bg: 'rgba(255,255,255,0.1)', color: '#e8edff' },
+];
+
+function PaymentMethods({ align = 'center' }) {
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: align }}>
+        {PAYMENT_METHODS.map(m => (
+          <span
+            key={m.label}
+            style={{
+              fontSize: 10,
+              fontWeight: 800,
+              padding: '4px 9px',
+              borderRadius: 6,
+              background: m.bg,
+              color: m.color,
+              letterSpacing: 0.2,
+              whiteSpace: 'nowrap',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+          >
+            {m.label}
+          </span>
+        ))}
+      </div>
+      <p style={{ margin: '8px 0 0', fontSize: 10.5, color: '#6b7a94', textAlign: align, letterSpacing: 0.2 }}>
+        Secured by Paystack
+      </p>
+    </div>
+  );
+}
+
 function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessage }) {
   const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94' };
   return (
@@ -1628,7 +1666,7 @@ function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessag
             {PRO_PRICE_GHS} GHS
             <span style={{ fontSize: 13, fontWeight: 500, color: C.t2, marginLeft: 6 }}>/ month</span>
           </p>
-          <p style={{ fontSize: 12, color: C.t2, margin: '0 0 14px', lineHeight: 1.5 }}>Full workspace access via Paystack.</p>
+          <p style={{ fontSize: 12, color: C.t2, margin: '0 0 14px', lineHeight: 1.5 }}>Pay by mobile money, card, or bank.</p>
           <div style={{ display: 'grid', gap: 8, fontSize: 12, color: C.t2, marginBottom: 16 }}>
             <span>· Unlimited words</span>
             <span>· Full dashboard and all pages</span>
@@ -1637,9 +1675,12 @@ function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessag
           {subscription.tier === 'pro' ? (
             <div style={{ padding: '9px 16px', borderRadius: 9, border: '1px solid rgba(74,222,128,0.22)', color: '#4ade80', background: 'rgba(74,222,128,0.07)', fontSize: 12, fontWeight: 700, textAlign: 'center' }}>Premium Active</div>
           ) : (
-            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ width: '100%', padding: '10px 16px', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', cursor: upgradeLoading ? 'wait' : 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', opacity: upgradeLoading ? 0.72 : 1 }}>
-              {upgradeLoading ? 'Redirecting to Paystack…' : 'Pay with Paystack'}
-            </button>
+            <>
+              <button onClick={onUpgrade} disabled={upgradeLoading} style={{ width: '100%', padding: '11px 16px', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', cursor: upgradeLoading ? 'wait' : 'pointer', fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', opacity: upgradeLoading ? 0.72 : 1, lineHeight: 1.3 }}>
+                {upgradeLoading ? 'Redirecting to checkout…' : 'Pay with Card, Bank or Mobile Money'}
+              </button>
+              <PaymentMethods />
+            </>
           )}
         </div>
       </div>
@@ -1665,7 +1706,7 @@ function PricingPage({ subscription, onUpgrade, upgradeLoading, upgradeMessage, 
           </button>
         ) : subscription.tier !== 'pro' ? (
           <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '9px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', fontFamily: 'inherit', opacity: upgradeLoading ? 0.72 : 1 }}>
-            {upgradeLoading ? 'Opening Paystack…' : 'Upgrade to Premium'}
+            {upgradeLoading ? 'Opening checkout…' : 'Upgrade to Premium'}
           </button>
         ) : null}
       </div>
