@@ -1496,6 +1496,23 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
           {!isPhone && (
             <p style={{ margin: 0, color: '#b8c2d8', fontSize: isNarrowWorkbench ? 13 : 'clamp(14px, 2vh, 18px)', lineHeight: 1.45 }}>AI that makes your ideas sound natural, authentic, and undetectable.</p>
           )}
+          <div style={{ marginTop: isPhone ? 8 : 'clamp(8px, 1.2vh, 12px)', display: 'flex', justifyContent: 'center' }}>
+            {subscription.tier === 'pro' ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 13px', borderRadius: 999, border: '1px solid rgba(110,231,183,0.34)', background: 'rgba(52,211,153,0.1)', color: '#6ee7b7', fontSize: isPhone ? 12 : 13, fontWeight: 700 }}>
+                <Ic d={P.premium} s={14} fill /> Unlimited words
+              </span>
+            ) : (
+              <span
+                title="Free plan: 500 words per day. Resets daily."
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 13px', borderRadius: 999, border: `1px solid ${remaining <= 0 ? 'rgba(248,113,113,0.4)' : 'rgba(126,151,255,0.32)'}`, background: remaining <= 0 ? 'rgba(248,113,113,0.1)' : 'rgba(126,151,255,0.1)', color: remaining <= 0 ? '#fca5a5' : '#9ec1ff', fontSize: isPhone ? 12 : 13, fontWeight: 700 }}
+              >
+                <Ic d={P.spark} s={14} />
+                {remaining <= 0
+                  ? `Daily limit reached · resets tomorrow`
+                  : `${remaining} of ${FREE_WORD_LIMIT} free words left today`}
+              </span>
+            )}
+          </div>
         </section>
 
         <section style={{ width: 'min(100%, 1120px)', margin: '0 auto', borderRadius: isPhone ? 14 : 20, border: '1px solid rgba(70,103,178,0.55)', background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))', boxShadow: '0 24px 70px rgba(0,0,0,0.35), 0 0 70px rgba(37,99,235,0.12)', overflow: 'hidden', viewTransitionName: 'humanizer-composer', flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
@@ -1622,6 +1639,14 @@ const PAYMENT_METHODS = [
   { label: 'AT Money',     bg: '#0a3d91', color: '#ffffff' },
   { label: 'Card',         bg: 'rgba(255,255,255,0.1)', color: '#e8edff' },
   { label: 'Bank',         bg: 'rgba(255,255,255,0.1)', color: '#e8edff' },
+];
+
+const PRO_BENEFITS = [
+  'Unlimited words every day — no 500-word daily cap',
+  'Full dashboard & workspace access',
+  'Save unlimited documents with full history',
+  'All tools: Humanize, Summarize, Expand & Fix Grammar',
+  'Priority access to new features',
 ];
 
 function PaymentMethods({ align = 'center' }) {
@@ -2153,14 +2178,34 @@ function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfil
               {subscription.tier === 'pro' ? `${PRO_PRICE_GHS} GHS / month · Unlimited processing` : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remaining today`}
             </p>
           </div>
-          {subscription.tier === 'pro' ? (
+          {subscription.tier === 'pro' && (
             <div style={{ padding: '8px 16px', borderRadius: 9, border: '1px solid rgba(74,222,128,0.22)', color: '#4ade80', background: 'rgba(74,222,128,0.07)', fontSize: 12, fontWeight: 700 }}>Pro Active</div>
-          ) : (
-            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '8px 16px', borderRadius: 9, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 12, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: upgradeLoading ? 0.7 : 1, whiteSpace: 'nowrap' }}>
-              {upgradeLoading ? 'Redirecting…' : `Upgrade · ${PRO_PRICE_GHS} GHS`}
-            </button>
           )}
         </div>
+
+        {subscription.tier !== 'pro' && (
+          <div style={{ marginTop: 16, padding: '18px 18px 16px', borderRadius: 12, border: '1px solid rgba(73,104,255,0.26)', background: 'linear-gradient(145deg, rgba(73,104,255,0.1), rgba(124,60,255,0.06))' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ color: '#c4b5fd', display: 'grid', placeItems: 'center' }}><Ic d={P.premium} s={18} fill /></span>
+              <span style={{ fontWeight: 800, fontSize: 15, color: C.t1 }}>Upgrade to Pro</span>
+            </div>
+            <p style={{ margin: '0 0 14px', fontSize: 13, color: C.t2 }}>
+              <span style={{ fontSize: 20, fontWeight: 800, color: C.t1 }}>{PRO_PRICE_GHS} GHS</span> / month — cancel anytime.
+            </p>
+            <div style={{ display: 'grid', gap: 9, marginBottom: 16 }}>
+              {PRO_BENEFITS.map(b => (
+                <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, color: '#d8deef' }}>
+                  <span style={{ color: '#4ade80', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Ic d={P.check2} s={16} /></span>
+                  {b}
+                </div>
+              ))}
+            </div>
+            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ width: '100%', padding: '12px 16px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13.5, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', boxShadow: '0 10px 24px rgba(73,104,255,0.26)', fontFamily: 'inherit', opacity: upgradeLoading ? 0.72 : 1, lineHeight: 1.3 }}>
+              {upgradeLoading ? 'Redirecting to checkout…' : 'Pay with Card, Bank or Mobile Money'}
+            </button>
+            <PaymentMethods />
+          </div>
+        )}
         {upgradeMessage && <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#4ade80' : C.t2, margin: '10px 0 0' }}>{upgradeMessage}</p>}
       </div>
 
