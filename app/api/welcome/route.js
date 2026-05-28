@@ -72,7 +72,7 @@ export async function POST(request) {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
                 <tr>
                   <td style="padding:10px 14px;background:rgba(168,199,250,0.06);border:1px solid rgba(168,199,250,0.1);border-radius:10px;margin-bottom:8px;display:block;">
-                    <span style="color:#a8c7fa;font-size:13px;font-weight:600;">✓ Humanize up to 500 words free</span>
+                    <span style="color:#a8c7fa;font-size:13px;font-weight:600;">✓ Humanize 500 words free every day</span>
                   </td>
                 </tr>
                 <tr><td style="height:8px;"></td></tr>

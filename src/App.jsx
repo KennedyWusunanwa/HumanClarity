@@ -21,6 +21,7 @@ const DEFAULT_PROFILE = { name: '', email: '' };
 const DEFAULT_SUBSCRIPTION = {
   tier: 'free',
   wordsUsed: 0,
+  usageDate: '',
   lastPaymentReference: '',
   upgradedAt: '',
   paymentStatus: 'inactive',
@@ -83,9 +84,22 @@ function passwordStrength(password) {
   if (score === 3) return { score: 3, label: 'Good', color: '#60a5fa' };
   return { score: 4, label: 'Strong', color: '#34d399' };
 }
+// Local-date key (YYYY-MM-DD) used to scope the free quota to a single day.
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Words counted toward today's free quota. Usage from a previous day doesn't count —
+// the free tier is 500 words per day, not a one-time cap.
+function usageToday(subscription) {
+  if (!subscription || subscription.usageDate !== todayKey()) return 0;
+  return Number(subscription.wordsUsed || 0);
+}
+
 function wordsRemaining(subscription) {
   if (subscription.tier === 'pro') return Infinity;
-  return Math.max(0, FREE_WORD_LIMIT - Number(subscription.wordsUsed || 0));
+  return Math.max(0, FREE_WORD_LIMIT - usageToday(subscription));
 }
 function planLabel(subscription) {
   if (subscription.tier === 'pro') return 'Premium';
@@ -103,6 +117,7 @@ function buildPersistedState(profile, history, saved, subscription) {
       ...DEFAULT_SUBSCRIPTION,
       ...subscription,
       wordsUsed: Number(subscription?.wordsUsed || 0),
+      usageDate: subscription?.usageDate || '',
     },
   };
 }
@@ -130,6 +145,7 @@ function normalizeUserState(user) {
       ...rawSubscription,
       tier: rawSubscription.tier || metadata.plan || 'free',
       wordsUsed: Number(rawSubscription.wordsUsed ?? metadata.usage_words ?? 0),
+      usageDate: rawSubscription.usageDate || '',
     },
   };
 }
@@ -1267,13 +1283,13 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
       if (remaining <= 0) {
         setError(
           isSignedIn
-            ? `Your free plan limit of ${FREE_WORD_LIMIT} words is used up. Upgrade to Pro for unlimited processing.`
-            : `Guest access is limited to ${FREE_WORD_LIMIT} words. Sign in or upgrade to keep going.`,
+            ? `You've used your ${FREE_WORD_LIMIT} free words for today. Your quota resets tomorrow — upgrade to Pro for unlimited processing.`
+            : `Guest access is limited to ${FREE_WORD_LIMIT} words per day. Sign in or upgrade to keep going.`,
         );
         return;
       }
       if (wordCount > remaining) {
-        setError(`This document uses ${wordCount} words, but your free plan has ${remaining} words left.`);
+        setError(`This document uses ${wordCount} words, but your free plan has ${remaining} words left today.`);
         return;
       }
     }
@@ -1315,13 +1331,13 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
       if (remaining <= 0) {
         setError(
           isSignedIn
-            ? `Your free plan limit of ${FREE_WORD_LIMIT} words is used up. Upgrade to Pro for unlimited processing.`
-            : `Guest access is limited to ${FREE_WORD_LIMIT} words. Sign in or upgrade to keep going.`,
+            ? `You've used your ${FREE_WORD_LIMIT} free words for today. Your quota resets tomorrow — upgrade to Pro for unlimited processing.`
+            : `Guest access is limited to ${FREE_WORD_LIMIT} words per day. Sign in or upgrade to keep going.`,
         );
         return;
       }
       if (wordCount > remaining) {
-        setError(`This document uses ${wordCount} words, but your free plan has ${remaining} words left.`);
+        setError(`This document uses ${wordCount} words, but your free plan has ${remaining} words left today.`);
         return;
       }
     }
@@ -1649,9 +1665,9 @@ function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessag
             {subscription.tier !== 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: '#4ade80', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 999, padding: '2px 8px' }}>Current</span>}
           </div>
           <p style={{ fontSize: 28, fontWeight: 800, margin: '0 0 4px', color: C.t1, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>0 GHS</p>
-          <p style={{ fontSize: 12, color: C.t2, margin: '0 0 14px', lineHeight: 1.5 }}>Limited quota for the Humanizer.</p>
+          <p style={{ fontSize: 12, color: C.t2, margin: '0 0 14px', lineHeight: 1.5 }}>{FREE_WORD_LIMIT} words per day for the Humanizer.</p>
           <div style={{ display: 'grid', gap: 8, fontSize: 12, color: C.t2 }}>
-            <span>· {wordsRemaining(subscription)} of {FREE_WORD_LIMIT} words remaining</span>
+            <span>· {wordsRemaining(subscription)} of {FREE_WORD_LIMIT} words remaining today</span>
             <span>· Humanizer access only</span>
             <span>· Dashboard and workspace locked</span>
           </div>
@@ -1816,7 +1832,7 @@ function PremiumLockedPage({ title, description, subscription, onUpgrade, upgrad
       <div style={{ background: 'rgba(73,104,255,0.07)', border: '1px solid rgba(73,104,255,0.22)', borderRadius: 14, padding: '20px 22px', marginBottom: 20 }}>
         <p style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 800, color: C.t1 }}>Premium required</p>
         <p style={{ margin: '0 0 4px', fontSize: 13, color: C.t2 }}>
-          {subscription.tier === 'pro' ? 'Your access is already active.' : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remain in Humanizer.`}
+          {subscription.tier === 'pro' ? 'Your access is already active.' : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remain today in the Humanizer.`}
         </p>
       </div>
       <PlanComparison subscription={subscription} onUpgrade={onUpgrade} upgradeLoading={upgradeLoading} upgradeMessage={upgradeMessage} />
@@ -2134,7 +2150,7 @@ function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfil
               <span style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 999, padding: '2px 8px', fontSize: 10, fontWeight: 700, color: '#4ade80' }}>Active</span>
             </div>
             <p style={{ fontSize: 12, color: C.t2, margin: 0 }}>
-              {subscription.tier === 'pro' ? `${PRO_PRICE_GHS} GHS / month · Unlimited processing` : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remaining`}
+              {subscription.tier === 'pro' ? `${PRO_PRICE_GHS} GHS / month · Unlimited processing` : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remaining today`}
             </p>
           </div>
           {subscription.tier === 'pro' ? (
@@ -2224,6 +2240,14 @@ export default function App() {
       return 0;
     }
   });
+  const [guestUsageDate, setGuestUsageDate] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      return window.localStorage.getItem('hc-guest-words-date') || '';
+    } catch {
+      return '';
+    }
+  });
   const [session, setSession] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
@@ -2241,9 +2265,10 @@ export default function App() {
   const pulseTimeoutRef = useRef(null);
   const isSignedIn = Boolean(session?.user);
   const isPremium = subscription.tier === 'pro';
+  const guestUsedToday = guestUsageDate === todayKey() ? guestWordsUsed : 0;
   const toolSubscription = isSignedIn
     ? subscription
-    : { ...DEFAULT_SUBSCRIPTION, wordsUsed: guestWordsUsed };
+    : { ...DEFAULT_SUBSCRIPTION, wordsUsed: guestUsedToday, usageDate: todayKey() };
 
   function beginBusy(message) {
     const startedAt = Date.now();
@@ -2439,8 +2464,9 @@ export default function App() {
     if (typeof window === 'undefined') return;
     try {
       window.localStorage.setItem('hc-guest-words-used', String(guestWordsUsed));
+      window.localStorage.setItem('hc-guest-words-date', guestUsageDate);
     } catch {}
-  }, [guestWordsUsed]);
+  }, [guestWordsUsed, guestUsageDate]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -2739,14 +2765,18 @@ export default function App() {
   }
 
   function handleUsageAdd(words) {
-    setSubscription(prev => ({
-      ...prev,
-      wordsUsed: Number(prev.wordsUsed || 0) + Number(words || 0),
-    }));
+    setSubscription(prev => {
+      const today = todayKey();
+      const base = prev.usageDate === today ? Number(prev.wordsUsed || 0) : 0;
+      return { ...prev, usageDate: today, wordsUsed: base + Number(words || 0) };
+    });
   }
 
   function handleGuestUsageAdd(words) {
-    setGuestWordsUsed(prev => Number(prev || 0) + Number(words || 0));
+    const today = todayKey();
+    const carried = guestUsageDate === today ? guestWordsUsed : 0;
+    setGuestUsageDate(today);
+    setGuestWordsUsed(carried + Number(words || 0));
   }
 
   async function handleUpgrade() {
