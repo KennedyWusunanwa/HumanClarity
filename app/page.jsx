@@ -46,7 +46,7 @@ const App = dynamic(() => import('@/App'), {
             }}
           />
           <img
-            src="/HumanClarity AI icon.png"
+            src="/hc-icon.png"
             alt="HumanClarity AI"
             className="float-y"
             style={{ width: 54, height: 54, objectFit: 'contain', filter: 'drop-shadow(0 0 12px rgba(124,82,255,0.45))' }}

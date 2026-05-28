@@ -39,9 +39,9 @@ export const metadata = {
   publisher: 'HumanClarity AI',
 
   icons: {
-    icon: '/HumanClarity AI icon.png',
-    shortcut: '/HumanClarity AI icon.png',
-    apple: '/HumanClarity AI icon.png',
+    icon: '/hc-icon.png',
+    shortcut: '/hc-icon.png',
+    apple: '/hc-icon.png',
   },
 
   openGraph: {

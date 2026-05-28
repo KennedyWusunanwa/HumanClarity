@@ -692,7 +692,7 @@ function SignInModal({
             )}
 
             <div className="auth-modal-brand" style={{ display: 'flex', alignItems: 'center', gap: isPhone ? 10 : 12, marginBottom: isPhone ? 12 : 14 }}>
-              <img src="/HumanClarity AI icon.png" alt="" className="auth-modal-brand-icon" style={{ width: isPhone ? 36 : 42, height: isPhone ? 36 : 42, objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(168,199,250,0.3))' }} />
+              <img src="/hc-icon.png" alt="" className="auth-modal-brand-icon" style={{ width: isPhone ? 36 : 42, height: isPhone ? 36 : 42, objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(168,199,250,0.3))' }} />
               <div>
                 <p style={{ margin: 0, color: '#e3e3e3', fontWeight: 700, fontSize: 16, fontFamily: '"Roboto", Arial, sans-serif' }}>HumanClarity AI</p>
                 <p style={{ margin: '2px 0 0', color: '#a8c7fa', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural writing, fast</p>
@@ -890,7 +890,7 @@ function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', 
 
       <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(8px, 2vw, 14px)', flexWrap: 'nowrap', padding: '12px clamp(14px, 3vw, 32px)', background: 'transparent', borderBottom: 'none' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 1.8vw, 10px)', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
-          <img src="/HumanClarity AI icon.png" alt="HumanClarity AI" style={{ height: 'clamp(24px, 6.2vw, 34px)', flexShrink: 0, filter: 'drop-shadow(0 0 5px rgba(168,199,250,0.28))' }} />
+          <img src="/hc-icon.png" alt="HumanClarity AI" style={{ height: 'clamp(24px, 6.2vw, 34px)', flexShrink: 0, filter: 'drop-shadow(0 0 5px rgba(168,199,250,0.28))' }} />
           <span style={{ fontFamily: '"Roboto", Arial, sans-serif', fontWeight: 700, fontSize: 'clamp(11px, 3.7vw, 17px)', background: 'linear-gradient(135deg, #a8c7fa 0%, #d3e3fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: 0, lineHeight: 1.1, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>HumanClarity AI</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'clamp(8px, 1.6vw, 10px)', flex: '0 0 auto', flexShrink: 0 }}>
@@ -1122,7 +1122,7 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
 
       <aside style={{ position: 'absolute', zIndex: 5, top: 0, left: 0, bottom: 0, width: railWidth, transition: 'width 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderRight: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.72)', backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', padding: isPhone ? 8 : 12, boxSizing: 'border-box' }}>
         <button onClick={() => setRailOpen(v => !v)} aria-label={railOpen ? 'Collapse navigation' : 'Expand navigation'} style={{ minHeight: 50, border: 'none', background: 'transparent', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: 12, padding: showRailLabels ? '0 8px' : 0, cursor: 'pointer', fontFamily: 'inherit' }}>
-          <img src="/HumanClarity AI icon.png" alt="" style={{ width: 31, height: 31, objectFit: 'contain' }} />
+          <img src="/hc-icon.png" alt="" style={{ width: 31, height: 31, objectFit: 'contain' }} />
           {showRailLabels && (
             <span style={{ textAlign: 'left' }}>
               <span style={{ display: 'block', fontSize: 18, fontWeight: 900 }}>HumanClarity</span>
@@ -1472,7 +1472,7 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
     <>
       <section style={{ textAlign: 'center', maxWidth: 900, margin: isPhone ? '0 auto 10px' : '0 auto clamp(14px, 2.4vh, 24px)', flex: '0 0 auto' }}>
           {!isPhone && (
-            <img src="/HumanClarity AI icon.png" alt="" style={{ width: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', height: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', objectFit: 'contain', margin: '0 auto clamp(8px, 1.4vh, 14px)', display: 'block', filter: 'drop-shadow(0 0 6px rgba(124,82,255,0.28))' }} />
+            <img src="/hc-icon.png" alt="" style={{ width: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', height: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', objectFit: 'contain', margin: '0 auto clamp(8px, 1.4vh, 14px)', display: 'block', filter: 'drop-shadow(0 0 6px rgba(124,82,255,0.28))' }} />
           )}
           <h1 style={{ margin: isPhone ? '0 0 4px' : '0 0 clamp(6px, 1vh, 10px)', fontSize: isPhone ? 22 : isNarrowWorkbench ? 'clamp(28px, 8vw, 38px)' : 'clamp(30px, 5.2vh, 52px)', lineHeight: 1.1, fontWeight: 800, letterSpacing: 0 }}>
             Your writing, <span style={{ background: 'linear-gradient(135deg,#e9edf7 0%, #7fb1ff 62%, #6f8cff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>clearer.</span>
