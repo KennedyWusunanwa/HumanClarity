@@ -108,6 +108,17 @@ textarea {
   scrollbar-color: rgba(151,171,255,0.72) rgba(11,17,31,0.7);
 }
 
+/* iOS Safari auto-zooms the page when you focus a form field whose font-size is
+   below 16px. Force at least 16px on touch-sized viewports so typing never triggers
+   a zoom-in. !important is required to win over the components' inline font sizes. */
+@media (max-width: 860px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 button {
   transition:
     transform 0.16s ease,
