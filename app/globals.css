@@ -65,7 +65,11 @@ html.dark {
 body {
   margin: 0;
   min-width: 320px;
+  /* dvh matches the dynamic mobile viewport so the body never grows taller than the
+     100dvh app shell — otherwise the address bar's height shows as dead space below
+     the footer on phones. The vh line is a fallback for browsers without dvh. */
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--text1);
   font-family: "Roboto", Arial, sans-serif;
