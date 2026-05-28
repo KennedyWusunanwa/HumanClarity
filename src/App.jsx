@@ -1132,7 +1132,7 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
   }
 
   return (
-    <div style={{ height: '100dvh', position: 'relative', overflow: 'hidden', background: '#0e0f11', color: '#f8fafc', viewTransitionName: page === 'tool' ? 'humanizer-page' : undefined }}>
+    <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#0e0f11', color: '#f8fafc', viewTransitionName: page === 'tool' ? 'humanizer-page' : undefined }}>
       <ParticleCanvas count={48} isDark speed={0.52} />
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 22%, rgba(66,133,244,0.2), transparent 35%), radial-gradient(ellipse at 50% 46%, rgba(37,99,235,0.12), transparent 48%), linear-gradient(180deg, rgba(14,15,17,0.7), #0e0f11 96%)', pointerEvents: 'none' }} />
 
@@ -1172,7 +1172,7 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
         </div>
       </aside>
 
-      <header style={{ position: 'relative', zIndex: 3, height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: isPhone ? '12px 12px' : '12px clamp(16px, 3vw, 32px)', paddingLeft: `calc(${railWidth}px + ${isPhone ? '12px' : 'clamp(16px, 3vw, 32px)'})`, transition: 'padding-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderBottom: 'none', background: 'transparent', boxSizing: 'border-box' }}>
+      <header style={{ position: 'relative', zIndex: 3, height: 62, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: isPhone ? '12px 12px' : '12px clamp(16px, 3vw, 32px)', paddingLeft: `calc(${railWidth}px + ${isPhone ? '12px' : 'clamp(16px, 3vw, 32px)'})`, transition: 'padding-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderBottom: 'none', background: 'transparent', boxSizing: 'border-box' }}>
         <div style={{ color: '#fff', fontSize: 'clamp(13px, 3.6vw, 18px)', fontWeight: 800, whiteSpace: 'nowrap' }}>
           {viewportWidth <= 520 ? 'HC AI' : 'HumanClarity AI'}
         </div>
@@ -1210,11 +1210,11 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
         </div>
       </header>
 
-      <main style={{ position: 'relative', zIndex: 2, height: 'calc(100dvh - 62px - 36px)', marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: mainPadding ?? (scroll ? 0 : (isPhone ? '10px 10px 8px' : 'clamp(12px, 2vh, 22px) clamp(18px, 4vw, 44px)')), boxSizing: 'border-box', display: 'flex', flexDirection: 'column', minHeight: 0, overflowY: scroll ? 'auto' : 'hidden' }}>
+      <main style={{ position: 'relative', zIndex: 2, flex: '1 1 auto', marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: mainPadding ?? (scroll ? 0 : (isPhone ? '10px 10px 8px' : 'clamp(12px, 2vh, 22px) clamp(18px, 4vw, 44px)')), boxSizing: 'border-box', display: 'flex', flexDirection: 'column', minHeight: 0, overflowY: scroll ? 'auto' : 'hidden' }}>
         {children}
       </main>
 
-      <footer style={{ position: 'relative', zIndex: 3, height: 36, marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: isPhone ? '0 12px' : '0 clamp(18px, 4vw, 44px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: '1px solid rgba(70,103,178,0.18)', background: 'transparent', boxSizing: 'border-box', color: '#8e918f', fontSize: 12 }}>
+      <footer style={{ position: 'relative', zIndex: 3, height: 36, flexShrink: 0, marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: isPhone ? '0 12px' : '0 clamp(18px, 4vw, 44px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: '1px solid rgba(70,103,178,0.18)', background: 'transparent', boxSizing: 'border-box', color: '#8e918f', fontSize: 12 }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
           {!isPhone && <>Made in Ghana © {new Date().getFullYear()}</>}
           {isPhone && <>© {new Date().getFullYear()}</>}
