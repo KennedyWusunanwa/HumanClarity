@@ -153,6 +153,10 @@ function normalizeUserState(user) {
 const UPLOAD_ACCEPT =
   '.txt,.pdf,.docx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
+// Must stay under Vercel's ~4.5 MB serverless request-body limit, and match the
+// server-side cap in app/api/extract/route.js.
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 // ─── icon ─────────────────────────────────────────────────────────────────────
 
 function Ic({ d, s = 20, fill = false }) {
@@ -1394,6 +1398,15 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
 
     if (!file) return;
 
+    if (file.size === 0) {
+      setError('That file appears to be empty.');
+      return;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError(`That file is ${fmtBytes(file.size)}. The upload limit is 4 MB — for longer documents, paste the text directly.`);
+      return;
+    }
+
     setUploading(true);
     setError('');
     setOutput(null);
@@ -1407,12 +1420,34 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
         body: formData,
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Upload failed.');
+      // The endpoint returns JSON, but platform-level errors (413, 502, timeout)
+      // can return an HTML page. Parse defensively so the user sees a real message.
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        const fallback =
+          res.status === 413
+            ? 'That file is too large to upload. The limit is 4 MB.'
+            : `Upload failed (${res.status}). Please try again.`;
+        throw new Error(data?.error || fallback);
+      }
+
+      if (!data?.text) {
+        throw new Error('No text could be extracted from that file.');
+      }
 
       setInput(data.text);
     } catch (err) {
-      setError(err.message);
+      setError(
+        err?.name === 'TypeError'
+          ? 'Network error during upload. Check your connection and try again.'
+          : err?.message || 'Upload failed.',
+      );
     } finally {
       setUploading(false);
     }
