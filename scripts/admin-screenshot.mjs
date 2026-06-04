@@ -19,6 +19,7 @@ const USERS = {
   viewerRole: 'admin',
 };
 const PRICING = { pricing: { proPriceGhs: 50, proPriceUsdEstimate: 4.44, currency: 'GHS', freeWordLimit: 500, billingPeriod: 'month' } };
+const EMAIL_POLICY = { policy: { mode: 'allowlist', allowedDomains: ['gmail.com', 'googlemail.com', 'yahoo.com', 'ymail.com', 'icloud.com', 'me.com', 'mac.com'] } };
 const ADMINS = {
   admins: [
     { id: 'me', username: 'owner', role: 'admin', disabled: false, created_at: '2025-11-01', created_by: 'bootstrap', last_login_at: '2026-06-03T09:00:00Z' },
@@ -39,6 +40,7 @@ async function mock(page) {
     const url = route.request().url();
     let body = {};
     if (url.includes('/api/admin/session')) body = SESSION;
+    else if (url.includes('/api/admin/email-policy')) body = EMAIL_POLICY;
     else if (url.includes('/api/admin/users')) body = USERS;
     else if (url.includes('/api/admin/pricing')) body = PRICING;
     else if (url.includes('/api/admin/appeals')) body = APPEALS;

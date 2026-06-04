@@ -490,6 +490,117 @@ function Stat({ label, value, color }) {
 }
 
 // ─── users tab ──────────────────────────────────────────────────────────────
+// Admin-editable sign-up email policy (restrict to providers vs allow any).
+function EmailPolicyCard({ canManage, flash, onAuthLost }) {
+  const [policy, setPolicy] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState('allowlist');
+  const [domainsText, setDomainsText] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api('/api/admin/email-policy');
+        setPolicy(res.policy);
+        setMode(res.policy.mode);
+        setDomainsText((res.policy.allowedDomains || []).join('\n'));
+      } catch (err) {
+        if (err.status === 401) onAuthLost();
+        /* else: non-fatal, card stays hidden */
+      }
+    })();
+  }, [onAuthLost]);
+
+  if (!policy) return null;
+
+  const parsedDomains = domainsText
+    .split(/[\s,]+/)
+    .map((d) => d.trim().toLowerCase().replace(/^@+/, ''))
+    .filter(Boolean);
+  const dirty = mode !== policy.mode || parsedDomains.join(',') !== (policy.allowedDomains || []).join(',');
+
+  async function save() {
+    setSaving(true);
+    try {
+      const res = await api('/api/admin/email-policy', {
+        method: 'PUT',
+        body: JSON.stringify({ mode, allowedDomains: parsedDomains }),
+      });
+      setPolicy(res.policy);
+      setMode(res.policy.mode);
+      setDomainsText((res.policy.allowedDomains || []).join('\n'));
+      flash('Sign-up email policy saved.');
+    } catch (err) {
+      handleErr(err, flash, onAuthLost);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const summary =
+    policy.mode === 'any'
+      ? 'Any real email allowed'
+      : `Restricted to ${policy.allowedDomains.length} provider${policy.allowedDomains.length === 1 ? '' : 's'}`;
+
+  return (
+    <div style={{ background: T.panel, border: `1px solid ${T.border}`, borderRadius: 12, padding: '12px 14px', marginBottom: 14 }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, background: 'none', border: 'none', cursor: 'pointer', color: T.t1, fontFamily: 'inherit', padding: 0 }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+          <span style={{ fontSize: 13.5, fontWeight: 700 }}>Sign-up email policy</span>
+          <Badge color={policy.mode === 'any' ? T.t2 : '#7fb1ff'} bg={policy.mode === 'any' ? undefined : 'rgba(124,159,255,0.12)'} border={policy.mode === 'any' ? T.border : 'rgba(124,159,255,0.35)'}>
+            {summary}
+          </Badge>
+        </span>
+        <span style={{ color: T.t3, fontSize: 13 }}>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
+          <div style={{ display: 'grid', gap: 8 }}>
+            {[
+              ['allowlist', 'Restrict to specific providers', 'Only the listed domains can sign up — blocks fake addresses on random domains.'],
+              ['any', 'Allow any real email', 'Any address whose domain has a working mail server (MX) can sign up.'],
+            ].map(([val, label, desc]) => (
+              <label key={val} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: canManage ? 'pointer' : 'default', opacity: canManage ? 1 : 0.7 }}>
+                <input type="radio" name="emailmode" checked={mode === val} disabled={!canManage} onChange={() => setMode(val)} style={{ marginTop: 3 }} />
+                <span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: T.t1 }}>{label}</span>
+                  <span style={{ display: 'block', fontSize: 11.5, color: T.t3, marginTop: 2 }}>{desc}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+
+          {mode === 'allowlist' && (
+            <Field label="Allowed domains" hint="One per line (or comma-separated). e.g. gmail.com, yahoo.com, icloud.com, outlook.com">
+              <textarea
+                value={domainsText}
+                onChange={(e) => setDomainsText(e.target.value)}
+                disabled={!canManage}
+                rows={5}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'monospace', fontSize: 12.5 }}
+              />
+            </Field>
+          )}
+
+          {canManage ? (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <Btn variant="primary" disabled={saving || !dirty} onClick={save}>{saving ? 'Saving…' : 'Save policy'}</Btn>
+              {dirty && <span style={{ fontSize: 12, color: T.amber }}>Unsaved changes</span>}
+            </div>
+          ) : (
+            <p style={{ fontSize: 11.5, color: T.t3, margin: 0 }}>Only an Admin can change the sign-up policy.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function UsersTab({ can, flash, onAuthLost }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -554,6 +665,8 @@ function UsersTab({ can, flash, onAuthLost }) {
 
   return (
     <div>
+      <EmailPolicyCard canManage={canManage} flash={flash} onAuthLost={onAuthLost} />
+
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
         <Stat label="Total users" value={stats.total} />
         <Stat label="Premium" value={stats.premium} color={T.green} />

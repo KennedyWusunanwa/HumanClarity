@@ -106,6 +106,46 @@ export async function getRawUser(id) {
   return data?.user || null;
 }
 
+// Creates an end-user account with the service role, pre-confirmed (email_confirm:
+// true) so they can sign in immediately — this is how signups skip the email
+// confirmation step while the server enforces the sign-up policy. Throws if the
+// email already exists.
+export async function createEndUser({ email, password, name }) {
+  const supabase = getServiceClient();
+  const subscription = {
+    tier: 'free',
+    wordsUsed: 0,
+    usageDate: '',
+    lastPaymentReference: '',
+    upgradedAt: '',
+    paymentStatus: 'inactive',
+  };
+  const { data, error } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: {
+      display_name: name || '',
+      plan: 'free',
+      usage_words: 0,
+      app_state: {
+        profile: { name: name || '', email },
+        history: [],
+        saved: [],
+        subscription,
+      },
+    },
+  });
+  if (error) throw error;
+  return data.user;
+}
+
+export async function deleteEndUser(id) {
+  const supabase = getServiceClient();
+  const { error } = await supabase.auth.admin.deleteUser(id);
+  if (error) throw error;
+}
+
 // Enable/disable premium for an end user while preserving the rest of their
 // metadata. Sets an admin_override flag the app respects so a manual change
 // isn't silently undone by the Paystack auto-restore (see src/App.jsx).

@@ -127,3 +127,22 @@ values (
   )
 )
 on conflict (key) do nothing;
+
+-- Sign-up email policy. 'allowlist' restricts new sign-ups to the listed major
+-- providers (blocks fake addresses on random real domains); editable in the
+-- admin dashboard's Users tab. Falls back to these defaults if absent.
+insert into public.app_config (key, value)
+values (
+  'email_policy',
+  jsonb_build_object(
+    'mode', 'allowlist',
+    'allowedDomains', jsonb_build_array(
+      'gmail.com', 'googlemail.com',
+      'yahoo.com', 'ymail.com', 'rocketmail.com',
+      'yahoo.co.uk', 'yahoo.ca', 'yahoo.com.au', 'yahoo.in',
+      'yahoo.fr', 'yahoo.de', 'yahoo.es', 'yahoo.it', 'yahoo.com.br', 'yahoo.com.mx',
+      'icloud.com', 'me.com', 'mac.com'
+    )
+  )
+)
+on conflict (key) do nothing;

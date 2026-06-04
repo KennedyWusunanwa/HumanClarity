@@ -2911,66 +2911,44 @@ export default function App() {
       const supabase = getSupabaseBrowserClient();
 
       if (payload.mode === 'signup') {
-        // Validate the email before paying the cost of a Supabase signup.
-        // Server-side check does format, disposable-domain, and DNS MX lookup.
+        // Instant client-side feedback (format/disposable). The real gate is the
+        // server route below, which enforces the sign-up email policy and creates
+        // the account with the service role — so the allow-list can't be bypassed
+        // by calling Supabase directly from the browser.
         const quick = quickEmailCheck(payload.email);
         if (!quick.ok) throw new Error(emailErrorMessage(quick.reason));
 
-        try {
-          const validateRes = await fetch('/api/validate-email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: payload.email }),
-          });
-          const validateData = await validateRes.json().catch(() => ({}));
-          if (!validateRes.ok || validateData?.ok === false) {
-            throw new Error(emailErrorMessage(validateData?.reason || 'unknown'));
-          }
-        } catch (validateErr) {
-          if (validateErr instanceof Error && validateErr.message) throw validateErr;
-          throw new Error(emailErrorMessage('lookup-failed'));
+        const signupRes = await fetch('/api/account/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: payload.name,
+            email: payload.email,
+            password: payload.password,
+          }),
+        });
+        const signupData = await signupRes.json().catch(() => ({}));
+        if (!signupRes.ok) {
+          throw new Error(signupData.error || 'Could not create your account.');
         }
 
-        const initialProfile = { name: payload.name, email: payload.email };
-        const initialState = buildPersistedState(
-          initialProfile,
-          [],
-          [],
-          DEFAULT_SUBSCRIPTION,
-        );
-
-        const { data, error } = await supabase.auth.signUp({
+        // The account is created pre-confirmed, so sign in immediately to start a session.
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: payload.email,
           password: payload.password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: {
-              display_name: payload.name,
-              plan: 'free',
-              usage_words: 0,
-              app_state: initialState,
-            },
-          },
         });
-
         if (error) throw error;
 
-        if (data.session?.user) {
-          setSession(data.session);
-          applyUserState(data.session.user);
-          setShowSignIn(false);
-          setView(pendingView || 'tool');
-          // fire-and-forget welcome email
-          fetch('/api/welcome', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: payload.name, email: payload.email }),
-          }).catch(() => {});
-        } else {
-          // email confirmation still enabled in Supabase — ask user to confirm
-          setAuthMode('signin');
-          setAuthMessage('Account created! Check your inbox for a confirmation link, then sign in.');
-        }
+        setSession(data.session);
+        applyUserState(data.user);
+        setShowSignIn(false);
+        setView(pendingView || 'tool');
+        // fire-and-forget welcome email
+        fetch('/api/welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: payload.name, email: payload.email }),
+        }).catch(() => {});
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: payload.email,

@@ -10,6 +10,8 @@ const { roleHasPermission, PERMISSIONS } = await import('../src/lib/admin/roles.
 const { normalizePricing, validatePricingInput } = await import('../src/lib/admin/pricing.js');
 const { normalizeUserRow } = await import('../src/lib/admin/service.js');
 const { usernameIssue } = await import('../src/lib/admin/validate.js');
+const { domainAllowed, DEFAULT_ALLOWED_DOMAINS } = await import('../src/lib/email-validation.js');
+const { normalizeEmailPolicy } = await import('../src/lib/admin/email-policy.js');
 
 let pass = 0;
 let fail = 0;
@@ -93,6 +95,22 @@ check('stale usage not counted as today', usedYesterday.wordsUsed === 0);
 check('valid username ok', usernameIssue('owner_1') === null);
 check('short username flagged', !!usernameIssue('ab'));
 check('bad chars flagged', !!usernameIssue('bad name!'));
+
+// ── email allow-list ──
+check('gmail allowed', domainAllowed('gmail.com', DEFAULT_ALLOWED_DOMAINS) === true);
+check('icloud allowed', domainAllowed('icloud.com', DEFAULT_ALLOWED_DOMAINS) === true);
+check('fake sss.com blocked', domainAllowed('sss.com', DEFAULT_ALLOWED_DOMAINS) === false);
+check('fake gsg.com blocked', domainAllowed('gsg.com', DEFAULT_ALLOWED_DOMAINS) === false);
+check('allow-list is case-insensitive', domainAllowed('GMAIL.COM', DEFAULT_ALLOWED_DOMAINS) === true);
+check('empty allow-list falls back to default (gmail ok)', domainAllowed('gmail.com', []) === true);
+
+// ── email policy normalization ──
+const polDefault = normalizeEmailPolicy({ mode: 'allowlist', allowedDomains: [] });
+check('empty allowlist policy falls back to defaults', polDefault.allowedDomains.length > 0);
+const polAny = normalizeEmailPolicy({ mode: 'any', allowedDomains: ['x'] });
+check('mode any preserved', polAny.mode === 'any');
+const polClean = normalizeEmailPolicy({ mode: 'allowlist', allowedDomains: ['@Gmail.com', 'gmail.com', 'not a domain', 'outlook.com'] });
+check('policy lowercases + strips @ + dedupes + drops junk', JSON.stringify(polClean.allowedDomains.sort()) === JSON.stringify(['gmail.com', 'outlook.com']));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

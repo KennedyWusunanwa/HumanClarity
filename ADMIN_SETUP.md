@@ -96,17 +96,21 @@ UI. A role change or a disabled account takes effect on the user's next request.
   "your account is banned" screen (with an appeal form) — both when they reload
   and when they try to sign in. Unban them from **Users** or by resolving their
   appeal.
-- **Skipping email confirmation:** turn off **Supabase → Authentication →
-  Sign In / Providers → Email → "Confirm email"**. New users can then sign in
-  immediately without clicking a link. (If you keep it on, you can still confirm
-  individual users with the **Confirm email** button in the Users tab.)
-- **Limiting to real emails (free):** signup already validates format, blocks
-  disposable/temp-mail domains, and requires the domain to have a real mail
-  server (MX lookup) — all free, in `src/lib/email-validation.js`. Note this
-  proves the *domain* can receive mail, **not** that a specific mailbox exists.
-  The only free way to prove a mailbox is real is the confirmation email; the
-  only other option is a paid verification API. Abusers who slip through are
-  handled after the fact by **Ban**.
+- **Email confirmation is skipped automatically.** Signups go through a server
+  route (`/api/account/signup`) that creates the account **pre-confirmed** via
+  the service role, so users sign in immediately with no verification link. You
+  do **not** need to toggle anything in Supabase for this.
+- **Sign-up email policy (Users tab → "Sign-up email policy").** This is the
+  free way to keep fake emails out. In **allow-list** mode only the listed
+  providers can sign up (default: Gmail / Yahoo / iCloud), which blocks fake
+  addresses on random real domains like `sas@sss.com`. The check is enforced
+  **server-side** in the signup route, so it can't be bypassed from the browser.
+  - Add providers (e.g. `outlook.com`, a business domain) right in that card — no
+    redeploy needed.
+  - Switch to **"Allow any real email"** to instead accept any domain that has a
+    working mail server (MX). Note: MX proves the *domain* accepts mail, not that
+    a specific mailbox exists — so allow-list mode is stricter.
+  - Anyone who still slips through is handled after the fact by **Ban**.
 
 ---
 

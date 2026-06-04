@@ -48,6 +48,29 @@ export const DISPOSABLE_DOMAINS = new Set([
   'zehnminutenmail.de', 'zoaxe.com',
 ]);
 
+// Major consumer email providers allowed to sign up by default. An admin can
+// edit the live list in the dashboard (stored in app_config 'email_policy');
+// this is the fallback/default. Restricting to these blocks fake addresses on
+// arbitrary real domains (e.g. sas@sss.com) without any verification step.
+export const DEFAULT_ALLOWED_DOMAINS = [
+  // Gmail
+  'gmail.com', 'googlemail.com',
+  // Yahoo (incl. common regional + legacy)
+  'yahoo.com', 'ymail.com', 'rocketmail.com',
+  'yahoo.co.uk', 'yahoo.ca', 'yahoo.com.au', 'yahoo.in',
+  'yahoo.fr', 'yahoo.de', 'yahoo.es', 'yahoo.it', 'yahoo.com.br', 'yahoo.com.mx',
+  // Apple / iCloud
+  'icloud.com', 'me.com', 'mac.com',
+];
+
+// True if `domain` is in the allow-list (case-insensitive). Falls back to the
+// default list when none is provided.
+export function domainAllowed(domain, allowed) {
+  const list = Array.isArray(allowed) && allowed.length ? allowed : DEFAULT_ALLOWED_DOMAINS;
+  const d = String(domain || '').trim().toLowerCase();
+  return list.some((x) => String(x || '').trim().toLowerCase() === d);
+}
+
 export function extractDomain(email) {
   const trimmed = String(email || '').trim().toLowerCase();
   const at = trimmed.lastIndexOf('@');
@@ -77,9 +100,15 @@ export function emailErrorMessage(reason) {
       return 'Disposable or temporary email providers are not allowed.';
     case 'no-mx':
       return "We couldn't find a mail server for that domain. Double-check the spelling.";
+    case 'domain-not-allowed':
+      return 'Please sign up with a personal email from a supported provider (e.g. Gmail, Yahoo, or iCloud).';
     case 'lookup-failed':
-      return "We couldn't verify that email right now. Try again in a moment.";
+      return "We couldn't check that email right now. Try again in a moment.";
+    case 'exists':
+      return 'An account with this email already exists. Please sign in instead.';
     default:
-      return 'That email address could not be verified.';
+      // Avoid the words "confirm/verified/verification" here — normalizeAuthErrorMessage
+      // pattern-matches those to show a "confirm your email" hint, which would be wrong.
+      return "We couldn't check that email address. Please try again.";
   }
 }
