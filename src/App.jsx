@@ -74,6 +74,19 @@ function normalizeAuthErrorMessage(error) {
 
   return msg;
 }
+// Remove any persisted Supabase auth token from localStorage. supabase-js stores
+// the session under a key like `sb-<ref>-auth-token`; if sign-out doesn't clear it
+// (e.g. it errors), a page reload would re-hydrate and silently sign the user back in.
+function purgeSupabaseAuthStorage() {
+  if (typeof window === 'undefined') return;
+  try {
+    for (const key of Object.keys(window.localStorage)) {
+      if (key.startsWith('sb-') && key.includes('-auth-token')) {
+        window.localStorage.removeItem(key);
+      }
+    }
+  } catch {}
+}
 function passwordStrength(password) {
   let score = 0;
   if (password.length >= 8) score += 1;
@@ -2302,6 +2315,161 @@ function Empty({ icon, text, action, onAction }) {
   );
 }
 
+// ─── banned screen ──────────────────────────────────────────────────────────
+function BannedScreen({ email, onSubmitAppeal, onBackToHome }) {
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const [error, setError] = useState('');
+
+  async function submit(e) {
+    e.preventDefault();
+    if (!message.trim()) {
+      setError('Please tell us why your account should be reinstated.');
+      return;
+    }
+    setStatus('sending');
+    setError('');
+    try {
+      await onSubmitAppeal(message.trim());
+      setStatus('sent');
+    } catch (err) {
+      setStatus('error');
+      setError(err.message || 'Could not submit your appeal.');
+    }
+  }
+
+  return (
+    <main
+      style={{
+        minHeight: '100dvh',
+        background: 'radial-gradient(ellipse at 50% 30%, rgba(248,113,113,0.10), transparent 60%), #0b0d12',
+        color: '#e7ebf5',
+        fontFamily: '"Roboto", Arial, sans-serif',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 18,
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 460,
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(248,113,113,0.28)',
+          borderRadius: 18,
+          padding: 28,
+          boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+        }}
+      >
+        <div
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: '50%',
+            background: 'rgba(248,113,113,0.12)',
+            border: '1px solid rgba(248,113,113,0.35)',
+            display: 'grid',
+            placeItems: 'center',
+            margin: '0 auto 16px',
+          }}
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" strokeWidth="2" strokeLinecap="round">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M5.6 5.6l12.8 12.8" />
+          </svg>
+        </div>
+        <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800, textAlign: 'center' }}>Your account is banned</h1>
+        <p style={{ margin: '0 0 4px', fontSize: 13.5, color: '#9aa7c4', textAlign: 'center', lineHeight: 1.6 }}>
+          Access for <strong style={{ color: '#cdd6ee' }}>{email || 'this account'}</strong> has been suspended by an administrator.
+        </p>
+        <p style={{ margin: '0 0 20px', fontSize: 13.5, color: '#9aa7c4', textAlign: 'center', lineHeight: 1.6 }}>
+          If you think this is a mistake, send an appeal and an admin will review it.
+        </p>
+
+        {status === 'sent' ? (
+          <div
+            style={{
+              background: 'rgba(74,222,128,0.1)',
+              border: '1px solid rgba(74,222,128,0.3)',
+              borderRadius: 12,
+              padding: 16,
+              textAlign: 'center',
+            }}
+          >
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#86efac' }}>Appeal submitted</p>
+            <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#9aa7c4', lineHeight: 1.6 }}>
+              Thanks — your appeal is now with our team. You’ll regain access if it’s approved.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={submit} style={{ display: 'grid', gap: 12 }}>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Explain why your account should be reinstated…"
+              rows={4}
+              maxLength={2000}
+              style={{
+                width: '100%',
+                background: 'rgba(0,0,0,0.25)',
+                border: '1px solid rgba(168,199,250,0.16)',
+                borderRadius: 12,
+                padding: '12px 14px',
+                color: '#e7ebf5',
+                fontSize: 14,
+                fontFamily: 'inherit',
+                outline: 'none',
+                resize: 'vertical',
+                boxSizing: 'border-box',
+              }}
+            />
+            {error && <p style={{ margin: 0, fontSize: 12.5, color: '#fca5a5' }}>{error}</p>}
+            <button
+              type="submit"
+              disabled={status === 'sending'}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: 10,
+                background: 'linear-gradient(135deg,#5b76ff,#7c9fff)',
+                color: '#fff',
+                fontWeight: 700,
+                fontSize: 14,
+                border: 'none',
+                cursor: status === 'sending' ? 'wait' : 'pointer',
+                fontFamily: 'inherit',
+                opacity: status === 'sending' ? 0.7 : 1,
+              }}
+            >
+              {status === 'sending' ? 'Submitting…' : 'Submit appeal'}
+            </button>
+          </form>
+        )}
+
+        <button
+          onClick={onBackToHome}
+          style={{
+            width: '100%',
+            marginTop: 14,
+            padding: '10px 16px',
+            borderRadius: 10,
+            background: 'transparent',
+            color: '#8e9dc2',
+            fontWeight: 600,
+            fontSize: 13,
+            border: '1px solid rgba(168,199,250,0.14)',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
+          Back to home
+        </button>
+      </div>
+    </main>
+  );
+}
+
 // ─── app ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -2346,6 +2514,7 @@ export default function App() {
   const [saved, setSaved] = useState([]);
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [subscription, setSubscription] = useState(DEFAULT_SUBSCRIPTION);
+  const [bannedInfo, setBannedInfo] = useState(null); // { email } when the account is banned
   const persistSignatureRef = useRef('');
   const handledPaymentRef = useRef('');
   const restoreAttemptRef = useRef('');
@@ -2507,10 +2676,23 @@ export default function App() {
       if (error) setAuthError(error.message);
 
       const nextSession = data.session || null;
-      setSession(nextSession);
       if (nextSession?.user) {
+        // An account can be banned while a session is still live — block it here
+        // so a reload doesn't drop a banned user straight back into the app.
+        const banned = await fetchBanStatus({
+          accessToken: nextSession.access_token,
+          email: nextSession.user.email,
+        });
+        if (!mounted) return;
+        if (banned) {
+          await forceBannedState(nextSession.user.email || '');
+          setAuthReady(true);
+          return;
+        }
+        setSession(nextSession);
         applyUserState(nextSession.user);
       } else {
+        setSession(null);
         resetAppState();
       }
       setAuthReady(true);
@@ -2795,7 +2977,21 @@ export default function App() {
           password: payload.password,
         });
 
-        if (error) throw error;
+        if (error) {
+          // A banned account can't sign in — tell them clearly and offer an appeal
+          // instead of showing a generic "invalid credentials" message.
+          if (await fetchBanStatus({ email: payload.email })) {
+            await forceBannedState(payload.email);
+            return;
+          }
+          throw error;
+        }
+
+        // Defensive: enforce the ban even if a session was somehow issued.
+        if (await fetchBanStatus({ accessToken: data.session?.access_token, email: payload.email })) {
+          await forceBannedState(payload.email);
+          return;
+        }
 
         setSession(data.session);
         applyUserState(data.user);
@@ -2810,14 +3006,58 @@ export default function App() {
     }
   }
 
+  // Returns true if the given account is banned. Token path is authoritative;
+  // email path is the fallback for a failed sign-in (no session yet).
+  async function fetchBanStatus({ accessToken, email }) {
+    try {
+      const res = await fetch('/api/account/ban-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken: accessToken || '', email: email || '' }),
+      });
+      const data = await res.json();
+      return Boolean(data?.banned);
+    } catch {
+      return false;
+    }
+  }
+
+  // Sign the user out locally and show the "you're banned" screen.
+  async function forceBannedState(email) {
+    try {
+      await getSupabaseBrowserClient().auth.signOut();
+    } catch {}
+    purgeSupabaseAuthStorage();
+    resetAppState();
+    setSession(null);
+    setShowSignIn(false);
+    setBannedInfo({ email });
+  }
+
+  async function submitAppeal(message) {
+    const res = await fetch('/api/account/appeal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: bannedInfo?.email || '', message }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Could not submit your appeal.');
+    return data;
+  }
+
   async function handleSignOut() {
     const startedAt = beginBusy('Signing out...');
     try {
       const supabase = getSupabaseBrowserClient();
-      await supabase.auth.signOut({ scope: 'local' });
+      // Global scope revokes the refresh token server-side, not just locally.
+      await supabase.auth.signOut();
     } catch (error) {
       setAuthError(error.message || 'Could not sign out.');
     } finally {
+      // Belt-and-suspenders: if signOut didn't clear storage (e.g. it errored),
+      // purge the Supabase auth token so a reload can't silently re-hydrate the
+      // session and "sign back in" automatically.
+      purgeSupabaseAuthStorage();
       resetAppState();
       setSession(null);
       setShowSignIn(false);
@@ -2927,6 +3167,24 @@ export default function App() {
       setPaymentMessage(error.message || 'Could not start checkout.');
       await endBusy(startedAt);
     }
+  }
+
+  // A banned account takes over the whole app — they can read the notice and
+  // file an appeal, nothing else.
+  if (bannedInfo) {
+    return (
+      <>
+        <TopProgress active={pulseActive || Boolean(busyMessage)} />
+        <BannedScreen
+          email={bannedInfo.email}
+          onSubmitAppeal={submitAppeal}
+          onBackToHome={() => {
+            setBannedInfo(null);
+            setView('landing');
+          }}
+        />
+      </>
+    );
   }
 
   if (view === 'landing') {

@@ -263,3 +263,73 @@ export async function setConfig(key, value, updatedBy) {
   if (error) throw error;
   return data.value;
 }
+
+// ── End-user lookup by email / token (for ban-status + appeals) ─────────────
+
+// Scans all accounts and returns the normalized row for an email, or null. Fine
+// at this app's scale; revisit with a DB function if the user base grows large.
+export async function findUserByEmail(email) {
+  const target = String(email || '').trim().toLowerCase();
+  if (!target) return null;
+  const users = await listAllUsers();
+  return users.find((u) => u.email.toLowerCase() === target) || null;
+}
+
+// Validates an end user's access token and returns their normalized row (with
+// fresh banned status), or null if the token is invalid.
+export async function getUserFromToken(accessToken) {
+  if (!accessToken) return null;
+  const supabase = getServiceClient();
+  const { data, error } = await supabase.auth.getUser(accessToken);
+  if (error || !data?.user) return null;
+  const raw = await getRawUser(data.user.id);
+  return raw ? normalizeUserRow(raw) : null;
+}
+
+// ── Ban appeals ─────────────────────────────────────────────────────────────
+
+export async function createAppeal({ userId, email, message }) {
+  const supabase = getServiceClient();
+  const { data, error } = await supabase
+    .from('ban_appeals')
+    .insert({ user_id: userId || null, email, message })
+    .select('id, email, status, created_at')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function listAppeals({ status } = {}) {
+  const supabase = getServiceClient();
+  let query = supabase.from('ban_appeals').select('*').order('created_at', { ascending: false });
+  if (status) query = query.eq('status', status);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getAppealById(id) {
+  const supabase = getServiceClient();
+  const { data, error } = await supabase.from('ban_appeals').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data || null;
+}
+
+export async function updateAppeal(id, patch) {
+  const supabase = getServiceClient();
+  const { data, error } = await supabase.from('ban_appeals').update(patch).eq('id', id).select('*').single();
+  if (error) throw error;
+  return data;
+}
+
+// Number of still-open appeals for an email — used to avoid duplicate submissions.
+export async function countOpenAppealsForEmail(email) {
+  const supabase = getServiceClient();
+  const { count, error } = await supabase
+    .from('ban_appeals')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'open')
+    .ilike('email', email);
+  if (error) throw error;
+  return count || 0;
+}

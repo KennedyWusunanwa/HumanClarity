@@ -92,6 +92,27 @@ create table if not exists public.app_config (
 alter table public.app_config enable row level security;
 -- Intentionally no policies → only the service role can access this table.
 
+-- ── Ban appeals ────────────────────────────────────────────────────────────
+-- Submitted by banned end users from the "you're banned" screen; reviewed in the
+-- admin dashboard's Appeals tab.
+create table if not exists public.ban_appeals (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid,
+  email       text not null,
+  message     text not null,
+  status      text not null default 'open'
+              check (status in ('open', 'resolved', 'dismissed')),
+  created_at  timestamptz not null default now(),
+  resolved_at timestamptz,
+  resolved_by text
+);
+
+create index if not exists ban_appeals_status_idx
+  on public.ban_appeals (status, created_at desc);
+
+alter table public.ban_appeals enable row level security;
+-- Intentionally no policies → only the service role can access this table.
+
 -- Seed the pricing row with the current hard-coded defaults so nothing breaks
 -- before an admin edits it. (Pro = 50 GHS / month, free tier = 500 words/day.)
 insert into public.app_config (key, value)

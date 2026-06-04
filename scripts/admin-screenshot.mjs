@@ -26,6 +26,13 @@ const ADMINS = {
     { id: 'a3', username: 'viewer', role: 'guest', disabled: true, created_at: '2026-04-01', created_by: 'owner', last_login_at: null },
   ],
 };
+const APPEALS = {
+  appeals: [
+    { id: 'p1', email: 'ss@gsg.com', message: 'I think this was a mistake — I only signed up to try the tool. Please reinstate my account.', status: 'open', created_at: '2026-06-04T01:20:00Z', resolved_at: null, resolved_by: null },
+    { id: 'p2', email: 'grace.hopper@outlook.com', message: 'Sorry for the spam, it won’t happen again.', status: 'resolved', created_at: '2026-05-30T10:00:00Z', resolved_at: '2026-05-31T09:00:00Z', resolved_by: 'owner' },
+  ],
+  counts: { open: 1, total: 2 },
+};
 
 async function mock(page) {
   await page.route('**/api/admin/**', (route) => {
@@ -34,6 +41,7 @@ async function mock(page) {
     if (url.includes('/api/admin/session')) body = SESSION;
     else if (url.includes('/api/admin/users')) body = USERS;
     else if (url.includes('/api/admin/pricing')) body = PRICING;
+    else if (url.includes('/api/admin/appeals')) body = APPEALS;
     else if (url.includes('/api/admin/admins')) body = ADMINS;
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
   });
@@ -47,6 +55,7 @@ const tabs = [
   { key: 'Users', label: 'Users' },
   { key: 'Pricing', label: 'Pricing' },
   { key: 'Admins', label: 'Admins' },
+  { key: 'Appeals', label: 'Appeals' },
 ];
 
 (async () => {
@@ -58,7 +67,7 @@ const tabs = [
     await page.goto(`${BASE}/admin`, { waitUntil: 'networkidle', timeout: 30000 });
     await page.waitForTimeout(600);
     for (const t of tabs) {
-      const btn = page.getByRole('button', { name: t.label, exact: true }).first();
+      const btn = page.getByRole('button', { name: new RegExp('^' + t.label) }).first();
       if (await btn.isVisible({ timeout: 2000 }).catch(() => false)) {
         await btn.click();
         await page.waitForTimeout(500);

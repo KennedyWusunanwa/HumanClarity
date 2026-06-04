@@ -408,12 +408,27 @@ function AuthCard({ mode, onSignedIn, flash }) {
 // ─── dashboard shell ────────────────────────────────────────────────────────
 function Dashboard({ me, onSignOut, flash, onAuthLost }) {
   const [tab, setTab] = useState('users');
+  const [openAppeals, setOpenAppeals] = useState(0);
   const can = (perm) => Array.isArray(me.permissions) && me.permissions.includes(perm);
+
+  const loadAppealCount = useCallback(async () => {
+    try {
+      const res = await api('/api/admin/appeals');
+      setOpenAppeals(res.counts?.open || 0);
+    } catch {
+      /* non-fatal */
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAppealCount();
+  }, [loadAppealCount]);
 
   const tabs = [
     { key: 'users', label: 'Users' },
     { key: 'pricing', label: 'Pricing' },
     { key: 'admins', label: 'Admins' },
+    { key: 'appeals', label: 'Appeals', badge: openAppeals },
   ];
 
   return (
@@ -437,6 +452,11 @@ function Dashboard({ me, onSignOut, flash, onAuthLost }) {
         {tabs.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)} className={`hc-tab ${tab === t.key ? 'hc-tab-active' : ''}`}>
             {t.label}
+            {t.badge > 0 && (
+              <span style={{ marginLeft: 7, fontSize: 11, fontWeight: 800, color: '#fff', background: T.red, borderRadius: 999, padding: '1px 7px' }}>
+                {t.badge}
+              </span>
+            )}
           </button>
         ))}
       </nav>
@@ -445,6 +465,7 @@ function Dashboard({ me, onSignOut, flash, onAuthLost }) {
         {tab === 'users' && <UsersTab can={can} flash={flash} onAuthLost={onAuthLost} />}
         {tab === 'pricing' && <PricingTab can={can} flash={flash} onAuthLost={onAuthLost} />}
         {tab === 'admins' && <AdminsTab me={me} can={can} flash={flash} onAuthLost={onAuthLost} />}
+        {tab === 'appeals' && <AppealsTab can={can} flash={flash} onAuthLost={onAuthLost} onChange={loadAppealCount} />}
       </main>
     </div>
   );
@@ -1011,6 +1032,113 @@ function RoleLegend() {
           <p style={{ margin: '7px 0 0', fontSize: 11.5, color: T.t3, lineHeight: 1.5 }}>{ROLE_DESC[r]}</p>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ─── appeals tab ────────────────────────────────────────────────────────────
+function AppealStatusBadge({ status }) {
+  if (status === 'resolved') return <Badge color="#86efac" bg="rgba(74,222,128,0.1)" border="rgba(74,222,128,0.3)">Resolved</Badge>;
+  if (status === 'dismissed') return <Badge color={T.t2}>Dismissed</Badge>;
+  return <Badge color="#fde68a" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.3)">Open</Badge>;
+}
+
+function AppealsTab({ can, flash, onAuthLost, onChange }) {
+  const [appeals, setAppeals] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('open'); // open | all
+  const [busyId, setBusyId] = useState(null);
+  const canManage = can(PERM.MANAGE_USERS);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api('/api/admin/appeals');
+      setAppeals(res.appeals || []);
+    } catch (err) {
+      handleErr(err, flash, onAuthLost);
+    } finally {
+      setLoading(false);
+    }
+  }, [flash, onAuthLost]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function act(appeal, unban) {
+    setBusyId(appeal.id);
+    try {
+      await api(`/api/admin/appeals/${appeal.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: unban ? 'resolved' : 'dismissed', unban }),
+      });
+      flash(unban ? `Unbanned ${appeal.email} and resolved the appeal.` : `Dismissed appeal from ${appeal.email}.`);
+      await load();
+      onChange?.();
+    } catch (err) {
+      handleErr(err, flash, onAuthLost);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const all = appeals || [];
+  const openCount = all.filter((a) => a.status === 'open').length;
+  const shown = all.filter((a) => (filter === 'all' ? true : a.status === 'open'));
+
+  return (
+    <div style={{ maxWidth: 760 }}>
+      <SectionHead title="Ban appeals" subtitle="Requests from banned users asking to be reinstated." />
+
+      <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+        <Stat label="Open appeals" value={openCount} color={openCount ? T.amber : T.t1} />
+        <Stat label="Total" value={all.length} />
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        {[['open', 'Open'], ['all', 'All']].map(([key, label]) => (
+          <Btn key={key} size="sm" variant={filter === key ? 'primary' : 'ghost'} onClick={() => setFilter(key)}>{label}</Btn>
+        ))}
+      </div>
+
+      {!canManage && (
+        <p style={{ fontSize: 12, color: T.t3, margin: '0 0 12px' }}>View-only. Unban/dismiss requires an Admin role.</p>
+      )}
+
+      {loading ? (
+        <SkeletonRows />
+      ) : shown.length === 0 ? (
+        <Empty text={filter === 'open' ? 'No open appeals.' : 'No appeals yet.'} />
+      ) : (
+        <div className="hc-cards">
+          {shown.map((a) => (
+            <div key={a.id} className="hc-card" style={{ opacity: busyId === a.id ? 0.5 : 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, color: T.t1, wordBreak: 'break-word' }}>{a.email}</div>
+                  <div style={{ fontSize: 12, color: T.t3, marginTop: 3 }}>{fmtDateTime(a.created_at)}</div>
+                </div>
+                <AppealStatusBadge status={a.status} />
+              </div>
+              <p style={{ margin: '10px 0 0', fontSize: 13.5, color: T.t2, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{a.message}</p>
+              {a.status !== 'open' && (
+                <p style={{ margin: '8px 0 0', fontSize: 11.5, color: T.t3 }}>
+                  {a.status === 'resolved' ? 'Resolved' : 'Dismissed'}
+                  {a.resolved_by ? ` by ${a.resolved_by}` : ''}
+                  {a.resolved_at ? ` · ${fmtDateTime(a.resolved_at)}` : ''}
+                </p>
+              )}
+              {canManage && a.status === 'open' && (
+                <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                  <Btn size="sm" variant="success" disabled={busyId === a.id} onClick={() => act(a, true)}>Unban &amp; resolve</Btn>
+                  <Btn size="sm" variant="ghost" disabled={busyId === a.id} onClick={() => act(a, false)}>Dismiss</Btn>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -17,9 +17,14 @@ It is a separate area from the main app, with its own username/password logins
 In the **Supabase dashboard → SQL Editor → New query**, paste the contents of
 [`supabase/admin-schema.sql`](supabase/admin-schema.sql) and click **Run**.
 
-This creates two tables (`admin_users`, `app_config`) with Row-Level Security on
-and **no public policies**, so only the server (service-role key) can read them.
-It also seeds the current pricing (50 GHS/month, 500 free words/day).
+This creates the tables (`admin_users`, `app_config`, `ban_appeals`) with
+Row-Level Security on and **no public policies**, so only the server
+(service-role key) can read them. It also seeds the current pricing (50 GHS/month,
+500 free words/day).
+
+> The script is **idempotent** (`create … if not exists`) — safe to re-run any
+> time. If you set up before the **Appeals** feature was added, just run it again
+> to add the `ban_appeals` table.
 
 ### 2. Add two environment variables
 
@@ -81,6 +86,27 @@ UI. A role change or a disabled account takes effect on the user's next request.
 - **Admins** — create dashboard logins, assign roles, reset passwords, enable/
   disable, or delete. You can't delete/disable the **last** active admin or your
   own account (prevents lockout).
+- **Appeals** — banned users can file an appeal from the "you're banned" screen;
+  they show here (with an open-count badge on the tab). Admins can **Unban &
+  resolve** or **Dismiss** each one.
+
+## Banning & email verification
+
+- **Banning works immediately now.** A banned user is signed out and shown a
+  "your account is banned" screen (with an appeal form) — both when they reload
+  and when they try to sign in. Unban them from **Users** or by resolving their
+  appeal.
+- **Skipping email confirmation:** turn off **Supabase → Authentication →
+  Sign In / Providers → Email → "Confirm email"**. New users can then sign in
+  immediately without clicking a link. (If you keep it on, you can still confirm
+  individual users with the **Confirm email** button in the Users tab.)
+- **Limiting to real emails (free):** signup already validates format, blocks
+  disposable/temp-mail domains, and requires the domain to have a real mail
+  server (MX lookup) — all free, in `src/lib/email-validation.js`. Note this
+  proves the *domain* can receive mail, **not** that a specific mailbox exists.
+  The only free way to prove a mailbox is real is the confirmation email; the
+  only other option is a paid verification API. Abusers who slip through are
+  handled after the fact by **Ban**.
 
 ---
 
