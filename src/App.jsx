@@ -14,9 +14,12 @@ const ACTION_LABEL = {
   fix_grammar: 'Grammar Fixed',
 };
 
-const FREE_WORD_LIMIT = 500;
-const PRO_PRICE_GHS = 50;
-const PRO_PRICE_USD_ESTIMATE = 4.44;
+// These are overwritten at runtime from /api/pricing (admin-editable) — see the
+// pricing-fetch effect in App(). They start at the historical defaults so the UI
+// renders correctly before the fetch resolves and if the request fails.
+let FREE_WORD_LIMIT = 500;
+let PRO_PRICE_GHS = 50;
+let PRO_PRICE_USD_ESTIMATE = 4.44;
 const DEFAULT_PROFILE = { name: '', email: '' };
 const DEFAULT_SUBSCRIPTION = {
   tier: 'free',
@@ -2451,6 +2454,30 @@ export default function App() {
     document.documentElement.classList.add('dark');
   }, []);
 
+  // Pull the live, admin-editable pricing/limits and apply them. The module-level
+  // PRO_PRICE_GHS / FREE_WORD_LIMIT are read during render, so updating them and
+  // then bumping state forces every price/limit display to refresh.
+  const [, setPricingTick] = useState(0);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/pricing')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p) => {
+        if (!active || !p) return;
+        const ghs = Number(p.proPriceGhs);
+        const words = Number(p.freeWordLimit);
+        const usd = Number(p.proPriceUsdEstimate);
+        if (Number.isFinite(ghs) && ghs >= 0) PRO_PRICE_GHS = ghs;
+        if (Number.isFinite(words) && words >= 0) FREE_WORD_LIMIT = Math.round(words);
+        if (Number.isFinite(usd) && usd >= 0) PRO_PRICE_USD_ESTIMATE = usd;
+        setPricingTick((n) => n + 1);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
   useEffect(() => {
     return () => {
       if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current);
@@ -2558,6 +2585,10 @@ export default function App() {
   useEffect(() => {
     if (!authReady || !session?.user || subscription.tier === 'pro') return;
 
+    // If an admin explicitly revoked Premium for this account, don't let the
+    // Paystack auto-restore silently re-enable it.
+    if (session.user.user_metadata?.admin_override === 'revoked') return;
+
     // Use the verified account email — never the editable profile email — so a user
     // can't restore Premium by typing in an address that paid on another account.
     const email = (session.user.email || profile.email || '').trim().toLowerCase();
@@ -2634,9 +2665,10 @@ export default function App() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Could not verify payment.');
         if (data.status !== 'success') throw new Error('Payment was not completed.');
-        // Confirm the transaction actually paid for Pro (50 GHS = 5000 pesewas) so a
-        // smaller/unrelated successful charge can't unlock Premium.
-        if (Number(data.amount) < 5000 || data.currency !== 'GHS') {
+        // The verify route decides this server-side against the live admin-set price
+        // (data.meetsPrice), so a smaller/unrelated charge can't unlock Premium and a
+        // stale client-cached price can't wrongly reject a real payer after a price cut.
+        if (data.meetsPrice === false) {
           throw new Error('This payment did not match the Pro plan amount.');
         }
 

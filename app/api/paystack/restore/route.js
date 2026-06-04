@@ -10,6 +10,13 @@ async function fetchPaystack(url, secretKey) {
   return { res, data };
 }
 
+// Floor (in pesewas) below which a "Pro" charge is treated as a test/trivial
+// payment rather than a real purchase. We deliberately do NOT require the exact
+// current price here: the price is admin-editable, so a genuine past payer must
+// still be restored even after the price changes. The plan/product metadata is
+// set server-side by our initialize route, so it can't be forged by end users.
+const RESTORE_MIN_PESEWAS = 100; // 1.00 GHS
+
 function findMatchingUpgrade(transactions) {
   if (!Array.isArray(transactions)) return null;
 
@@ -20,8 +27,7 @@ function findMatchingUpgrade(transactions) {
 
     return (
       transaction?.status === 'success' &&
-      transaction?.currency === 'GHS' &&
-      Number(transaction?.amount || 0) === 5000 &&
+      Number(transaction?.amount || 0) >= RESTORE_MIN_PESEWAS &&
       (plan === 'pro' || product.includes('humanclarity pro monthly'))
     );
   }) || null;

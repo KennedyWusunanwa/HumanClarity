@@ -1,3 +1,5 @@
+import { getPricing, DEFAULT_PRICING } from '@/lib/admin/pricing';
+
 export async function POST(request) {
   try {
     const secretKey = process.env.PAYSTACK_SECRET_KEY;
@@ -15,6 +17,18 @@ export async function POST(request) {
       return Response.json({ error: 'Email is required.' }, { status: 400 });
     }
 
+    // Price is admin-editable via the dashboard. If the admin backend isn't
+    // configured yet, fall back to the historical default so checkout never breaks.
+    let pricing = DEFAULT_PRICING;
+    try {
+      pricing = await getPricing();
+    } catch {
+      pricing = DEFAULT_PRICING;
+    }
+    const amountPesewas = Math.round(Number(pricing.proPriceGhs) * 100);
+    const amount = String(Number.isFinite(amountPesewas) && amountPesewas > 0 ? amountPesewas : 5000);
+    const currency = pricing.currency || 'GHS';
+
     const reference = `hc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
     const res = await fetch('https://api.paystack.co/transaction/initialize', {
@@ -25,8 +39,8 @@ export async function POST(request) {
       },
       body: JSON.stringify({
         email: email.trim(),
-        amount: '5000',
-        currency: 'GHS',
+        amount,
+        currency,
         reference,
         callback_url: callbackUrl,
         metadata: {

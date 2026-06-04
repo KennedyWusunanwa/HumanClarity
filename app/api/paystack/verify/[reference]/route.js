@@ -1,3 +1,5 @@
+import { getPricing, DEFAULT_PRICING } from '@/lib/admin/pricing';
+
 export async function GET(_request, { params }) {
   try {
     const secretKey = process.env.PAYSTACK_SECRET_KEY;
@@ -34,6 +36,26 @@ export async function GET(_request, { params }) {
       );
     }
 
+    // Decide whether this charge covered the Pro price SERVER-side, using the live
+    // admin-set price (falling back to the default). This avoids trusting a stale
+    // client-cached price, which could wrongly reject a real payer after a price cut.
+    let expectedPesewas = Math.round(Number(DEFAULT_PRICING.proPriceGhs) * 100);
+    let expectedCurrency = DEFAULT_PRICING.currency;
+    try {
+      const pricing = await getPricing();
+      const p = Math.round(Number(pricing.proPriceGhs) * 100);
+      if (Number.isFinite(p) && p > 0) expectedPesewas = p;
+      if (pricing.currency) expectedCurrency = pricing.currency;
+    } catch {
+      // keep defaults
+    }
+
+    const paidAmount = Number(data.data.amount);
+    const meetsPrice =
+      Number.isFinite(paidAmount) &&
+      paidAmount >= expectedPesewas &&
+      data.data.currency === expectedCurrency;
+
     return Response.json({
       status: data.data.status,
       amount: data.data.amount,
@@ -41,6 +63,8 @@ export async function GET(_request, { params }) {
       paid_at: data.data.paid_at,
       reference: data.data.reference,
       customer_email: data.data.customer?.email || '',
+      meetsPrice,
+      expectedAmount: expectedPesewas,
     });
   } catch (error) {
     return Response.json(

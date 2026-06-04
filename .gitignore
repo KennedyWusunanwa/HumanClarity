@@ -15,6 +15,9 @@ mobile-header-final.png
 
 tsconfig.tsbuildinfo
 
+# Local screenshot/test artifacts (binary, regenerated on demand)
+screenshots/
+
 .DS_Store
 Thumbs.db
 
