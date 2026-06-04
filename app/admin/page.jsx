@@ -516,6 +516,9 @@ function UsersTab({ can, flash, onAuthLost }) {
       } else if (kind === 'ban') {
         await api(`/api/admin/users/${user.id}/ban`, { method: 'POST', body: JSON.stringify({ banned: !user.isBanned }) });
         flash(`${user.email} has been ${!user.isBanned ? 'banned' : 'unbanned'}.`);
+      } else if (kind === 'confirm') {
+        await api(`/api/admin/users/${user.id}/confirm-email`, { method: 'POST', body: JSON.stringify({}) });
+        flash(`${user.email}'s email is now confirmed.`);
       }
       await load();
     } catch (err) {
@@ -671,6 +674,11 @@ function UserActions({ u, busy, onAction }) {
       <Btn size="sm" variant={u.isPremium ? 'default' : 'success'} disabled={busy} onClick={() => onAction('premium')}>
         {u.isPremium ? 'Remove Premium' : 'Make Premium'}
       </Btn>
+      {!u.emailConfirmed && (
+        <Btn size="sm" variant="default" disabled={busy} onClick={() => onAction('confirm')}>
+          Confirm email
+        </Btn>
+      )}
       <Btn size="sm" variant={u.isBanned ? 'default' : 'danger'} disabled={busy} onClick={() => onAction('ban')}>
         {u.isBanned ? 'Unban' : 'Ban'}
       </Btn>

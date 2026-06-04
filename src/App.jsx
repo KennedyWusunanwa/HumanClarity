@@ -1541,7 +1541,7 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
               </span>
             ) : (
               <span
-                title="Free plan: 500 words per day. Resets daily."
+                title={`Free plan: ${FREE_WORD_LIMIT} words per day. Resets daily.`}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 13px', borderRadius: 999, border: `1px solid ${remaining <= 0 ? 'rgba(248,113,113,0.4)' : 'rgba(126,151,255,0.32)'}`, background: remaining <= 0 ? 'rgba(248,113,113,0.1)' : 'rgba(126,151,255,0.1)', color: remaining <= 0 ? '#fca5a5' : '#9ec1ff', fontSize: isPhone ? 12 : 13, fontWeight: 700 }}
               >
                 <Ic d={P.spark} s={14} />
@@ -1679,13 +1679,17 @@ const PAYMENT_METHODS = [
   { label: 'Bank',         bg: 'rgba(255,255,255,0.1)', color: '#e8edff' },
 ];
 
-const PRO_BENEFITS = [
-  'Unlimited words every day — no 500-word daily cap',
-  'Full dashboard & workspace access',
-  'Save unlimited documents with full history',
-  'All tools: Humanize, Summarize, Expand & Fix Grammar',
-  'Priority access to new features',
-];
+// A function (not a const array) so the daily-cap number reflects the live,
+// admin-set FREE_WORD_LIMIT at render time rather than freezing at module load.
+function proBenefits() {
+  return [
+    `Unlimited words every day — no ${FREE_WORD_LIMIT}-word daily cap`,
+    'Full dashboard & workspace access',
+    'Save unlimited documents with full history',
+    'All tools: Humanize, Summarize, Expand & Fix Grammar',
+    'Priority access to new features',
+  ];
+}
 
 function PaymentMethods({ align = 'center' }) {
   return (
@@ -2231,7 +2235,7 @@ function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfil
               <span style={{ fontSize: 20, fontWeight: 800, color: C.t1 }}>{PRO_PRICE_GHS} GHS</span> / month — cancel anytime.
             </p>
             <div style={{ display: 'grid', gap: 9, marginBottom: 16 }}>
-              {PRO_BENEFITS.map(b => (
+              {proBenefits().map(b => (
                 <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, color: '#d8deef' }}>
                   <span style={{ color: '#4ade80', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Ic d={P.check2} s={16} /></span>
                   {b}

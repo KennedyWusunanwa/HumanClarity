@@ -72,7 +72,8 @@ UI. A role change or a disabled account takes effect on the user's next request.
 ## What each tab does
 
 - **Users** — search/filter all accounts; see plan, words used today, status, and
-  join date. Admins can **Make/Remove Premium** and **Ban/Unban** each user.
+  join date. Admins can **Make/Remove Premium**, **Ban/Unban**, and **Confirm
+  email** (manually verify an unconfirmed account so they can sign in).
 - **Pricing** — edit the Premium monthly price and the free daily word limit.
   Saving updates new checkouts (Paystack is charged the new amount) and the
   price shown across the app within ~1 minute. Currency is fixed to your Paystack

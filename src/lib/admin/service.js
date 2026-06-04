@@ -150,6 +150,15 @@ export async function setUserBan(id, banned) {
   return normalizeUserRow(data.user);
 }
 
+// Mark a user's email as confirmed (lets them sign in without clicking the link).
+// email_confirm: true sets email_confirmed_at via the GoTrue admin API.
+export async function confirmUserEmail(id) {
+  const supabase = getServiceClient();
+  const { data, error } = await supabase.auth.admin.updateUserById(id, { email_confirm: true });
+  if (error) throw error;
+  return normalizeUserRow(data.user);
+}
+
 // ── admin_users helpers ────────────────────────────────────────────────────
 
 function publicAdmin(row) {
