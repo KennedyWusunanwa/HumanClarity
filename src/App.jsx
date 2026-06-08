@@ -998,7 +998,7 @@ function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', 
       <footer style={{ padding: '14px clamp(16px, 4vw, 32px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: `1px solid ${isDark ? 'var(--r-168-199-250-0_1)' : 'var(--r-168-199-250-0_15)'}`, background: bodyBg, fontSize: 13, color: text3 }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           Made in Ghana © {new Date().getFullYear()}
-          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--h-c7d3ff)', fontWeight: 600, textDecoration: 'none', textShadow: '0 0 10px var(--r-126-151-255-0_55), 0 0 22px var(--r-124-82-255-0_35)' }}>
+          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--h-c7d3ff)', fontWeight: 600, textDecoration: 'none' }}>
             Kennedy Abubakar
           </a>
         </span>
@@ -1156,7 +1156,7 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
           {!isPhone && <>Made in Ghana © {new Date().getFullYear()}</>}
           {isPhone && <>© {new Date().getFullYear()}</>}
-          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--h-c7d3ff)', fontWeight: 600, textDecoration: 'none', textShadow: '0 0 10px var(--r-126-151-255-0_55), 0 0 22px var(--r-124-82-255-0_35)' }}>
+          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--h-c7d3ff)', fontWeight: 600, textDecoration: 'none' }}>
             Kennedy Abubakar
           </a>
         </span>
