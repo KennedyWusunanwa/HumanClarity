@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { quickEmailCheck, emailErrorMessage } from '@/lib/email-validation';
+import ThemeToggle from '@/components/ThemeToggle';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -94,11 +95,11 @@ function passwordStrength(password) {
   if (/[a-z]/.test(password) && /\d/.test(password)) score += 1;
   if (/[^A-Za-z0-9]/.test(password)) score += 1;
 
-  if (password.length === 0) return { score: 0, label: 'Enter a password', color: '#8e918f' };
-  if (score <= 1) return { score: 1, label: 'Weak', color: '#f87171' };
-  if (score === 2) return { score: 2, label: 'Fair', color: '#fbbf24' };
-  if (score === 3) return { score: 3, label: 'Good', color: '#60a5fa' };
-  return { score: 4, label: 'Strong', color: '#34d399' };
+  if (password.length === 0) return { score: 0, label: 'Enter a password', color: 'var(--h-8e918f)' };
+  if (score <= 1) return { score: 1, label: 'Weak', color: 'var(--h-f87171)' };
+  if (score === 2) return { score: 2, label: 'Fair', color: 'var(--h-fbbf24)' };
+  if (score === 3) return { score: 3, label: 'Good', color: 'var(--h-60a5fa)' };
+  return { score: 4, label: 'Strong', color: 'var(--h-34d399)' };
 }
 // Local-date key (YYYY-MM-DD) used to scope the free quota to a single day.
 function todayKey() {
@@ -332,7 +333,7 @@ function DetectionPreview({ compact = false }) {
   const sz = compact ? 84 : 92;
   const innerSz = compact ? 60 : 66;
   const hl = (text) => (
-    <span style={{ background: 'rgba(52,211,153,0.18)', color: '#6ee7b7', borderRadius: 4, padding: '1px 5px' }}>{text}</span>
+    <span style={{ background: 'var(--r-52-211-153-0_18)', color: 'var(--h-6ee7b7)', borderRadius: 4, padding: '1px 5px' }}>{text}</span>
   );
 
   const lines = [
@@ -346,22 +347,22 @@ function DetectionPreview({ compact = false }) {
       position: 'relative',
       overflow: 'hidden',
       borderRadius: compact ? 18 : 22,
-      border: '1px solid rgba(168,199,250,0.12)',
-      background: 'linear-gradient(155deg, rgba(13,17,32,0.99), rgba(8,10,18,0.99))',
+      border: '1px solid var(--r-168-199-250-0_12)',
+      background: 'linear-gradient(155deg, var(--r-13-17-32-0_99), var(--r-8-10-18-0_99))',
     }}>
-      <div style={{ position: 'absolute', top: -50, left: -30, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,199,250,0.1), transparent 70%)', filter: 'blur(28px)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: -50, left: -30, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, var(--r-168-199-250-0_1), transparent 70%)', filter: 'blur(28px)', pointerEvents: 'none' }} />
 
       <div style={{ position: 'relative', zIndex: 1, padding: compact ? '18px 18px 16px' : '20px 20px 18px' }}>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 5px rgba(34,197,94,0.45)' }} />
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: '#7eb8f7' }}>Deep Scan</span>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--h-22c55e)', boxShadow: '0 0 5px var(--r-34-197-94-0_45)' }} />
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'var(--h-7eb8f7)' }}>Deep Scan</span>
           </div>
           <div style={{
             padding: '3px 9px', borderRadius: 999,
-            background: 'rgba(52,211,153,0.09)', border: '1px solid rgba(52,211,153,0.2)',
-            color: '#4ade80', fontSize: 10, fontWeight: 700,
+            background: 'var(--r-52-211-153-0_09)', border: '1px solid var(--r-52-211-153-0_2)',
+            color: 'var(--h-4ade80)', fontSize: 10, fontWeight: 700,
             opacity: progress >= 88 ? 1 : 0,
             transition: 'opacity 0.5s ease',
           }}>
@@ -370,9 +371,9 @@ function DetectionPreview({ compact = false }) {
         </div>
 
         <div style={{
-          borderRadius: 12, border: '1px solid rgba(168,199,250,0.08)',
-          background: 'rgba(255,255,255,0.02)', padding: compact ? 12 : 14, marginBottom: 16,
-          fontSize: compact ? 12.5 : 13, lineHeight: 1.8, color: '#b8c8e0',
+          borderRadius: 12, border: '1px solid var(--r-168-199-250-0_08)',
+          background: 'var(--r-255-255-255-0_02)', padding: compact ? 12 : 14, marginBottom: 16,
+          fontSize: compact ? 12.5 : 13, lineHeight: 1.8, color: 'var(--h-b8c8e0)',
         }}>
           {lines.map((line, i) => (
             <span key={i} style={{
@@ -391,13 +392,13 @@ function DetectionPreview({ compact = false }) {
           <div style={{
             width: sz, height: sz, borderRadius: '50%', margin: '0 auto',
             display: 'grid', placeItems: 'center',
-            background: `conic-gradient(#22c55e 0deg ${deg}deg, rgba(255,255,255,0.05) ${deg}deg 360deg)`,
+            background: `conic-gradient(var(--h-22c55e) 0deg ${deg}deg, var(--r-255-255-255-0_05) ${deg}deg 360deg)`,
           }}>
             <div style={{
               width: innerSz, height: innerSz, borderRadius: '50%',
-              background: 'rgba(9,11,19,0.98)',
+              background: 'var(--r-9-11-19-0_98)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#4ade80', fontWeight: 800,
+              color: 'var(--h-4ade80)', fontWeight: 800,
               fontSize: compact ? 18 : 20,
               fontFamily: '"Roboto", Arial, sans-serif',
               letterSpacing: '-0.02em',
@@ -407,17 +408,17 @@ function DetectionPreview({ compact = false }) {
           </div>
 
           <div>
-            <p style={{ margin: '0 0 4px', color: '#4ade80', fontSize: compact ? 20 : 24, fontWeight: 800, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>
+            <p style={{ margin: '0 0 4px', color: 'var(--h-4ade80)', fontSize: compact ? 20 : 24, fontWeight: 800, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>
               {progress}% Human
             </p>
-            <p style={{ margin: '0 0 10px', color: '#6b7a94', fontSize: compact ? 11.5 : 12.5, lineHeight: 1.55 }}>
+            <p style={{ margin: '0 0 10px', color: 'var(--h-6b7a94)', fontSize: compact ? 11.5 : 12.5, lineHeight: 1.55 }}>
               Natural phrasing preserved. Meaning intact.
             </p>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 5,
               padding: '4px 9px', borderRadius: 999,
-              background: 'rgba(168,199,250,0.06)', border: '1px solid rgba(168,199,250,0.14)',
-              color: '#7eb8f7', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+              background: 'var(--r-168-199-250-0_06)', border: '1px solid var(--r-168-199-250-0_14)',
+              color: 'var(--h-7eb8f7)', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
               opacity: progress >= 88 ? 1 : 0,
               transition: 'opacity 0.5s ease 0.15s',
             }}>
@@ -441,8 +442,8 @@ function TopProgress({ active = false }) {
         style={{
           width: '38%',
           height: '100%',
-          background: 'linear-gradient(90deg, rgba(168,199,250,0), rgba(168,199,250,0.95), rgba(211,227,253,0.95), rgba(168,199,250,0))',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.28)',
+          background: 'linear-gradient(90deg, var(--r-168-199-250-0), var(--r-168-199-250-0_95), var(--r-211-227-253-0_95), var(--r-168-199-250-0))',
+          boxShadow: '0 1px 4px var(--r-0-0-0-0_28)',
         }}
       />
     </div>
@@ -476,15 +477,15 @@ function HumanizerOutputLoader({ isPhone = false }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', minHeight: 0, gap: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#cdd9ff' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--h-cdd9ff)' }}>
         <span
           className="spin-soft"
           style={{
             width: 22,
             height: 22,
             borderRadius: '50%',
-            border: '2px solid rgba(126,151,255,0.25)',
-            borderTopColor: '#9ec1ff',
+            border: '2px solid var(--r-126-151-255-0_25)',
+            borderTopColor: 'var(--h-9ec1ff)',
             flexShrink: 0,
           }}
         />
@@ -522,7 +523,7 @@ function LoadingOverlay({ open = false, message = 'Loading...' }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'rgba(4,7,18,0.48)',
+        background: 'var(--r-4-7-18-0_48)',
         backdropFilter: 'blur(10px)',
       }}
     >
@@ -535,10 +536,10 @@ function LoadingOverlay({ open = false, message = 'Loading...' }) {
           gap: 12,
           padding: '16px 18px',
           borderRadius: 18,
-          background: 'rgba(10,14,34,0.88)',
-          border: '1px solid rgba(168,199,250,0.24)',
-          color: '#e3e3e3',
-          boxShadow: '0 12px 28px rgba(0,0,0,0.32)',
+          background: 'var(--r-10-14-34-0_88)',
+          border: '1px solid var(--r-168-199-250-0_24)',
+          color: 'var(--h-e3e3e3)',
+          boxShadow: '0 12px 28px var(--r-0-0-0-0_32)',
         }}
       >
         <span
@@ -547,8 +548,8 @@ function LoadingOverlay({ open = false, message = 'Loading...' }) {
             width: 18,
             height: 18,
             borderRadius: '50%',
-            border: '2px solid rgba(168,199,250,0.18)',
-            borderTopColor: '#d3e3fd',
+            border: '2px solid var(--r-168-199-250-0_18)',
+            borderTopColor: 'var(--h-d3e3fd)',
             flexShrink: 0,
           }}
         />
@@ -682,16 +683,16 @@ function SignInModal({
 
   const inp = {
     width: '100%', padding: '13px 14px', borderRadius: 12,
-    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(168,199,250,0.2)',
-    color: '#e3e3e3', fontSize: 14, outline: 'none', boxSizing: 'border-box',
+    background: 'var(--fld-bg)', border: '1px solid var(--r-168-199-250-0_2)',
+    color: 'var(--h-e3e3e3)', fontSize: 14, outline: 'none', boxSizing: 'border-box',
     transition: 'border-color 0.15s, box-shadow 0.15s',
     fontFamily: 'inherit',
   };
   const eyeBtn = {
     position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(168,199,250,0.16)',
-    background: 'rgba(255,255,255,0.06)', color: '#d3e3fd', cursor: 'pointer',
+    width: 34, height: 34, borderRadius: 10, border: '1px solid var(--r-168-199-250-0_16)',
+    background: 'var(--r-255-255-255-0_06)', color: 'var(--h-d3e3fd)', cursor: 'pointer',
   };
   const showStrengthMeter = mode === 'signup';
   const fullSpan = mode === 'signup' ? { gridColumn: '1 / -1' } : null;
@@ -707,39 +708,39 @@ function SignInModal({
   return (
     <div
       className="auth-modal-overlay"
-      style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: isTablet ? 'flex-start' : 'center', justifyContent: 'center', background: 'rgba(5,7,16,0.82)', backdropFilter: 'blur(18px)', padding: overlayPadding, overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: isTablet ? 'flex-start' : 'center', justifyContent: 'center', background: 'var(--r-5-7-16-0_82)', backdropFilter: 'blur(18px)', padding: overlayPadding, overflowY: 'auto', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="page-fade surface-fade auth-modal-shell" style={{ width: `min(1120px, calc(100vw - ${overlayPadding * 2}px))`, maxHeight: `calc(100dvh - ${overlayPadding * 2}px)`, height: shellHeight, background: 'linear-gradient(145deg, rgba(15,19,38,0.97) 0%, rgba(10,11,15,0.98) 100%)', border: '1px solid rgba(168,199,250,0.22)', borderRadius: shellRadius, position: 'relative', boxShadow: '0 30px 70px rgba(0,0,0,0.62)', overflow: 'hidden' }}>
-        <div className="auth-modal-glow auth-modal-glow-top" style={{ position: 'absolute', top: -80, left: isPhone ? -40 : '18%', width: isPhone ? 220 : 340, height: isPhone ? 220 : 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,199,250,0.28), transparent 70%)', filter: 'blur(48px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
-        <div className="auth-modal-glow auth-modal-glow-bottom" style={{ position: 'absolute', bottom: -110, right: isPhone ? -60 : '10%', width: isPhone ? 240 : 360, height: isPhone ? 240 : 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,133,244,0.22), transparent 72%)', filter: 'blur(60px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
-        <div style={{ position: 'absolute', inset: 0, borderRadius: shellRadius, backgroundImage: 'radial-gradient(circle, rgba(168,199,250,0.09) 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none', opacity: 0.75 }} />
+      <div className="page-fade surface-fade auth-modal-shell" style={{ width: `min(1120px, calc(100vw - ${overlayPadding * 2}px))`, maxHeight: `calc(100dvh - ${overlayPadding * 2}px)`, height: shellHeight, background: 'linear-gradient(145deg, var(--r-15-19-38-0_97) 0%, var(--r-10-11-15-0_98) 100%)', border: '1px solid var(--r-168-199-250-0_22)', borderRadius: shellRadius, position: 'relative', boxShadow: '0 30px 70px var(--r-0-0-0-0_62)', overflow: 'hidden' }}>
+        <div className="auth-modal-glow auth-modal-glow-top" style={{ position: 'absolute', top: -80, left: isPhone ? -40 : '18%', width: isPhone ? 220 : 340, height: isPhone ? 220 : 340, borderRadius: '50%', background: 'radial-gradient(circle, var(--r-168-199-250-0_28), transparent 70%)', filter: 'blur(48px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
+        <div className="auth-modal-glow auth-modal-glow-bottom" style={{ position: 'absolute', bottom: -110, right: isPhone ? -60 : '10%', width: isPhone ? 240 : 360, height: isPhone ? 240 : 360, borderRadius: '50%', background: 'radial-gradient(circle, var(--r-66-133-244-0_22), transparent 72%)', filter: 'blur(60px)', pointerEvents: 'none', opacity: isPhone ? 0.7 : 1 }} />
+        <div style={{ position: 'absolute', inset: 0, borderRadius: shellRadius, backgroundImage: 'radial-gradient(circle, var(--r-168-199-250-0_09) 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none', opacity: 0.75 }} />
 
-        <button onClick={onClose} className="auth-modal-close" style={{ position: 'absolute', top: isPhone ? 12 : 18, right: isPhone ? 12 : 18, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: '#8e918f', cursor: 'pointer', zIndex: 2 }}>
+        <button onClick={onClose} className="auth-modal-close" style={{ position: 'absolute', top: isPhone ? 12 : 18, right: isPhone ? 12 : 18, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--r-255-255-255-0_05)', border: '1px solid var(--r-255-255-255-0_08)', borderRadius: 10, color: 'var(--h-8e918f)', cursor: 'pointer', zIndex: 2 }}>
           <Ic d={P.close} s={14} />
         </button>
 
         <div className="auth-modal-grid" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: isStacked ? 'minmax(0, 1fr)' : 'minmax(0, 1.05fr) minmax(320px, 0.95fr)', alignItems: 'stretch', minHeight: 0, height: '100%' }}>
-          <div className="auth-modal-main" style={{ padding: mainPadding, borderRight: isStacked ? 'none' : '1px solid rgba(168,199,250,0.12)', minWidth: 0, overflowY: 'auto', minHeight: 0, height: '100%' }}>
+          <div className="auth-modal-main" style={{ padding: mainPadding, borderRight: isStacked ? 'none' : '1px solid var(--r-168-199-250-0_12)', minWidth: 0, overflowY: 'auto', minHeight: 0, height: '100%' }}>
             {!isPhone && (
-              <button onClick={onClose} className="auth-modal-back" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 22, padding: 0, background: 'transparent', border: 'none', color: '#8e918f', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={onClose} className="auth-modal-back" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 22, padding: 0, background: 'transparent', border: 'none', color: 'var(--h-8e918f)', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' }}>
               <Ic d={P.arrow} s={14} /> Back to home
               </button>
             )}
 
             <div className="auth-modal-brand" style={{ display: 'flex', alignItems: 'center', gap: isPhone ? 10 : 12, marginBottom: isPhone ? 12 : 14 }}>
-              <img src="/hc-icon.png" alt="" className="auth-modal-brand-icon" style={{ width: isPhone ? 36 : 42, height: isPhone ? 36 : 42, objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(168,199,250,0.3))' }} />
+              <img src="/hc-icon.png" alt="" className="auth-modal-brand-icon" style={{ width: isPhone ? 36 : 42, height: isPhone ? 36 : 42, objectFit: 'contain', filter: 'drop-shadow(0 0 6px var(--r-168-199-250-0_3))' }} />
               <div>
-                <p style={{ margin: 0, color: '#e3e3e3', fontWeight: 700, fontSize: 16, fontFamily: '"Roboto", Arial, sans-serif' }}>HumanClarity AI</p>
-                <p style={{ margin: '2px 0 0', color: '#a8c7fa', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural writing, fast</p>
+                <p style={{ margin: 0, color: 'var(--h-e3e3e3)', fontWeight: 700, fontSize: 16, fontFamily: '"Roboto", Arial, sans-serif' }}>HumanClarity AI</p>
+                <p style={{ margin: '2px 0 0', color: 'var(--h-a8c7fa)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural writing, fast</p>
               </div>
             </div>
 
             <div className="auth-modal-copy" style={{ marginBottom: isPhone ? 16 : 18 }}>
-              <h2 className="auth-modal-title" style={{ fontSize: titleSize, fontWeight: 700, color: '#e3e3e3', fontFamily: '"Roboto", Arial, sans-serif', margin: '0 0 8px', letterSpacing: 0, lineHeight: isPhone ? 0.98 : 1.02 }}>
+              <h2 className="auth-modal-title" style={{ fontSize: titleSize, fontWeight: 700, color: 'var(--h-e3e3e3)', fontFamily: '"Roboto", Arial, sans-serif', margin: '0 0 8px', letterSpacing: 0, lineHeight: isPhone ? 0.98 : 1.02 }}>
                 {mode === 'signup' ? 'Create your HumanClarity space' : 'Sign in to your account'}
               </h2>
-              <p className="auth-modal-subtitle" style={{ fontSize: subtitleSize, color: '#8e918f', margin: 0, lineHeight: isPhone ? 1.55 : 1.6, maxWidth: 480 }}>
+              <p className="auth-modal-subtitle" style={{ fontSize: subtitleSize, color: 'var(--h-8e918f)', margin: 0, lineHeight: isPhone ? 1.55 : 1.6, maxWidth: 480 }}>
                 {mode === 'signup'
                   ? 'Create an account to save documents, track usage, and unlock upgrades from the dashboard.'
                   : 'Sign in to continue reviewing, saving, and refining your writing.'}
@@ -749,7 +750,7 @@ function SignInModal({
             <form className={`auth-modal-form ${mode === 'signup' ? 'is-signup' : 'is-signin'}`} onSubmit={handleSubmit} style={{ display: 'grid', gap: isPhone ? 12 : 10, gridTemplateColumns: formColumns }}>
               {mode === 'signup' && (
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#8e918f', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--h-8e918f)', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
                     <Ic d={P.user} s={12} /> Full Name
                   </label>
                   <input
@@ -757,15 +758,15 @@ function SignInModal({
                     onChange={e => { setName(e.target.value); setLocalError(''); }}
                     placeholder="Full name"
                     style={inp}
-                    onFocus={e => { e.target.style.borderColor = 'rgba(168,199,250,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(168,199,250,0.12)'; }}
-                    onBlur={e => { e.target.style.borderColor = 'rgba(168,199,250,0.18)'; e.target.style.boxShadow = 'none'; }}
+                    onFocus={e => { e.target.style.borderColor = 'var(--r-168-199-250-0_56)'; e.target.style.boxShadow = '0 0 0 3px var(--r-168-199-250-0_12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'var(--r-168-199-250-0_18)'; e.target.style.boxShadow = 'none'; }}
                     autoFocus
                   />
                 </div>
               )}
 
               <div style={mode === 'signup' ? null : fullSpan}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#8e918f', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--h-8e918f)', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
                   <Ic d={P.mail} s={12} /> Email
                 </label>
                 <input
@@ -774,13 +775,13 @@ function SignInModal({
                   onChange={e => { setEmail(e.target.value); setLocalError(''); }}
                   placeholder="m@example.com"
                   style={inp}
-                  onFocus={e => { e.target.style.borderColor = 'rgba(168,199,250,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(168,199,250,0.12)'; }}
-                  onBlur={e => { e.target.style.borderColor = 'rgba(168,199,250,0.18)'; e.target.style.boxShadow = 'none'; }}
+                  onFocus={e => { e.target.style.borderColor = 'var(--r-168-199-250-0_56)'; e.target.style.boxShadow = '0 0 0 3px var(--r-168-199-250-0_12)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'var(--r-168-199-250-0_18)'; e.target.style.boxShadow = 'none'; }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#8e918f', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--h-8e918f)', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
                   <Ic d={P.shield} s={12} /> Password
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -790,8 +791,8 @@ function SignInModal({
                     onChange={e => { setPassword(e.target.value); setLocalError(''); }}
                     placeholder="At least 6 characters"
                     style={{ ...inp, paddingRight: 52 }}
-                    onFocus={e => { e.target.style.borderColor = 'rgba(168,199,250,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(168,199,250,0.12)'; }}
-                    onBlur={e => { e.target.style.borderColor = 'rgba(168,199,250,0.18)'; e.target.style.boxShadow = 'none'; }}
+                    onFocus={e => { e.target.style.borderColor = 'var(--r-168-199-250-0_56)'; e.target.style.boxShadow = '0 0 0 3px var(--r-168-199-250-0_12)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'var(--r-168-199-250-0_18)'; e.target.style.boxShadow = 'none'; }}
                   />
                   <button type="button" onClick={() => setShowPassword(v => !v)} style={eyeBtn}>
                     <Ic d={showPassword ? P.eyeOff : P.eye} s={15} />
@@ -806,7 +807,7 @@ function SignInModal({
                           style={{
                             height: 6,
                             borderRadius: 999,
-                            background: index < strength.score ? strength.color : 'rgba(255,255,255,0.08)',
+                            background: index < strength.score ? strength.color : 'var(--r-255-255-255-0_08)',
                             boxShadow: index < strength.score ? `0 0 12px ${strength.color}40` : 'none',
                           }}
                         />
@@ -821,7 +822,7 @@ function SignInModal({
 
               {mode === 'signup' && (
                 <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#8e918f', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: 'var(--h-8e918f)', marginBottom: 7, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
                     <Ic d={P.check2} s={12} /> Confirm Password
                   </label>
                   <div style={{ position: 'relative' }}>
@@ -831,8 +832,8 @@ function SignInModal({
                       onChange={e => { setConfirmPassword(e.target.value); setLocalError(''); }}
                       placeholder="Repeat your password"
                       style={{ ...inp, paddingRight: 52 }}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(168,199,250,0.56)'; e.target.style.boxShadow = '0 0 0 3px rgba(168,199,250,0.12)'; }}
-                      onBlur={e => { e.target.style.borderColor = 'rgba(168,199,250,0.18)'; e.target.style.boxShadow = 'none'; }}
+                      onFocus={e => { e.target.style.borderColor = 'var(--r-168-199-250-0_56)'; e.target.style.boxShadow = '0 0 0 3px var(--r-168-199-250-0_12)'; }}
+                      onBlur={e => { e.target.style.borderColor = 'var(--r-168-199-250-0_18)'; e.target.style.boxShadow = 'none'; }}
                     />
                     <button type="button" onClick={() => setShowConfirmPassword(v => !v)} style={eyeBtn}>
                       <Ic d={showConfirmPassword ? P.eyeOff : P.eye} s={15} />
@@ -841,33 +842,33 @@ function SignInModal({
                 </div>
               )}
 
-              {(localError || error) && <p style={{ ...fullSpan, color: '#f87171', fontSize: 13, margin: '0' }}>{localError || error}</p>}
-              {message && <p style={{ ...fullSpan, color: '#34d399', fontSize: 13, margin: '0' }}>{message}</p>}
+              {(localError || error) && <p style={{ ...fullSpan, color: 'var(--h-f87171)', fontSize: 13, margin: '0' }}>{localError || error}</p>}
+              {message && <p style={{ ...fullSpan, color: 'var(--h-34d399)', fontSize: 13, margin: '0' }}>{message}</p>}
               {mode === 'signin' && (
                 <button
                   type="button"
                   onClick={handleResendConfirmation}
                   disabled={resendLoading}
-                  style={{ ...fullSpan, padding: 0, background: 'transparent', border: 'none', color: '#d3e3fd', textAlign: 'left', fontSize: 12, cursor: resendLoading ? 'wait' : 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
+                  style={{ ...fullSpan, padding: 0, background: 'transparent', border: 'none', color: 'var(--h-d3e3fd)', textAlign: 'left', fontSize: 12, cursor: resendLoading ? 'wait' : 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}
                 >
                   {resendLoading ? 'Resending confirmation email…' : 'Resend confirmation email'}
                 </button>
               )}
 
-              <button type="submit" disabled={loading} style={{ ...fullSpan, width: '100%', padding: '14px', borderRadius: 14, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 15, border: 'none', cursor: loading ? 'wait' : 'pointer', boxShadow: '0 14px 28px rgba(73,104,255,0.24)', fontFamily: '"Roboto", Arial, sans-serif', letterSpacing: '0.01em', animation: 'none', opacity: loading ? 0.7 : 1 }}>
+              <button type="submit" disabled={loading} style={{ ...fullSpan, width: '100%', padding: '14px', borderRadius: 14, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 15, border: 'none', cursor: loading ? 'wait' : 'pointer', boxShadow: '0 14px 28px var(--r-73-104-255-0_24)', fontFamily: '"Roboto", Arial, sans-serif', letterSpacing: '0.01em', animation: 'none', opacity: loading ? 0.7 : 1 }}>
                 {loading ? 'Working…' : mode === 'signup' ? 'Create Account' : 'Sign In'}
               </button>
 
-              <div style={{ ...fullSpan, display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 4px', color: '#5f6368' }}>
-                <div style={{ flex: 1, height: 1, background: 'rgba(168,199,250,0.14)' }} />
+              <div style={{ ...fullSpan, display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 4px', color: 'var(--h-5f6368)' }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--r-168-199-250-0_14)' }} />
                 <span style={{ fontSize: 12 }}>{mode === 'signup' ? 'Already have an account?' : 'Need an account?'}</span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(168,199,250,0.14)' }} />
+                <div style={{ flex: 1, height: 1, background: 'var(--r-168-199-250-0_14)' }} />
               </div>
 
               <button
                 type="button"
                 onClick={() => onModeChange(mode === 'signup' ? 'signin' : 'signup')}
-                style={{ ...fullSpan, width: '100%', padding: '13px 14px', borderRadius: 14, background: 'linear-gradient(135deg, rgba(30,43,80,0.72), rgba(17,24,39,0.72))', color: '#e8edff', fontWeight: 600, fontSize: 14, border: '1px solid rgba(126,151,255,0.32)', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ ...fullSpan, width: '100%', padding: '13px 14px', borderRadius: 14, background: 'linear-gradient(135deg, var(--r-30-43-80-0_72), var(--r-17-24-39-0_72))', color: 'var(--h-e8edff)', fontWeight: 600, fontSize: 14, border: '1px solid var(--r-126-151-255-0_32)', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 {mode === 'signup' ? 'Go to Sign In' : 'Create Account'}
               </button>
@@ -875,7 +876,7 @@ function SignInModal({
           </div>
 
           {showPreview && (
-            <div className="auth-modal-preview" style={{ padding: previewPadding, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0, overflowY: 'auto', borderTop: isStacked ? '1px solid rgba(168,199,250,0.12)' : 'none', height: '100%' }}>
+            <div className="auth-modal-preview" style={{ padding: previewPadding, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0, overflowY: 'auto', borderTop: isStacked ? '1px solid var(--r-168-199-250-0_12)' : 'none', height: '100%' }}>
             <div style={{ width: '100%', maxWidth: 520 }}>
               <DetectionPreview compact />
             </div>
@@ -909,45 +910,46 @@ function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', 
     { n: '03', title: 'Copy and use',     desc: 'Get your polished result instantly and copy it anywhere.' },
   ];
 
-  const heroBg  = isDark ? 'radial-gradient(ellipse at 50% 60%, rgba(66,133,244,0.12) 0%, transparent 60%), #0e0f11' : 'radial-gradient(ellipse at 50% 60%, rgba(168,199,250,0.08) 0%, transparent 60%), #f0f4ff';
-  const bodyBg  = isDark ? '#0e0f11' : '#f0f4ff';
+  const heroBg  = isDark ? 'radial-gradient(ellipse at 50% 60%, var(--r-66-133-244-0_12) 0%, transparent 60%), var(--h-0e0f11)' : 'radial-gradient(ellipse at 50% 60%, var(--r-168-199-250-0_08) 0%, transparent 60%), var(--h-f0f4ff)';
+  const bodyBg  = isDark ? 'var(--h-0e0f11)' : 'var(--h-f0f4ff)';
   const featBg  = bodyBg;
   const stepsBg = bodyBg;
-  const text1   = isDark ? '#e3e3e3' : '#1f1f1f';
-  const text2   = isDark ? '#8e918f' : '#5f6368';
-  const text3   = isDark ? '#8e918f' : '#8e918f';
-  const cardBg  = isDark ? 'rgba(255,255,255,0.025)' : 'rgba(168,199,250,0.04)';
-  const cardBdr = isDark ? 'rgba(168,199,250,0.22)'   : 'rgba(168,199,250,0.18)';
-  const navBg   = isDark ? 'rgba(5,8,20,0.82)' : 'rgba(255,255,255,0.82)';
-  const navBdr  = isDark ? 'rgba(168,199,250,0.16)' : 'rgba(168,199,250,0.2)';
+  const text1   = isDark ? 'var(--h-e3e3e3)' : 'var(--h-1f1f1f)';
+  const text2   = isDark ? 'var(--h-8e918f)' : 'var(--h-5f6368)';
+  const text3   = isDark ? 'var(--h-8e918f)' : 'var(--h-8e918f)';
+  const cardBg  = isDark ? 'var(--r-255-255-255-0_025)' : 'var(--r-168-199-250-0_04)';
+  const cardBdr = isDark ? 'var(--r-168-199-250-0_22)'   : 'var(--r-168-199-250-0_18)';
+  const navBg   = isDark ? 'var(--r-5-8-20-0_82)' : 'var(--r-255-255-255-0_82)';
+  const navBdr  = isDark ? 'var(--r-168-199-250-0_16)' : 'var(--r-168-199-250-0_2)';
 
   return (
     <div className="page-fade" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: bodyBg, color: text1 }}>
 
       <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(8px, 2vw, 14px)', flexWrap: 'nowrap', padding: '12px clamp(14px, 3vw, 32px)', background: 'transparent', borderBottom: 'none' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 1.8vw, 10px)', minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
-          <img src="/hc-icon.png" alt="HumanClarity AI" style={{ height: 'clamp(24px, 6.2vw, 34px)', flexShrink: 0, filter: 'drop-shadow(0 0 5px rgba(168,199,250,0.28))' }} />
-          <span style={{ fontFamily: '"Roboto", Arial, sans-serif', fontWeight: 700, fontSize: 'clamp(11px, 3.7vw, 17px)', background: 'linear-gradient(135deg, #a8c7fa 0%, #d3e3fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: 0, lineHeight: 1.1, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>HumanClarity AI</span>
+          <img src="/hc-icon.png" alt="HumanClarity AI" style={{ height: 'clamp(24px, 6.2vw, 34px)', flexShrink: 0, filter: 'drop-shadow(0 0 5px var(--r-168-199-250-0_28))' }} />
+          <span style={{ fontFamily: '"Roboto", Arial, sans-serif', fontWeight: 700, fontSize: 'clamp(11px, 3.7vw, 17px)', background: 'linear-gradient(135deg, var(--h-a8c7fa) 0%, var(--h-d3e3fd) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: 0, lineHeight: 1.1, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>HumanClarity AI</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'clamp(8px, 1.6vw, 10px)', flex: '0 0 auto', flexShrink: 0 }}>
+          <ThemeToggle size={36} />
           {isSignedIn ? (
             <>
-              <span title={profile.name || profile.email} style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff', flexShrink: 0, userSelect: 'none' }}>
+              <span title={profile.name || profile.email} style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff', flexShrink: 0, userSelect: 'none' }}>
                 {initials(profile.name || profile.email)}
               </span>
-              <button onClick={onSignOut} aria-label="Sign out" title="Sign out" style={{ width: 34, height: 34, padding: 0, borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <button onClick={onSignOut} aria-label="Sign out" title="Sign out" style={{ width: 34, height: 34, padding: 0, borderRadius: 10, background: 'var(--r-239-68-68-0_08)', border: '1px solid var(--r-239-68-68-0_28)', color: 'var(--h-fca5a5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Ic d={P.signout} s={16} />
               </button>
-              <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', whiteSpace: 'nowrap' }}>
+              <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 14px 26px var(--r-73-104-255-0_24)', whiteSpace: 'nowrap' }}>
                 Open App
               </button>
             </>
           ) : (
             <>
-              <button onClick={onSignIn} style={{ padding: '8px clamp(10px, 2.8vw, 14px)', borderRadius: 10, background: 'linear-gradient(135deg, rgba(30,43,80,0.7), rgba(17,24,39,0.72))', color: '#e8edff', fontWeight: 700, fontSize: 'clamp(11px, 3vw, 13px)', border: '1px solid rgba(126,151,255,0.32)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', boxShadow: '0 10px 22px rgba(0,0,0,0.18)' }}>
+              <button onClick={onSignIn} style={{ padding: '8px clamp(10px, 2.8vw, 14px)', borderRadius: 10, background: 'linear-gradient(135deg, var(--r-30-43-80-0_7), var(--r-17-24-39-0_72))', color: 'var(--h-e8edff)', fontWeight: 700, fontSize: 'clamp(11px, 3vw, 13px)', border: '1px solid var(--r-126-151-255-0_32)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', boxShadow: '0 10px 22px var(--r-0-0-0-0_18)' }}>
                 Sign In
               </button>
-              <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', whiteSpace: 'nowrap' }}>
+              <button onClick={onStart} style={{ padding: '9px clamp(12px, 3.2vw, 18px)', borderRadius: 10, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 'clamp(11px, 3.2vw, 14px)', border: 'none', cursor: 'pointer', boxShadow: '0 14px 26px var(--r-73-104-255-0_24)', whiteSpace: 'nowrap' }}>
                 Get Started Free
               </button>
             </>
@@ -957,25 +959,25 @@ function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', 
 
       <section style={{ position: 'relative', minHeight: 'calc(100vh - 64px)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '72px 20px 96px', background: heroBg }}>
         <ParticleCanvas count={46} isDark={isDark} speed={0.55} />
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 47%, rgba(66,133,244,0.2) 0%, rgba(66,133,244,0.08) 34%, transparent 68%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(14,15,17,0.25), #0e0f11 96%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 47%, var(--r-66-133-244-0_2) 0%, var(--r-66-133-244-0_08) 34%, transparent 68%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, var(--r-14-15-17-0_25), var(--h-0e0f11) 96%)', pointerEvents: 'none' }} />
 
         <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 780, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
           <h1 style={{ fontSize: 'clamp(26px, 4vw, 52px)', fontWeight: 700, lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 14px', maxWidth: 700 }}>
             Your humanizer to turn AI content into{' '}
-            <span style={{ background: 'linear-gradient(135deg, #a8c7fa 0%, #d3e3fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>undetectable, human</span>{' '}text.
+            <span style={{ background: 'linear-gradient(135deg, var(--h-a8c7fa) 0%, var(--h-d3e3fd) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>undetectable, human</span>{' '}text.
           </h1>
           <p style={{ fontSize: 'clamp(14px, 1.8vw, 17px)', color: text2, margin: '0 0 36px', maxWidth: 560, lineHeight: 1.65 }}>
             Bypass AI detectors like Turnitin and convince your readers — in seconds.
           </p>
 
-          <button onClick={onStart} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '14px clamp(24px, 4vw, 44px)', borderRadius: 12, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 'clamp(14px, 1.8vw, 16px)', border: 'none', cursor: 'pointer', boxShadow: '0 12px 28px rgba(73,104,255,0.28)', marginBottom: 28, viewTransitionName: 'humanizer-composer' }}>
+          <button onClick={onStart} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '14px clamp(24px, 4vw, 44px)', borderRadius: 12, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 'clamp(14px, 1.8vw, 16px)', border: 'none', cursor: 'pointer', boxShadow: '0 12px 28px var(--r-73-104-255-0_28)', marginBottom: 28, viewTransitionName: 'humanizer-composer' }}>
             Go to Main App <Ic d={P.arrow} s={18} />
           </button>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 24 }}>
             {features.map((f) => (
-              <button key={f.title} onClick={onStart} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 38, borderRadius: 999, border: '1px solid rgba(168,199,250,0.16)', background: 'rgba(168,199,250,0.06)', color: '#c4c7c5', padding: '0 14px', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button key={f.title} onClick={onStart} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, height: 38, borderRadius: 999, border: '1px solid var(--r-168-199-250-0_16)', background: 'var(--r-168-199-250-0_06)', color: 'var(--h-c4c7c5)', padding: '0 14px', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
                 <Ic d={f.icon} s={16} /> {f.title}
               </button>
             ))}
@@ -992,16 +994,16 @@ function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', 
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 96, background: `linear-gradient(to top, ${bodyBg}, transparent)`, pointerEvents: 'none' }} />
       </section>
       <section style={{ padding: 'clamp(70px, 11vh, 120px) clamp(16px, 4vw, 32px)', position: 'relative', background: featBg, overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 640, height: 1, background: 'linear-gradient(90deg, transparent, rgba(126,151,255,0.4), transparent)' }} />
-        <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 720, height: 380, background: 'radial-gradient(ellipse, rgba(73,104,255,0.09), transparent 65%)', pointerEvents: 'none', filter: 'blur(60px)' }} />
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 640, height: 1, background: 'linear-gradient(90deg, transparent, var(--r-126-151-255-0_4), transparent)' }} />
+        <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 720, height: 380, background: 'radial-gradient(ellipse, var(--r-73-104-255-0_09), transparent 65%)', pointerEvents: 'none', filter: 'blur(60px)' }} />
         <div style={{ maxWidth: 1120, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vh, 58px)' }}>
-            <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7e97ff', background: 'rgba(73,104,255,0.1)', border: '1px solid rgba(73,104,255,0.28)', marginBottom: 18 }}>
+            <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--h-7e97ff)', background: 'var(--r-73-104-255-0_1)', border: '1px solid var(--r-73-104-255-0_28)', marginBottom: 18 }}>
               Features
             </span>
             <h2 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, color: text1, margin: '0 0 14px', fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1.08, letterSpacing: '-0.01em' }}>
               Everything you need,{' '}
-              <span style={{ background: 'linear-gradient(135deg,#e9edf7 0%, #7fb1ff 55%, #8f5cff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>in one place</span>
+              <span style={{ background: 'linear-gradient(135deg,var(--h-e9edf7) 0%, var(--h-7fb1ff) 55%, var(--h-8f5cff) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>in one place</span>
             </h2>
             <p style={{ color: text2, fontSize: 'clamp(14px, 1.7vw, 16px)', maxWidth: 540, margin: '0 auto', lineHeight: 1.6 }}>
               Professional writing tools powered by Claude AI — every action just a click away.
@@ -1011,15 +1013,15 @@ function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', 
             {features.map((f) => (
               <div key={f.title} style={{
                 position: 'relative',
-                background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))',
-                border: '1px solid rgba(70,103,178,0.45)',
+                background: 'linear-gradient(145deg, var(--r-19-29-48-0_74), var(--r-8-13-24-0_78))',
+                border: '1px solid var(--r-70-103-178-0_45)',
                 borderRadius: 18,
                 padding: '28px 24px',
                 overflow: 'hidden',
-                boxShadow: '0 18px 40px rgba(0,0,0,0.32), 0 0 50px rgba(37,99,235,0.06)',
+                boxShadow: '0 18px 40px var(--r-0-0-0-0_32), 0 0 50px var(--r-37-99-235-0_06)',
               }}>
-                <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, background: 'radial-gradient(circle, rgba(126,151,255,0.2), transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, rgba(73,104,255,0.34), rgba(124,82,255,0.24))', border: '1px solid rgba(126,151,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, color: '#cdd9ff', boxShadow: '0 8px 18px rgba(73,104,255,0.2)' }}>
+                <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, background: 'radial-gradient(circle, var(--r-126-151-255-0_2), transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, var(--r-73-104-255-0_34), var(--r-124-82-255-0_24))', border: '1px solid var(--r-126-151-255-0_4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, color: 'var(--h-cdd9ff)', boxShadow: '0 8px 18px var(--r-73-104-255-0_2)' }}>
                   <Ic d={f.icon} s={22} />
                 </div>
                 <h3 style={{ fontSize: 17, fontWeight: 800, color: text1, margin: '0 0 10px' }}>{f.title}</h3>
@@ -1030,31 +1032,31 @@ function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', 
         </div>
       </section>
 
-      <section style={{ padding: 'clamp(70px, 11vh, 120px) clamp(16px, 4vw, 32px)', background: stepsBg, borderTop: '1px solid rgba(70,103,178,0.18)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 820, height: 380, background: 'radial-gradient(ellipse, rgba(124,82,255,0.08), transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+      <section style={{ padding: 'clamp(70px, 11vh, 120px) clamp(16px, 4vw, 32px)', background: stepsBg, borderTop: '1px solid var(--r-70-103-178-0_18)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 820, height: 380, background: 'radial-gradient(ellipse, var(--r-124-82-255-0_08), transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', marginBottom: 'clamp(36px, 6vh, 58px)' }}>
-            <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#a78bff', background: 'rgba(124,82,255,0.1)', border: '1px solid rgba(124,82,255,0.28)', marginBottom: 18 }}>
+            <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: 999, fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--h-a78bff)', background: 'var(--r-124-82-255-0_1)', border: '1px solid var(--r-124-82-255-0_28)', marginBottom: 18 }}>
               How it works
             </span>
             <h2 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 800, color: text1, margin: 0, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1.08, letterSpacing: '-0.01em' }}>
               Three steps to{' '}
-              <span style={{ background: 'linear-gradient(135deg,#e9edf7 0%, #7fb1ff 55%, #8f5cff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>better writing</span>
+              <span style={{ background: 'linear-gradient(135deg,var(--h-e9edf7) 0%, var(--h-7fb1ff) 55%, var(--h-8f5cff) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>better writing</span>
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18 }}>
             {steps.map((s) => (
               <div key={s.n} style={{
                 position: 'relative',
-                background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))',
-                border: '1px solid rgba(70,103,178,0.45)',
+                background: 'linear-gradient(145deg, var(--r-19-29-48-0_74), var(--r-8-13-24-0_78))',
+                border: '1px solid var(--r-70-103-178-0_45)',
                 borderRadius: 18,
                 padding: '28px 24px 24px',
                 overflow: 'hidden',
-                boxShadow: '0 18px 40px rgba(0,0,0,0.32), 0 0 50px rgba(37,99,235,0.06)',
+                boxShadow: '0 18px 40px var(--r-0-0-0-0_32), 0 0 50px var(--r-37-99-235-0_06)',
               }}>
-                <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, background: 'radial-gradient(circle, rgba(126,151,255,0.2), transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
-                <div style={{ width: 54, height: 54, borderRadius: 14, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, fontSize: 17, fontWeight: 900, color: '#fff', boxShadow: '0 12px 24px rgba(73,104,255,0.32)', fontFamily: '"Roboto", Arial, sans-serif' }}>
+                <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, background: 'radial-gradient(circle, var(--r-126-151-255-0_2), transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+                <div style={{ width: 54, height: 54, borderRadius: 14, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, fontSize: 17, fontWeight: 900, color: '#fff', boxShadow: '0 12px 24px var(--r-73-104-255-0_32)', fontFamily: '"Roboto", Arial, sans-serif' }}>
                   {s.n}
                 </div>
                 <h3 style={{ fontSize: 17, fontWeight: 800, color: text1, margin: '0 0 10px' }}>{s.title}</h3>
@@ -1067,21 +1069,21 @@ function Landing({ onStart, onSignIn, isSignedIn = false, profile = { name: '', 
 
       <section style={{ padding: '130px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden', background: bodyBg }}>
         <ParticleCanvas count={45} isDark={isDark} />
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 900, height: 400, background: 'radial-gradient(ellipse, rgba(168,199,250,0.2) 0%, transparent 70%)', filter: 'blur(70px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(168,199,250,0.16) 1px, transparent 1px)', backgroundSize: '38px 38px', pointerEvents: 'none', opacity: isDark ? 0.75 : 0.5 }} />
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 900, height: 400, background: 'radial-gradient(ellipse, var(--r-168-199-250-0_2) 0%, transparent 70%)', filter: 'blur(70px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, var(--r-168-199-250-0_16) 1px, transparent 1px)', backgroundSize: '38px 38px', pointerEvents: 'none', opacity: isDark ? 0.75 : 0.5 }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
           <h2 style={{ fontSize: 'clamp(28px, 5vw, 58px)', fontWeight: 700, color: text1, marginBottom: 16, fontFamily: '"Roboto", Arial, sans-serif' }}>Ready to get started?</h2>
           <p style={{ color: text2, marginBottom: 40, fontSize: 17, maxWidth: 400, margin: '0 auto 42px' }}>Join writers and students who use HumanClarity every day.</p>
-          <button onClick={onStart} style={{ padding: '18px 52px', borderRadius: 16, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 18, border: 'none', cursor: 'pointer', animation: 'none', letterSpacing: '0.01em', fontFamily: '"Roboto", Arial, sans-serif', boxShadow: '0 16px 34px rgba(73,104,255,0.24)' }}>
+          <button onClick={onStart} style={{ padding: '18px 52px', borderRadius: 16, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 18, border: 'none', cursor: 'pointer', animation: 'none', letterSpacing: '0.01em', fontFamily: '"Roboto", Arial, sans-serif', boxShadow: '0 16px 34px var(--r-73-104-255-0_24)' }}>
             Launch the App
           </button>
         </div>
       </section>
 
-      <footer style={{ padding: '14px clamp(16px, 4vw, 32px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: `1px solid ${isDark ? 'rgba(168,199,250,0.1)' : 'rgba(168,199,250,0.15)'}`, background: bodyBg, fontSize: 13, color: text3 }}>
+      <footer style={{ padding: '14px clamp(16px, 4vw, 32px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: `1px solid ${isDark ? 'var(--r-168-199-250-0_1)' : 'var(--r-168-199-250-0_15)'}`, background: bodyBg, fontSize: 13, color: text3 }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           Made in Ghana © {new Date().getFullYear()}
-          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#c7d3ff', fontWeight: 600, textDecoration: 'none', textShadow: '0 0 10px rgba(126,151,255,0.55), 0 0 22px rgba(124,82,255,0.35)' }}>
+          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--h-c7d3ff)', fontWeight: 600, textDecoration: 'none', textShadow: '0 0 10px var(--r-126-151-255-0_55), 0 0 22px var(--r-124-82-255-0_35)' }}>
             Kennedy Abubakar
           </a>
         </span>
@@ -1135,34 +1137,34 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
           width: '100%', minHeight: 48, display: 'flex', alignItems: 'center', gap: 14,
           borderRadius: 13, padding: showRailLabels ? '0 14px' : 0,
           justifyContent: showRailLabels ? 'flex-start' : 'center',
-          border: active ? '1px solid rgba(113,131,255,0.55)' : '1px solid transparent',
-          background: active ? 'rgba(76,88,180,0.2)' : 'transparent',
-          color: active ? '#eef2ff' : '#9ca8bd',
+          border: active ? '1px solid var(--r-113-131-255-0_55)' : '1px solid transparent',
+          background: active ? 'var(--r-76-88-180-0_2)' : 'transparent',
+          color: active ? 'var(--h-eef2ff)' : 'var(--h-9ca8bd)',
           cursor: 'pointer', fontFamily: 'inherit',
           fontSize: 15, fontWeight: active ? 800 : 600,
         }}
       >
-        <span style={{ color: active ? '#8f7cff' : '#9ca8bd', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+        <span style={{ color: active ? 'var(--h-8f7cff)' : 'var(--h-9ca8bd)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
           <Ic d={P[icon]} s={22} />
         </span>
         {showRailLabels && <span>{label}</span>}
-        {showRailLabels && active && <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#8f5cff' }} />}
+        {showRailLabels && active && <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: 'var(--h-8f5cff)' }} />}
       </button>
     );
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#0e0f11', color: '#f8fafc', viewTransitionName: page === 'tool' ? 'humanizer-page' : undefined }}>
+    <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'var(--h-0e0f11)', color: 'var(--h-f8fafc)', viewTransitionName: page === 'tool' ? 'humanizer-page' : undefined }}>
       <ParticleCanvas count={48} isDark speed={0.52} />
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 22%, rgba(66,133,244,0.2), transparent 35%), radial-gradient(ellipse at 50% 46%, rgba(37,99,235,0.12), transparent 48%), linear-gradient(180deg, rgba(14,15,17,0.7), #0e0f11 96%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 22%, var(--r-66-133-244-0_2), transparent 35%), radial-gradient(ellipse at 50% 46%, var(--r-37-99-235-0_12), transparent 48%), linear-gradient(180deg, var(--r-14-15-17-0_7), var(--h-0e0f11) 96%)', pointerEvents: 'none' }} />
 
-      <aside style={{ position: 'absolute', zIndex: 5, top: 0, left: 0, bottom: 0, width: railWidth, transition: 'width 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderRight: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.72)', backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', padding: isPhone ? 8 : 12, boxSizing: 'border-box' }}>
-        <button onClick={() => setRailOpen(v => !v)} aria-label={railOpen ? 'Collapse navigation' : 'Expand navigation'} style={{ minHeight: 50, border: 'none', background: 'transparent', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: 12, padding: showRailLabels ? '0 8px' : 0, cursor: 'pointer', fontFamily: 'inherit' }}>
+      <aside style={{ position: 'absolute', zIndex: 5, top: 0, left: 0, bottom: 0, width: railWidth, transition: 'width 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderRight: '1px solid var(--r-145-158-191-0_14)', background: 'var(--r-5-10-18-0_72)', backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', padding: isPhone ? 8 : 12, boxSizing: 'border-box' }}>
+        <button onClick={() => setRailOpen(v => !v)} aria-label={railOpen ? 'Collapse navigation' : 'Expand navigation'} style={{ minHeight: 50, border: 'none', background: 'transparent', color: 'var(--h-f8fafc)', display: 'flex', alignItems: 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: 12, padding: showRailLabels ? '0 8px' : 0, cursor: 'pointer', fontFamily: 'inherit' }}>
           <img src="/hc-icon.png" alt="" style={{ width: 31, height: 31, objectFit: 'contain' }} />
           {showRailLabels && (
             <span style={{ textAlign: 'left' }}>
               <span style={{ display: 'block', fontSize: 18, fontWeight: 900 }}>HumanClarity</span>
-              <span style={{ display: 'block', marginTop: 4, color: '#6d87ff', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural Writing, Fast</span>
+              <span style={{ display: 'block', marginTop: 4, color: 'var(--h-6d87ff)', fontSize: 11, fontWeight: 900, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Natural Writing, Fast</span>
             </span>
           )}
         </button>
@@ -1174,14 +1176,14 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
             <button
               onClick={() => onNav?.('pricing')}
               title="Upgrade to Premium"
-              style={{ width: '100%', minHeight: showRailLabels ? 172 : 50, borderRadius: 15, border: '1px solid rgba(113,131,255,0.25)', background: showRailLabels ? 'linear-gradient(145deg, rgba(23,30,58,0.92), rgba(13,18,32,0.92))' : 'transparent', color: '#fff', padding: showRailLabels ? 16 : 0, display: 'flex', flexDirection: showRailLabels ? 'column' : 'row', alignItems: showRailLabels ? 'flex-start' : 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: showRailLabels ? 8 : 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+              style={{ width: '100%', minHeight: showRailLabels ? 172 : 50, borderRadius: 15, border: '1px solid var(--r-113-131-255-0_25)', background: showRailLabels ? 'linear-gradient(145deg, var(--r-23-30-58-0_92), var(--r-13-18-32-0_92))' : 'transparent', color: 'var(--h-f8fafc)', padding: showRailLabels ? 16 : 0, display: 'flex', flexDirection: showRailLabels ? 'column' : 'row', alignItems: showRailLabels ? 'flex-start' : 'center', justifyContent: showRailLabels ? 'flex-start' : 'center', gap: showRailLabels ? 8 : 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
             >
-              <span style={{ color: '#8f5cff', display: 'grid', placeItems: 'center' }}><Ic d={P.premium} s={showRailLabels ? 25 : 22} /></span>
+              <span style={{ color: 'var(--h-8f5cff)', display: 'grid', placeItems: 'center' }}><Ic d={P.premium} s={showRailLabels ? 25 : 22} /></span>
               {showRailLabels && (
                 <>
                   <span style={{ fontSize: 15, fontWeight: 900 }}>Upgrade to Premium</span>
-                  <span style={{ color: '#aeb8ce', fontSize: 12.5, lineHeight: 1.45 }}>Unlock unlimited use and powerful capabilities.</span>
-                  <span style={{ width: '100%', minHeight: 40, marginTop: 8, borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 900 }}>
+                  <span style={{ color: 'var(--h-aeb8ce)', fontSize: 12.5, lineHeight: 1.45 }}>Unlock unlimited use and powerful capabilities.</span>
+                  <span style={{ width: '100%', minHeight: 40, marginTop: 8, borderRadius: 10, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 900 }}>
                     Upgrade Now <Ic d={P.zap} s={16} />
                   </span>
                 </>
@@ -1193,22 +1195,23 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
       </aside>
 
       <header style={{ position: 'relative', zIndex: 3, height: 62, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: isPhone ? '12px 12px' : '12px clamp(16px, 3vw, 32px)', paddingLeft: `calc(${railWidth}px + ${isPhone ? '12px' : 'clamp(16px, 3vw, 32px)'})`, transition: 'padding-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', borderBottom: 'none', background: 'transparent', boxSizing: 'border-box' }}>
-        <div style={{ color: '#fff', fontSize: 'clamp(13px, 3.6vw, 18px)', fontWeight: 800, whiteSpace: 'nowrap' }}>
+        <div style={{ color: 'var(--h-f8fafc)', fontSize: 'clamp(13px, 3.6vw, 18px)', fontWeight: 800, whiteSpace: 'nowrap' }}>
           {viewportWidth <= 520 ? 'HC AI' : 'HumanClarity AI'}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <ThemeToggle size={36} />
           {isSignedIn ? (
             <>
-              <span title={profile.name || profile.email} style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff', flexShrink: 0, userSelect: 'none' }}>
+              <span title={profile.name || profile.email} style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff', flexShrink: 0, userSelect: 'none' }}>
                 {initials(profile.name || profile.email)}
               </span>
               {onSignOut && (
-                <button onClick={onSignOut} aria-label="Sign out" title="Sign out" style={{ width: 34, height: 34, padding: 0, borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <button onClick={onSignOut} aria-label="Sign out" title="Sign out" style={{ width: 34, height: 34, padding: 0, borderRadius: 10, background: 'var(--r-239-68-68-0_08)', border: '1px solid var(--r-239-68-68-0_28)', color: 'var(--h-fca5a5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Ic d={P.signout} s={16} />
                 </button>
               )}
               {onPrimaryClick && (
-                <button onClick={onPrimaryClick} style={{ minHeight: 38, padding: '0 clamp(12px, 2.8vw, 22px)', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                <button onClick={onPrimaryClick} style={{ minHeight: 38, padding: '0 clamp(12px, 2.8vw, 22px)', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', boxShadow: '0 14px 26px var(--r-73-104-255-0_24)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                   {page === 'dashboard' ? 'Humanize' : 'Dashboard'}
                 </button>
               )}
@@ -1216,12 +1219,12 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
           ) : (
             <>
               {viewportWidth > 520 && onSecondaryClick && (
-                <button onClick={onSecondaryClick} style={{ minHeight: 38, padding: '0 clamp(10px, 2.4vw, 18px)', borderRadius: 9, border: '1px solid rgba(126,151,255,0.34)', color: '#e8edff', background: 'linear-gradient(135deg, rgba(30,43,80,0.78), rgba(17,24,39,0.74))', boxShadow: '0 10px 22px rgba(0,0,0,0.18)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                <button onClick={onSecondaryClick} style={{ minHeight: 38, padding: '0 clamp(10px, 2.4vw, 18px)', borderRadius: 9, border: '1px solid var(--r-126-151-255-0_34)', color: 'var(--h-e8edff)', background: 'linear-gradient(135deg, var(--r-30-43-80-0_78), var(--r-17-24-39-0_74))', boxShadow: '0 10px 22px var(--r-0-0-0-0_18)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                   Sign In
                 </button>
               )}
               {onPrimaryClick && (
-                <button onClick={onPrimaryClick} style={{ minHeight: 38, padding: '0 clamp(12px, 2.8vw, 22px)', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', boxShadow: '0 14px 26px rgba(73,104,255,0.24)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                <button onClick={onPrimaryClick} style={{ minHeight: 38, padding: '0 clamp(12px, 2.8vw, 22px)', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', boxShadow: '0 14px 26px var(--r-73-104-255-0_24)', fontSize: 13, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                   {viewportWidth <= 520 ? 'Start' : 'Get Started Free'}
                 </button>
               )}
@@ -1234,15 +1237,15 @@ function AppShell({ page, onNav, isSignedIn, subscription, profile = { name: '',
         {children}
       </main>
 
-      <footer style={{ position: 'relative', zIndex: 3, height: 36, flexShrink: 0, marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: isPhone ? '0 12px' : '0 clamp(18px, 4vw, 44px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: '1px solid rgba(70,103,178,0.18)', background: 'transparent', boxSizing: 'border-box', color: '#8e918f', fontSize: 12 }}>
+      <footer style={{ position: 'relative', zIndex: 3, height: 36, flexShrink: 0, marginLeft: railWidth, transition: 'margin-left 0.22s cubic-bezier(0.22, 1, 0.36, 1)', padding: isPhone ? '0 12px' : '0 clamp(18px, 4vw, 44px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: '1px solid var(--r-70-103-178-0_18)', background: 'transparent', boxSizing: 'border-box', color: 'var(--h-8e918f)', fontSize: 12 }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
           {!isPhone && <>Made in Ghana © {new Date().getFullYear()}</>}
           {isPhone && <>© {new Date().getFullYear()}</>}
-          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#c7d3ff', fontWeight: 600, textDecoration: 'none', textShadow: '0 0 10px rgba(126,151,255,0.55), 0 0 22px rgba(124,82,255,0.35)' }}>
+          <a href="https://kennedyabubakar.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--h-c7d3ff)', fontWeight: 600, textDecoration: 'none', textShadow: '0 0 10px var(--r-126-151-255-0_55), 0 0 22px var(--r-124-82-255-0_35)' }}>
             Kennedy Abubakar
           </a>
         </span>
-        <button onClick={() => onNav?.('landing')} style={{ color: '#8e918f', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: 13, fontFamily: 'inherit', padding: 0, flexShrink: 0 }}>
+        <button onClick={() => onNav?.('landing')} style={{ color: 'var(--h-8e918f)', background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: 13, fontFamily: 'inherit', padding: 0, flexShrink: 0 }}>
           Enter Home
         </button>
       </footer>
@@ -1523,15 +1526,15 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
   const outputWords = output?.wordCount || 0;
   const panelStyle = {
     borderRadius: 15,
-    border: '1px solid rgba(145,158,191,0.22)',
-    background: 'linear-gradient(145deg, rgba(15,23,38,0.84), rgba(8,13,24,0.72))',
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+    border: '1px solid var(--r-145-158-191-0_22)',
+    background: 'linear-gradient(145deg, var(--r-15-23-38-0_84), var(--r-8-13-24-0_72))',
+    boxShadow: 'inset 0 1px 0 var(--r-255-255-255-0_03)',
   };
   const actionButton = {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
     minHeight: 52, padding: '0 22px', borderRadius: 12,
-    border: '1px solid rgba(145,158,191,0.24)', background: 'rgba(17,24,39,0.78)',
-    color: '#d8deef', cursor: 'pointer', fontSize: 15, fontWeight: 500,
+    border: '1px solid var(--r-145-158-191-0_24)', background: 'var(--r-17-24-39-0_78)',
+    color: 'var(--h-d8deef)', cursor: 'pointer', fontSize: 15, fontWeight: 500,
     fontFamily: 'inherit', whiteSpace: 'nowrap',
   };
 
@@ -1539,23 +1542,23 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
     <>
       <section style={{ textAlign: 'center', maxWidth: 900, margin: isPhone ? '0 auto 10px' : '0 auto clamp(14px, 2.4vh, 24px)', flex: '0 0 auto' }}>
           {!isPhone && (
-            <img src="/hc-icon.png" alt="" style={{ width: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', height: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', objectFit: 'contain', margin: '0 auto clamp(8px, 1.4vh, 14px)', display: 'block', filter: 'drop-shadow(0 0 6px rgba(124,82,255,0.28))' }} />
+            <img src="/hc-icon.png" alt="" style={{ width: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', height: isNarrowWorkbench ? 30 : 'clamp(32px, 5vh, 48px)', objectFit: 'contain', margin: '0 auto clamp(8px, 1.4vh, 14px)', display: 'block', filter: 'drop-shadow(0 0 6px var(--r-124-82-255-0_28))' }} />
           )}
           <h1 style={{ margin: isPhone ? '0 0 4px' : '0 0 clamp(6px, 1vh, 10px)', fontSize: isPhone ? 22 : isNarrowWorkbench ? 'clamp(28px, 8vw, 38px)' : 'clamp(30px, 5.2vh, 52px)', lineHeight: 1.1, fontWeight: 800, letterSpacing: 0 }}>
-            Your writing, <span style={{ background: 'linear-gradient(135deg,#e9edf7 0%, #7fb1ff 62%, #6f8cff 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>clearer.</span>
+            Your writing, <span style={{ background: 'linear-gradient(135deg,var(--h-e9edf7) 0%, var(--h-7fb1ff) 62%, var(--h-6f8cff) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>clearer.</span>
           </h1>
           {!isPhone && (
-            <p style={{ margin: 0, color: '#b8c2d8', fontSize: isNarrowWorkbench ? 13 : 'clamp(14px, 2vh, 18px)', lineHeight: 1.45 }}>AI that makes your ideas sound natural, authentic, and undetectable.</p>
+            <p style={{ margin: 0, color: 'var(--h-b8c2d8)', fontSize: isNarrowWorkbench ? 13 : 'clamp(14px, 2vh, 18px)', lineHeight: 1.45 }}>AI that makes your ideas sound natural, authentic, and undetectable.</p>
           )}
           <div style={{ marginTop: isPhone ? 8 : 'clamp(8px, 1.2vh, 12px)', display: 'flex', justifyContent: 'center' }}>
             {subscription.tier === 'pro' ? (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 13px', borderRadius: 999, border: '1px solid rgba(110,231,183,0.34)', background: 'rgba(52,211,153,0.1)', color: '#6ee7b7', fontSize: isPhone ? 12 : 13, fontWeight: 700 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 13px', borderRadius: 999, border: '1px solid var(--r-110-231-183-0_34)', background: 'var(--r-52-211-153-0_1)', color: 'var(--h-6ee7b7)', fontSize: isPhone ? 12 : 13, fontWeight: 700 }}>
                 <Ic d={P.premium} s={14} fill /> Unlimited words
               </span>
             ) : (
               <span
                 title={`Free plan: ${FREE_WORD_LIMIT} words per day. Resets daily.`}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 13px', borderRadius: 999, border: `1px solid ${remaining <= 0 ? 'rgba(248,113,113,0.4)' : 'rgba(126,151,255,0.32)'}`, background: remaining <= 0 ? 'rgba(248,113,113,0.1)' : 'rgba(126,151,255,0.1)', color: remaining <= 0 ? '#fca5a5' : '#9ec1ff', fontSize: isPhone ? 12 : 13, fontWeight: 700 }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 13px', borderRadius: 999, border: `1px solid ${remaining <= 0 ? 'var(--r-248-113-113-0_4)' : 'var(--r-126-151-255-0_32)'}`, background: remaining <= 0 ? 'var(--r-248-113-113-0_1)' : 'var(--r-126-151-255-0_1)', color: remaining <= 0 ? 'var(--h-fca5a5)' : 'var(--h-9ec1ff)', fontSize: isPhone ? 12 : 13, fontWeight: 700 }}
               >
                 <Ic d={P.spark} s={14} />
                 {remaining <= 0
@@ -1566,14 +1569,14 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
           </div>
         </section>
 
-        <section style={{ width: 'min(100%, 1120px)', margin: '0 auto', borderRadius: isPhone ? 14 : 20, border: '1px solid rgba(70,103,178,0.55)', background: 'linear-gradient(145deg, rgba(19,29,48,0.74), rgba(8,13,24,0.78))', boxShadow: '0 24px 70px rgba(0,0,0,0.35), 0 0 70px rgba(37,99,235,0.12)', overflow: 'hidden', viewTransitionName: 'humanizer-composer', flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <section style={{ width: 'min(100%, 1120px)', margin: '0 auto', borderRadius: isPhone ? 14 : 20, border: '1px solid var(--r-70-103-178-0_55)', background: 'linear-gradient(145deg, var(--r-19-29-48-0_74), var(--r-8-13-24-0_78))', boxShadow: '0 24px 70px var(--r-0-0-0-0_35), 0 0 70px var(--r-37-99-235-0_12)', overflow: 'hidden', viewTransitionName: 'humanizer-composer', flex: '1 1 auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <div className={`humanizer-workbench-grid${isNarrowWorkbench && !output?.text && !loading ? ' is-input-only' : ''}`} style={{ display: 'grid', gridTemplateColumns: isNarrowWorkbench ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 1px minmax(0, 1fr)', gap: 0, flex: '1 1 auto', minHeight: 0 }}>
             <div style={{ padding: isPhone ? '12px 12px 10px' : 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isPhone ? 10 : 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
-                <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.doc} s={isPhone ? 18 : 21} /></span>
+                <span style={{ color: 'var(--h-a9c5ff)', display: 'grid', placeItems: 'center' }}><Ic d={P.doc} s={isPhone ? 18 : 21} /></span>
                 <span style={{ fontSize: isPhone ? 14 : 15, fontWeight: 800 }}>Input</span>
-                <span style={{ marginLeft: 'auto', color: '#aeb8ce', fontSize: isPhone ? 12 : 13 }}>{wordCount} words</span>
-                <button onClick={() => { setInput(''); setOutput(null); setError(''); }} style={{ minHeight: isPhone ? 28 : 30, padding: isPhone ? '0 10px' : '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>Clear</button>
+                <span style={{ marginLeft: 'auto', color: 'var(--h-aeb8ce)', fontSize: isPhone ? 12 : 13 }}>{wordCount} words</span>
+                <button onClick={() => { setInput(''); setOutput(null); setError(''); }} style={{ minHeight: isPhone ? 28 : 30, padding: isPhone ? '0 10px' : '0 13px', borderRadius: 8, border: '1px solid var(--r-145-158-191-0_18)', background: 'var(--r-15-23-42-0_55)', color: 'var(--h-aeb8ce)', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}>Clear</button>
               </div>
               <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ position: 'relative', flex: '1 1 auto', minHeight: 0, overflow: 'hidden' }}>
@@ -1583,27 +1586,27 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
                     onChange={e => setInput(e.target.value)}
                     placeholder={isPhone ? 'Paste your AI text here...' : 'Paste your AI text here or upload a document to begin...'}
                     aria-label="Input text"
-                    style={{ width: '100%', height: '100%', resize: 'none', border: 'none', outline: 'none', background: 'transparent', color: '#eef2ff', padding: isPhone ? '14px 14px 12px' : '24px 28px 18px 24px', fontFamily: 'inherit', fontSize: isPhone ? 15 : 16, lineHeight: 1.6, boxSizing: 'border-box', overflow: 'auto' }}
+                    style={{ width: '100%', height: '100%', resize: 'none', border: 'none', outline: 'none', background: 'transparent', color: 'var(--h-eef2ff)', padding: isPhone ? '14px 14px 12px' : '24px 28px 18px 24px', fontFamily: 'inherit', fontSize: isPhone ? 15 : 16, lineHeight: 1.6, boxSizing: 'border-box', overflow: 'auto' }}
                     disabled={loading || uploading}
                   />
                   {!input.trim() && !isNarrowWorkbench && (
                     <div style={{ position: 'absolute', inset: '88px 0 auto 0', display: 'grid', gridTemplateColumns: '1fr 1px 1fr', alignItems: 'center', pointerEvents: 'none' }}>
-                      <div style={{ display: 'grid', justifyItems: 'center', gap: 6, color: '#d7def0' }}>
+                      <div style={{ display: 'grid', justifyItems: 'center', gap: 6, color: 'var(--h-d7def0)' }}>
                         <Ic d={P.upload} s={28} />
                         <span style={{ fontSize: 14, fontWeight: 700 }}>Upload a file</span>
-                        <span style={{ fontSize: 12, color: '#98a4bb' }}>or drag and drop here</span>
+                        <span style={{ fontSize: 12, color: 'var(--h-98a4bb)' }}>or drag and drop here</span>
                       </div>
-                      <div style={{ height: 96, background: 'rgba(145,158,191,0.12)' }} />
-                      <div style={{ display: 'grid', justifyItems: 'center', gap: 6, color: '#d7def0' }}>
+                      <div style={{ height: 96, background: 'var(--r-145-158-191-0_12)' }} />
+                      <div style={{ display: 'grid', justifyItems: 'center', gap: 6, color: 'var(--h-d7def0)' }}>
                         <Ic d={P.pen} s={28} />
                         <span style={{ fontSize: 14, fontWeight: 700 }}>Start writing</span>
-                        <span style={{ fontSize: 12, color: '#98a4bb' }}>Begin with a blank canvas</span>
+                        <span style={{ fontSize: 12, color: 'var(--h-98a4bb)' }}>Begin with a blank canvas</span>
                       </div>
                     </div>
                   )}
                 </div>
                 {!isNarrowWorkbench && (
-                  <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 20px 16px', color: '#94a0b7', fontSize: 12, pointerEvents: 'none' }}>
+                  <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '0 20px 16px', color: 'var(--h-94a0b7)', fontSize: 12, pointerEvents: 'none' }}>
                     <span>{wordCount} words</span>
                     <span>Max 25,000 words</span>
                   </div>
@@ -1611,34 +1614,34 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
               </div>
             </div>
 
-            <div className="humanizer-workbench-divider" style={{ display: isNarrowWorkbench && !output?.text && !loading ? 'none' : 'block', background: 'rgba(145,158,191,0.13)', margin: 'clamp(12px, 1.8vh, 20px) 0', height: 'auto', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 38, height: 38, borderRadius: '50%', background: 'rgba(17,24,39,0.92)', border: '1px solid rgba(145,158,191,0.18)', display: 'grid', placeItems: 'center', color: '#a9c5ff' }}><Ic d={P.swap} s={21} /></div>
+            <div className="humanizer-workbench-divider" style={{ display: isNarrowWorkbench && !output?.text && !loading ? 'none' : 'block', background: 'var(--r-145-158-191-0_13)', margin: 'clamp(12px, 1.8vh, 20px) 0', height: 'auto', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 38, height: 38, borderRadius: '50%', background: 'var(--r-17-24-39-0_92)', border: '1px solid var(--r-145-158-191-0_18)', display: 'grid', placeItems: 'center', color: 'var(--h-a9c5ff)' }}><Ic d={P.swap} s={21} /></div>
             </div>
 
             <div style={{ padding: isPhone ? '12px 12px 10px' : 'clamp(12px, 1.8vh, 20px) 20px clamp(10px, 1.5vh, 16px)', minHeight: 0, display: isNarrowWorkbench && !output?.text && !loading ? 'none' : 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: isPhone ? 10 : 'clamp(10px, 1.4vh, 16px)', flex: '0 0 auto' }}>
-                <span style={{ color: '#a9c5ff', display: 'grid', placeItems: 'center' }}><Ic d={P.shield} s={isPhone ? 18 : 22} /></span>
+                <span style={{ color: 'var(--h-a9c5ff)', display: 'grid', placeItems: 'center' }}><Ic d={P.shield} s={isPhone ? 18 : 22} /></span>
                 <span style={{ fontSize: isPhone ? 14 : 15, fontWeight: 800 }}>Output</span>
-                <span style={{ marginLeft: 'auto', color: '#aeb8ce', fontSize: isPhone ? 12 : 13 }}>{outputWords} words</span>
+                <span style={{ marginLeft: 'auto', color: 'var(--h-aeb8ce)', fontSize: isPhone ? 12 : 13 }}>{outputWords} words</span>
                 <button onClick={() => {
                   navigator.clipboard.writeText(outputText);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
-                }} style={{ minHeight: isPhone ? 28 : 30, padding: isPhone ? '0 10px' : '0 13px', borderRadius: 8, border: '1px solid rgba(145,158,191,0.18)', background: 'rgba(15,23,42,0.55)', color: '#aeb8ce', fontSize: 12, cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center', fontFamily: 'inherit' }}><Ic d={P.copy} s={15} />{copied ? 'Copied' : 'Copy'}</button>
+                }} style={{ minHeight: isPhone ? 28 : 30, padding: isPhone ? '0 10px' : '0 13px', borderRadius: 8, border: '1px solid var(--r-145-158-191-0_18)', background: 'var(--r-15-23-42-0_55)', color: 'var(--h-aeb8ce)', fontSize: 12, cursor: 'pointer', display: 'inline-flex', gap: 6, alignItems: 'center', fontFamily: 'inherit' }}><Ic d={P.copy} s={15} />{copied ? 'Copied' : 'Copy'}</button>
               </div>
               <div style={{ ...panelStyle, minHeight: 0, flex: '1 1 auto', padding: isPhone ? 14 : 'clamp(16px, 2vh, 24px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 {loading ? (
                   <HumanizerOutputLoader isPhone={isPhone} />
                 ) : (
-                  <p style={{ margin: 0, color: output?.text ? '#f4f7fb' : '#98a4bb', fontSize: isPhone ? 14 : 'clamp(13px, 1.8vh, 16px)', lineHeight: 1.6, whiteSpace: 'pre-wrap', overflow: 'auto', flex: '1 1 auto' }}>{outputText}</p>
+                  <p style={{ margin: 0, color: output?.text ? 'var(--h-f4f7fb)' : 'var(--h-98a4bb)', fontSize: isPhone ? 14 : 'clamp(13px, 1.8vh, 16px)', lineHeight: 1.6, whiteSpace: 'pre-wrap', overflow: 'auto', flex: '1 1 auto' }}>{outputText}</p>
                 )}
                 <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 28, padding: '0 12px', borderRadius: 7, border: '1px solid rgba(145,158,191,0.18)', background: loading ? 'rgba(126,151,255,0.1)' : 'rgba(148,163,184,0.08)', color: '#b9c4da', fontSize: 13 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: loading ? '#9ec1ff' : output?.text ? '#6ee7b7' : '#70809e', boxShadow: loading ? '0 0 10px rgba(158,193,255,0.55)' : output?.text ? '0 0 10px rgba(110,231,183,0.5)' : 'none', animation: loading ? 'pulse-glow 1.4s ease-in-out infinite' : 'none' }} /> {loading ? 'Humanizing' : output?.text ? 'AI-Humanized' : 'Ready for output'}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 28, padding: '0 12px', borderRadius: 7, border: '1px solid var(--r-145-158-191-0_18)', background: loading ? 'var(--r-126-151-255-0_1)' : 'var(--r-148-163-184-0_08)', color: 'var(--h-b9c4da)', fontSize: 13 }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: loading ? 'var(--h-9ec1ff)' : output?.text ? 'var(--h-6ee7b7)' : 'var(--h-70809e)', boxShadow: loading ? '0 0 10px var(--r-158-193-255-0_55)' : output?.text ? '0 0 10px var(--r-110-231-183-0_5)' : 'none', animation: loading ? 'pulse-glow 1.4s ease-in-out infinite' : 'none' }} /> {loading ? 'Humanizing' : output?.text ? 'AI-Humanized' : 'Ready for output'}</span>
                   {output?.text && !loading && (
                     <>
-                      <span style={{ marginLeft: 'auto', color: '#b2bdd2', fontSize: 12 }}>Rate this result</span>
-                      <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d={P.thumbUp} s={20} /></button>
-                      <button style={{ color: '#c9d3e8', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d={P.thumbDown} s={20} /></button>
+                      <span style={{ marginLeft: 'auto', color: 'var(--h-b2bdd2)', fontSize: 12 }}>Rate this result</span>
+                      <button style={{ color: 'var(--h-c9d3e8)', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d={P.thumbUp} s={20} /></button>
+                      <button style={{ color: 'var(--h-c9d3e8)', background: 'transparent', border: 'none', cursor: 'pointer', display: 'grid', placeItems: 'center' }}><Ic d={P.thumbDown} s={20} /></button>
                     </>
                   )}
                 </div>
@@ -1646,30 +1649,30 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isPhone ? 6 : isNarrowWorkbench ? 8 : 'clamp(8px, 1.4vw, 16px)', padding: isPhone ? '8px 10px 10px' : isNarrowWorkbench ? '10px 20px 12px' : 'clamp(10px, 1.4vh, 14px) 20px clamp(10px, 1.8vh, 18px)', borderTop: '1px solid rgba(145,158,191,0.14)', background: 'rgba(5,10,18,0.22)', flex: '0 0 auto' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: isPhone ? 6 : isNarrowWorkbench ? 8 : 'clamp(8px, 1.4vw, 16px)', padding: isPhone ? '8px 10px 10px' : isNarrowWorkbench ? '10px 20px 12px' : 'clamp(10px, 1.4vh, 14px) 20px clamp(10px, 1.8vh, 18px)', borderTop: '1px solid var(--r-145-158-191-0_14)', background: 'var(--r-5-10-18-0_22)', flex: '0 0 auto' }}>
             <input ref={fileRef} type="file" accept={UPLOAD_ACCEPT} style={{ display: 'none' }} onChange={handleFile} />
-            <button onClick={() => fileRef.current?.click()} disabled={loading || uploading} aria-label={uploading ? 'Uploading' : 'Upload file'} style={{ ...actionButton, minHeight: isPhone ? 42 : 52, minWidth: isPhone ? 42 : 132, padding: isPhone ? 0 : '0 22px', background: 'rgba(35,45,65,0.88)', opacity: (loading || uploading) ? 0.55 : 1 }}><Ic d={P.upload} s={isPhone ? 20 : 24} /> {!isPhone && (uploading ? 'Uploading...' : 'Upload')}</button>
-            {!isPhone && <span style={{ color: '#b2bdd2', fontSize: 13, marginRight: isNarrowWorkbench ? 0 : 'auto' }}>PDF, DOCX, TXT</span>}
+            <button onClick={() => fileRef.current?.click()} disabled={loading || uploading} aria-label={uploading ? 'Uploading' : 'Upload file'} style={{ ...actionButton, minHeight: isPhone ? 42 : 52, minWidth: isPhone ? 42 : 132, padding: isPhone ? 0 : '0 22px', background: 'var(--r-35-45-65-0_88)', opacity: (loading || uploading) ? 0.55 : 1 }}><Ic d={P.upload} s={isPhone ? 20 : 24} /> {!isPhone && (uploading ? 'Uploading...' : 'Upload')}</button>
+            {!isPhone && <span style={{ color: 'var(--h-b2bdd2)', fontSize: 13, marginRight: isNarrowWorkbench ? 0 : 'auto' }}>PDF, DOCX, TXT</span>}
             {toolActions.map(action => (
-              <button key={action.id} onClick={() => toggleAction(action.id)} disabled={loading || uploading} style={{ ...actionButton, minHeight: isPhone ? 42 : 52, padding: isPhone ? '0 12px' : '0 22px', fontSize: isPhone ? 13 : 15, gap: isPhone ? 6 : 10, background: selectedAction === action.id ? 'rgba(77,100,190,0.28)' : actionButton.background, border: selectedAction === action.id ? '1px solid rgba(126,151,255,0.54)' : actionButton.border, opacity: (loading || uploading) ? 0.5 : 1 }}><Ic d={action.icon} s={isPhone ? 16 : 19} /> {action.label}</button>
+              <button key={action.id} onClick={() => toggleAction(action.id)} disabled={loading || uploading} style={{ ...actionButton, minHeight: isPhone ? 42 : 52, padding: isPhone ? '0 12px' : '0 22px', fontSize: isPhone ? 13 : 15, gap: isPhone ? 6 : 10, background: selectedAction === action.id ? 'var(--r-77-100-190-0_28)' : actionButton.background, border: selectedAction === action.id ? '1px solid var(--r-126-151-255-0_54)' : actionButton.border, opacity: (loading || uploading) ? 0.5 : 1 }}><Ic d={action.icon} s={isPhone ? 16 : 19} /> {action.label}</button>
             ))}
             <button
               className={`hc-loading-button${loading ? ' is-loading' : ''}`}
               onClick={runHumanizeFlow}
               disabled={!input.trim() || loading || uploading}
               aria-busy={loading}
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 11, minHeight: isPhone ? 48 : 52, width: isPhone ? '100%' : 'auto', minWidth: isPhone ? 0 : 196, padding: isPhone ? '0 18px' : '0 25px', borderRadius: 12, background: 'linear-gradient(135deg,#0b64f4,#0874ff)', color: '#fff', fontWeight: 900, fontSize: isPhone ? 15 : 16, border: 'none', cursor: (!input.trim() || loading || uploading) ? 'not-allowed' : 'pointer', opacity: (!input.trim() || loading || uploading) && !loading ? 0.84 : 1, boxShadow: loading ? '0 18px 36px rgba(73,104,255,0.28)' : (!input.trim() || loading || uploading) ? 'none' : '0 16px 30px rgba(8,116,255,0.24)', fontFamily: 'inherit', marginLeft: isPhone ? 0 : undefined, order: isPhone ? 99 : 0 }}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 11, minHeight: isPhone ? 48 : 52, width: isPhone ? '100%' : 'auto', minWidth: isPhone ? 0 : 196, padding: isPhone ? '0 18px' : '0 25px', borderRadius: 12, background: 'linear-gradient(135deg,var(--h-0b64f4),var(--h-0874ff))', color: '#fff', fontWeight: 900, fontSize: isPhone ? 15 : 16, border: 'none', cursor: (!input.trim() || loading || uploading) ? 'not-allowed' : 'pointer', opacity: (!input.trim() || loading || uploading) && !loading ? 0.84 : 1, boxShadow: loading ? '0 18px 36px var(--r-73-104-255-0_28)' : (!input.trim() || loading || uploading) ? 'none' : '0 16px 30px var(--r-8-116-255-0_24)', fontFamily: 'inherit', marginLeft: isPhone ? 0 : undefined, order: isPhone ? 99 : 0 }}
             >
-              {loading ? <span className="spin-soft" style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.38)', borderTopColor: '#fff', flexShrink: 0 }} /> : <Ic d={P.spark} s={20} />}
+              {loading ? <span className="spin-soft" style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid var(--r-255-255-255-0_38)', borderTopColor: '#fff', flexShrink: 0 }} /> : <Ic d={P.spark} s={20} />}
               {loading ? 'Humanizing...' : 'Humanize Now'}
             </button>
           </div>
         </section>
 
-        {error && <div style={{ width: 'min(100%, 1120px)', margin: '16px auto 0', padding: '12px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', fontSize: 13 }}>{error}</div>}
+        {error && <div style={{ width: 'min(100%, 1120px)', margin: '16px auto 0', padding: '12px 16px', borderRadius: 12, background: 'var(--r-239-68-68-0_1)', border: '1px solid var(--r-239-68-68-0_28)', color: 'var(--h-fca5a5)', fontSize: 13 }}>{error}</div>}
 
       {!isPhone && (
-        <div style={{ margin: 'clamp(8px, 1.4vh, 14px) auto 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, color: '#9ca8bd', fontSize: 13, flex: '0 0 auto' }}>
+        <div style={{ margin: 'clamp(8px, 1.4vh, 14px) auto 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, color: 'var(--h-9ca8bd)', fontSize: 13, flex: '0 0 auto' }}>
           <Ic d={P.shield} s={18} /> Your content is encrypted and never stored.
         </div>
       )}
@@ -1679,18 +1682,84 @@ function HumanizerTool({ history, setHistory, subscription, isSignedIn, onRequir
 // ─── dashboard ────────────────────────────────────────────────────────────────
 
 const STAT_META = [
-  { bg: 'linear-gradient(135deg, rgba(168,199,250,0.18), rgba(66,133,244,0.08))',  bdr: 'rgba(168,199,250,0.28)',  glow: 'rgba(168,199,250,0.15)',  ic: '#a8c7fa' },
-  { bg: 'linear-gradient(135deg, rgba(66,133,244,0.18), rgba(109,40,217,0.08))', bdr: 'rgba(66,133,244,0.28)', glow: 'rgba(66,133,244,0.12)', ic: '#a78bfa' },
-  { bg: 'linear-gradient(135deg, rgba(52,211,153,0.15), rgba(16,185,129,0.06))', bdr: 'rgba(52,211,153,0.25)', glow: 'rgba(52,211,153,0.1)',  ic: '#34d399' },
+  { bg: 'linear-gradient(135deg, var(--r-168-199-250-0_18), var(--r-66-133-244-0_08))',  bdr: 'var(--r-168-199-250-0_28)',  glow: 'var(--r-168-199-250-0_15)',  ic: 'var(--h-a8c7fa)' },
+  { bg: 'linear-gradient(135deg, var(--r-66-133-244-0_18), var(--r-109-40-217-0_08))', bdr: 'var(--r-66-133-244-0_28)', glow: 'var(--r-66-133-244-0_12)', ic: 'var(--h-a78bfa)' },
+  { bg: 'linear-gradient(135deg, var(--r-52-211-153-0_15), var(--r-16-185-129-0_06))', bdr: 'var(--r-52-211-153-0_25)', glow: 'var(--r-52-211-153-0_1)',  ic: 'var(--h-34d399)' },
 ];
 
-const PAYMENT_METHODS = [
-  { label: 'MTN MoMo',     bg: '#ffcc00', color: '#1a1a1a' },
-  { label: 'Telecel Cash', bg: '#e2231a', color: '#ffffff' },
-  { label: 'AT Money',     bg: '#0a3d91', color: '#ffffff' },
-  { label: 'Card',         bg: 'rgba(255,255,255,0.1)', color: '#e8edff' },
-  { label: 'Bank',         bg: 'rgba(255,255,255,0.1)', color: '#e8edff' },
-];
+// Real-brand payment badges. These use each provider's official colours, which are
+// fixed in both light and dark mode (brand colours are not theme-mapped). The chip
+// frame adapts to the theme via tokens.
+const BADGE = {
+  display: 'inline-flex', alignItems: 'center', height: 26, borderRadius: 7,
+  overflow: 'hidden', fontFamily: '"Roboto", Arial, sans-serif', fontWeight: 800,
+  fontSize: 11, lineHeight: 1, letterSpacing: 0.2, whiteSpace: 'nowrap',
+  boxShadow: '0 1px 2px var(--r-0-0-0-0_18)',
+};
+const seg = (bg, color, extra) => ({
+  background: bg, color, height: '100%', display: 'flex', alignItems: 'center',
+  padding: '0 7px', ...extra,
+});
+
+// MTN MoMo — yellow "MTN" lockup + black "MoMo" with white wordmark.
+function MtnMomoLogo() {
+  return (
+    <span style={BADGE} aria-label="MTN MoMo">
+      <span style={seg('#FFCC00', '#1A1A1A', { fontWeight: 900, letterSpacing: 0.4 })}>MTN</span>
+      <span style={seg('#1A1A1A', '#FFFFFF', { fontWeight: 800 })}>MoMo</span>
+    </span>
+  );
+}
+// Telecel Cash — Telecel red.
+function TelecelLogo() {
+  return (
+    <span style={BADGE} aria-label="Telecel Cash">
+      <span style={seg('#E4002B', '#FFFFFF', { fontWeight: 900 })}>telecel</span>
+      <span style={seg('#B30021', '#FFFFFF')}>Cash</span>
+    </span>
+  );
+}
+// AirtelTigo Money — Airtel red into Tigo blue.
+function AirtelTigoLogo() {
+  return (
+    <span style={BADGE} aria-label="AirtelTigo Money">
+      <span style={seg('#ED1C24', '#FFFFFF', { fontWeight: 900 })}>airtel</span>
+      <span style={seg('#0A3D91', '#FFFFFF', { fontWeight: 900 })}>tigo</span>
+    </span>
+  );
+}
+// Visa wordmark.
+function VisaLogo() {
+  return (
+    <span style={{ ...BADGE, background: '#FFFFFF', border: '1px solid var(--r-0-0-0-0_18)', padding: '0 9px' }} aria-label="Visa">
+      <span style={{ color: '#1A1F71', fontStyle: 'italic', fontWeight: 900, fontSize: 13, letterSpacing: 0.3 }}>VISA</span>
+    </span>
+  );
+}
+// Mastercard interlocking circles.
+function MastercardLogo() {
+  return (
+    <span style={{ ...BADGE, background: '#FFFFFF', border: '1px solid var(--r-0-0-0-0_18)', padding: '0 8px', gap: 5 }} aria-label="Mastercard">
+      <svg width="26" height="16" viewBox="0 0 38 24" aria-hidden="true">
+        <circle cx="15" cy="12" r="11" fill="#EB001B" />
+        <circle cx="23" cy="12" r="11" fill="#F79E1B" />
+        <path d="M19 3.6a11 11 0 0 1 0 16.8 11 11 0 0 1 0-16.8z" fill="#FF5F00" />
+      </svg>
+    </span>
+  );
+}
+// Bank transfer glyph.
+function BankLogo() {
+  return (
+    <span style={{ ...BADGE, background: '#FFFFFF', color: '#334155', border: '1px solid var(--r-0-0-0-0_18)', padding: '0 9px', gap: 5 }} aria-label="Bank transfer">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M3 21h18M4 10h16M5 10V7l7-4 7 4v3M6 21V10m4 11V10m4 11V10m4 11V10" />
+      </svg>
+      Bank
+    </span>
+  );
+}
+const PAYMENT_LOGOS = [MtnMomoLogo, TelecelLogo, AirtelTigoLogo, VisaLogo, MastercardLogo, BankLogo];
 
 // A function (not a const array) so the daily-cap number reflects the live,
 // admin-set FREE_WORD_LIMIT at render time rather than freezing at module load.
@@ -1707,27 +1776,10 @@ function proBenefits() {
 function PaymentMethods({ align = 'center' }) {
   return (
     <div style={{ marginTop: 10 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: align }}>
-        {PAYMENT_METHODS.map(m => (
-          <span
-            key={m.label}
-            style={{
-              fontSize: 10,
-              fontWeight: 800,
-              padding: '4px 9px',
-              borderRadius: 6,
-              background: m.bg,
-              color: m.color,
-              letterSpacing: 0.2,
-              whiteSpace: 'nowrap',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            {m.label}
-          </span>
-        ))}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, justifyContent: align, alignItems: 'center' }}>
+        {PAYMENT_LOGOS.map((Logo, i) => <Logo key={i} />)}
       </div>
-      <p style={{ margin: '8px 0 0', fontSize: 10.5, color: '#6b7a94', textAlign: align, letterSpacing: 0.2 }}>
+      <p style={{ margin: '9px 0 0', fontSize: 10.5, color: 'var(--h-6b7a94)', textAlign: align, letterSpacing: 0.2 }}>
         Secured by Paystack
       </p>
     </div>
@@ -1735,14 +1787,14 @@ function PaymentMethods({ align = 'center' }) {
 }
 
 function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessage }) {
-  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94' };
+  const C = { card: 'var(--r-255-255-255-0_04)', border: 'var(--r-168-199-250-0_1)', t1: 'var(--h-e3e3e3)', t2: 'var(--h-8e918f)', t3: 'var(--h-6b7a94)' };
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 16 }}>
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '20px 20px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.t3 }}>Free</span>
-            {subscription.tier !== 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: '#4ade80', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 999, padding: '2px 8px' }}>Current</span>}
+            {subscription.tier !== 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--h-4ade80)', background: 'var(--r-74-222-128-0_1)', border: '1px solid var(--r-74-222-128-0_22)', borderRadius: 999, padding: '2px 8px' }}>Current</span>}
           </div>
           <p style={{ fontSize: 28, fontWeight: 800, margin: '0 0 4px', color: C.t1, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>0 GHS</p>
           <p style={{ fontSize: 12, color: C.t2, margin: '0 0 14px', lineHeight: 1.5 }}>{FREE_WORD_LIMIT} words per day for the Humanizer.</p>
@@ -1753,10 +1805,10 @@ function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessag
           </div>
         </div>
 
-        <div style={{ background: 'rgba(73,104,255,0.07)', border: '1px solid rgba(73,104,255,0.24)', borderRadius: 14, padding: '20px 20px 18px' }}>
+        <div style={{ background: 'var(--r-73-104-255-0_07)', border: '1px solid var(--r-73-104-255-0_24)', borderRadius: 14, padding: '20px 20px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#a8c7fa' }}>Premium</span>
-            {subscription.tier === 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: '#4ade80', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 999, padding: '2px 8px' }}>Active</span>}
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--h-a8c7fa)' }}>Premium</span>
+            {subscription.tier === 'pro' && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--h-4ade80)', background: 'var(--r-74-222-128-0_1)', border: '1px solid var(--r-74-222-128-0_22)', borderRadius: 999, padding: '2px 8px' }}>Active</span>}
           </div>
           <p style={{ fontSize: 28, fontWeight: 800, margin: '0 0 4px', color: C.t1, fontFamily: '"Roboto", Arial, sans-serif', lineHeight: 1 }}>
             {PRO_PRICE_GHS} GHS
@@ -1769,10 +1821,10 @@ function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessag
             <span>· History, saved docs, profile</span>
           </div>
           {subscription.tier === 'pro' ? (
-            <div style={{ padding: '9px 16px', borderRadius: 9, border: '1px solid rgba(74,222,128,0.22)', color: '#4ade80', background: 'rgba(74,222,128,0.07)', fontSize: 12, fontWeight: 700, textAlign: 'center' }}>Premium Active</div>
+            <div style={{ padding: '9px 16px', borderRadius: 9, border: '1px solid var(--r-74-222-128-0_22)', color: 'var(--h-4ade80)', background: 'var(--r-74-222-128-0_07)', fontSize: 12, fontWeight: 700, textAlign: 'center' }}>Premium Active</div>
           ) : (
             <>
-              <button onClick={onUpgrade} disabled={upgradeLoading} style={{ width: '100%', padding: '11px 16px', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', cursor: upgradeLoading ? 'wait' : 'pointer', fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', opacity: upgradeLoading ? 0.72 : 1, lineHeight: 1.3 }}>
+              <button onClick={onUpgrade} disabled={upgradeLoading} style={{ width: '100%', padding: '11px 16px', borderRadius: 9, border: 'none', color: '#fff', background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', cursor: upgradeLoading ? 'wait' : 'pointer', fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit', boxShadow: '0 8px 20px var(--r-73-104-255-0_24)', opacity: upgradeLoading ? 0.72 : 1, lineHeight: 1.3 }}>
                 {upgradeLoading ? 'Redirecting to checkout…' : 'Pay with Card, Bank or Mobile Money'}
               </button>
               <PaymentMethods />
@@ -1780,13 +1832,13 @@ function PlanComparison({ subscription, onUpgrade, upgradeLoading, upgradeMessag
           )}
         </div>
       </div>
-      {upgradeMessage && <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#4ade80' : '#8e918f', margin: 0 }}>{upgradeMessage}</p>}
+      {upgradeMessage && <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? 'var(--h-4ade80)' : 'var(--h-8e918f)', margin: 0 }}>{upgradeMessage}</p>}
     </div>
   );
 }
 
 function PricingPage({ subscription, onUpgrade, upgradeLoading, upgradeMessage, isSignedIn, onSignIn, notice = '' }) {
-  const C = { t1: '#e3e3e3', t2: '#8e918f', accent: '#a8c7fa' };
+  const C = { t1: 'var(--h-e3e3e3)', t2: 'var(--h-8e918f)', accent: 'var(--h-a8c7fa)' };
   return (
     <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px', maxWidth: 760 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, marginBottom: 24 }}>
@@ -1797,17 +1849,17 @@ function PricingPage({ subscription, onUpgrade, upgradeLoading, upgradeMessage, 
           </p>
         </div>
         {!isSignedIn ? (
-          <button onClick={onSignIn} style={{ padding: '9px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', fontFamily: 'inherit' }}>
+          <button onClick={onSignIn} style={{ padding: '9px 18px', borderRadius: 10, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px var(--r-73-104-255-0_24)', fontFamily: 'inherit' }}>
             Sign In
           </button>
         ) : subscription.tier !== 'pro' ? (
-          <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '9px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', fontFamily: 'inherit', opacity: upgradeLoading ? 0.72 : 1 }}>
+          <button onClick={onUpgrade} disabled={upgradeLoading} style={{ padding: '9px 18px', borderRadius: 10, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', boxShadow: '0 8px 20px var(--r-73-104-255-0_24)', fontFamily: 'inherit', opacity: upgradeLoading ? 0.72 : 1 }}>
             {upgradeLoading ? 'Opening checkout…' : 'Upgrade to Premium'}
           </button>
         ) : null}
       </div>
       {notice && (
-        <div style={{ marginBottom: 16, padding: '12px 16px', borderRadius: 12, background: 'rgba(168,199,250,0.06)', border: '1px solid rgba(168,199,250,0.14)', color: C.accent, fontSize: 13 }}>
+        <div style={{ marginBottom: 16, padding: '12px 16px', borderRadius: 12, background: 'var(--r-168-199-250-0_06)', border: '1px solid var(--r-168-199-250-0_14)', color: C.accent, fontSize: 13 }}>
           {notice}
         </div>
       )}
@@ -1824,12 +1876,12 @@ function Dashboard({ history, saved, onNav, subscription, profile, onUpgrade, up
   const recent     = history.slice(0, 5);
   const remaining  = wordsRemaining(subscription);
 
-  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
+  const C = { card: 'var(--r-255-255-255-0_04)', border: 'var(--r-168-199-250-0_1)', t1: 'var(--h-e3e3e3)', t2: 'var(--h-8e918f)', t3: 'var(--h-6b7a94)', accent: 'var(--h-a8c7fa)' };
 
   const stats = [
-    { label: 'Words Processed', value: fmtNum(totalWords), sub: `${todayItems} session${todayItems !== 1 ? 's' : ''} today`, icon: P.pen, color: '#a8c7fa' },
-    { label: 'Saved Documents', value: String(saved.length), sub: `${savedToday} saved today`, icon: P.bookmark, color: '#c4b5fd' },
-    { label: 'Plan', value: planLabel(subscription), sub: subscription.tier === 'pro' ? 'Unlimited words' : `${remaining} words left`, icon: P.zap, color: '#4ade80' },
+    { label: 'Words Processed', value: fmtNum(totalWords), sub: `${todayItems} session${todayItems !== 1 ? 's' : ''} today`, icon: P.pen, color: 'var(--h-a8c7fa)' },
+    { label: 'Saved Documents', value: String(saved.length), sub: `${savedToday} saved today`, icon: P.bookmark, color: 'var(--h-c4b5fd)' },
+    { label: 'Plan', value: planLabel(subscription), sub: subscription.tier === 'pro' ? 'Unlimited words' : `${remaining} words left`, icon: P.zap, color: 'var(--h-4ade80)' },
   ];
 
   return (
@@ -1841,18 +1893,18 @@ function Dashboard({ history, saved, onNav, subscription, profile, onUpgrade, up
           </h1>
           <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>Here's an overview of your activity.</p>
         </div>
-        <button onClick={() => onNav('tool')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px rgba(73,104,255,0.24)', fontFamily: 'inherit' }}>
+        <button onClick={() => onNav('tool')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 10, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 20px var(--r-73-104-255-0_24)', fontFamily: 'inherit' }}>
           <Ic d={P.add} s={17} /> New Document
         </button>
       </div>
 
       {subscription.tier !== 'pro' && (
-        <div style={{ marginBottom: 22, background: 'rgba(73,104,255,0.07)', border: '1px solid rgba(73,104,255,0.2)', borderRadius: 14, padding: '16px 20px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ marginBottom: 22, background: 'var(--r-73-104-255-0_07)', border: '1px solid var(--r-73-104-255-0_2)', borderRadius: 14, padding: '16px 20px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div>
             <p style={{ margin: '0 0 3px', fontSize: 14, fontWeight: 700, color: C.t1 }}>Free plan — {remaining} words remaining</p>
             <p style={{ margin: 0, fontSize: 12, color: C.t2 }}>Upgrade to Premium for unlimited processing.</p>
           </div>
-          <button onClick={() => onNav('pricing')} style={{ padding: '8px 16px', borderRadius: 9, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+          <button onClick={() => onNav('pricing')} style={{ padding: '8px 16px', borderRadius: 9, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
             Upgrade
           </button>
         </div>
@@ -1883,7 +1935,7 @@ function Dashboard({ history, saved, onNav, subscription, profile, onUpgrade, up
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           {recent.map((item, i) => (
             <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: i < recent.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(168,199,250,0.08)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.accent, flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--r-168-199-250-0_08)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.accent, flexShrink: 0 }}>
                 <Ic d={P.doc} s={15} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -1902,14 +1954,14 @@ function Dashboard({ history, saved, onNav, subscription, profile, onUpgrade, up
 }
 
 function PremiumLockedPage({ title, description, subscription, onUpgrade, upgradeLoading, upgradeMessage }) {
-  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f' };
+  const C = { card: 'var(--r-255-255-255-0_04)', border: 'var(--r-168-199-250-0_1)', t1: 'var(--h-e3e3e3)', t2: 'var(--h-8e918f)' };
   return (
     <div style={{ padding: 'clamp(20px,3vw,36px) clamp(16px,3vw,32px) 48px', maxWidth: 760 }}>
       <div style={{ marginBottom: 22 }}>
         <h1 style={{ fontSize: 'clamp(18px,3vw,22px)', fontWeight: 800, color: C.t1, margin: '0 0 5px' }}>{title}</h1>
         <p style={{ color: C.t2, fontSize: 13, margin: 0 }}>{description}</p>
       </div>
-      <div style={{ background: 'rgba(73,104,255,0.07)', border: '1px solid rgba(73,104,255,0.22)', borderRadius: 14, padding: '20px 22px', marginBottom: 20 }}>
+      <div style={{ background: 'var(--r-73-104-255-0_07)', border: '1px solid var(--r-73-104-255-0_22)', borderRadius: 14, padding: '20px 22px', marginBottom: 20 }}>
         <p style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 800, color: C.t1 }}>Premium required</p>
         <p style={{ margin: '0 0 4px', fontSize: 13, color: C.t2 }}>
           {subscription.tier === 'pro' ? 'Your access is already active.' : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remain today in the Humanizer.`}
@@ -1931,15 +1983,15 @@ function ProfilePage({ profile, subscription, history, saved, onSaveProfile }) {
     setTimeout(() => setSaveOk(false), 2000);
   }
 
-  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
-  const inp = { width: '100%', padding: '11px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(168,199,250,0.14)', color: C.t1, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.15s' };
+  const C = { card: 'var(--r-255-255-255-0_04)', border: 'var(--r-168-199-250-0_1)', t1: 'var(--h-e3e3e3)', t2: 'var(--h-8e918f)', t3: 'var(--h-6b7a94)', accent: 'var(--h-a8c7fa)' };
+  const inp = { width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--fld-bg)', border: '1px solid var(--r-168-199-250-0_14)', color: C.t1, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.15s' };
 
   const totalWords = history.reduce((s, h) => s + (h.wordCount || 0), 0);
   const remaining = wordsRemaining(subscription);
   const stats = [
-    { label: 'Plan', value: planLabel(subscription), sub: subscription.tier === 'pro' ? 'Unlimited words' : `${remaining} words left`, color: '#4ade80' },
-    { label: 'Processed', value: fmtNum(totalWords), sub: 'Total words', color: '#a8c7fa' },
-    { label: 'Saved', value: String(saved.length), sub: 'Documents saved', color: '#c4b5fd' },
+    { label: 'Plan', value: planLabel(subscription), sub: subscription.tier === 'pro' ? 'Unlimited words' : `${remaining} words left`, color: 'var(--h-4ade80)' },
+    { label: 'Processed', value: fmtNum(totalWords), sub: 'Total words', color: 'var(--h-a8c7fa)' },
+    { label: 'Saved', value: String(saved.length), sub: 'Documents saved', color: 'var(--h-c4b5fd)' },
   ];
 
   const initials = profile.name ? profile.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : 'HC';
@@ -1952,12 +2004,12 @@ function ProfilePage({ profile, subscription, history, saved, onSaveProfile }) {
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, marginBottom: 24, background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '18px 20px' }}>
-        <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#4968ff,#7c3cff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18, color: '#fff', flexShrink: 0 }}>{initials}</div>
+        <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18, color: '#fff', flexShrink: 0 }}>{initials}</div>
         <div style={{ minWidth: 0 }}>
           <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: 15, color: C.t1 }}>{profile.name || 'No name set'}</p>
           <p style={{ margin: 0, fontSize: 12, color: C.t2 }}>{profile.email}</p>
         </div>
-        <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, background: subscription.tier === 'pro' ? 'rgba(74,222,128,0.1)' : 'rgba(168,199,250,0.08)', border: `1px solid ${subscription.tier === 'pro' ? 'rgba(74,222,128,0.22)' : 'rgba(168,199,250,0.16)'}`, color: subscription.tier === 'pro' ? '#4ade80' : C.accent, fontSize: 11, fontWeight: 700 }}>
+        <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, background: subscription.tier === 'pro' ? 'var(--r-74-222-128-0_1)' : 'var(--r-168-199-250-0_08)', border: `1px solid ${subscription.tier === 'pro' ? 'var(--r-74-222-128-0_22)' : 'var(--r-168-199-250-0_16)'}`, color: subscription.tier === 'pro' ? 'var(--h-4ade80)' : C.accent, fontSize: 11, fontWeight: 700 }}>
           {planLabel(subscription)}
         </div>
       </div>
@@ -1978,8 +2030,8 @@ function ProfilePage({ profile, subscription, history, saved, onSaveProfile }) {
           <div>
             <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Full Name</label>
             <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your full name" style={inp}
-              onFocus={e => e.target.style.borderColor = 'rgba(168,199,250,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(168,199,250,0.14)'} />
+              onFocus={e => e.target.style.borderColor = 'var(--r-168-199-250-0_4)'}
+              onBlur={e => e.target.style.borderColor = 'var(--r-168-199-250-0_14)'} />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Email</label>
@@ -1997,7 +2049,7 @@ function ProfilePage({ profile, subscription, history, saved, onSaveProfile }) {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button onClick={handleSave} style={{ padding: '10px 26px', borderRadius: 10, background: saveOk ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 18px rgba(73,104,255,0.22)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+        <button onClick={handleSave} style={{ padding: '10px 26px', borderRadius: 10, background: saveOk ? 'linear-gradient(135deg,var(--h-059669),var(--h-10b981))' : 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 18px var(--r-73-104-255-0_22)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
           {saveOk ? '✓ Saved' : 'Save Profile'}
         </button>
       </div>
@@ -2009,8 +2061,8 @@ function ProfilePage({ profile, subscription, history, saved, onSaveProfile }) {
 
 function HistoryPage({ history, setHistory, onNav }) {
   const [expanded, setExpanded] = useState(null);
-  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
-  const actionColors = { humanize: '#a8c7fa', summarize: '#c4b5fd', expand: '#6ee7b7', fix_grammar: '#fcd34d' };
+  const C = { card: 'var(--r-255-255-255-0_04)', border: 'var(--r-168-199-250-0_1)', t1: 'var(--h-e3e3e3)', t2: 'var(--h-8e918f)', t3: 'var(--h-6b7a94)', accent: 'var(--h-a8c7fa)' };
+  const actionColors = { humanize: 'var(--h-a8c7fa)', summarize: 'var(--h-c4b5fd)', expand: 'var(--h-6ee7b7)', fix_grammar: 'var(--h-fcd34d)' };
 
   function remove(id) {
     setHistory(prev => prev.filter(h => h.id !== id));
@@ -2048,19 +2100,19 @@ function HistoryPage({ history, setHistory, onNav }) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                     <button onClick={() => setExpanded(isOpen ? null : item.id)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: C.accent, background: 'rgba(168,199,250,0.07)', border: `1px solid rgba(168,199,250,0.14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: C.accent, background: 'var(--r-168-199-250-0_07)', border: `1px solid var(--r-168-199-250-0_14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                       {isOpen ? 'Collapse' : 'View'}
                     </button>
                     <button onClick={() => remove(item.id)}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.16)', borderRadius: 7, color: '#f87171', cursor: 'pointer' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.14)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.07)'}>
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, background: 'var(--r-239-68-68-0_07)', border: '1px solid var(--r-239-68-68-0_16)', borderRadius: 7, color: 'var(--h-f87171)', cursor: 'pointer' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--r-239-68-68-0_14)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'var(--r-239-68-68-0_07)'}>
                       <Ic d={P.trash} s={14} />
                     </button>
                   </div>
                 </div>
                 {isOpen && (
-                  <div style={{ borderTop: `1px solid ${C.border}`, padding: '14px 16px', background: 'rgba(255,255,255,0.02)' }}>
+                  <div style={{ borderTop: `1px solid ${C.border}`, padding: '14px 16px', background: 'var(--r-255-255-255-0_02)' }}>
                     <p style={{ fontSize: 13, lineHeight: 1.7, color: C.t1, margin: 0, whiteSpace: 'pre-wrap' }}>{item.outputText}</p>
                   </div>
                 )}
@@ -2079,7 +2131,7 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
   const [query,    setQuery]    = useState('');
   const [saveName, setSaveName] = useState('');
   const [savingId, setSavingId] = useState(null);
-  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
+  const C = { card: 'var(--r-255-255-255-0_04)', border: 'var(--r-168-199-250-0_1)', t1: 'var(--h-e3e3e3)', t2: 'var(--h-8e918f)', t3: 'var(--h-6b7a94)', accent: 'var(--h-a8c7fa)' };
 
   const filtered = useMemo(() =>
     saved.filter(d => !query || d.name.toLowerCase().includes(query.toLowerCase()) || d.content.toLowerCase().includes(query.toLowerCase())),
@@ -2104,7 +2156,7 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
         <div style={{ position: 'relative' }}>
           <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.t3 }}><Ic d={P.search} s={14} /></span>
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…"
-            style={{ paddingLeft: 34, paddingRight: 12, paddingTop: 8, paddingBottom: 8, borderRadius: 9, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.border}`, color: C.t1, fontSize: 13, outline: 'none', width: 'clamp(140px,25vw,200px)', fontFamily: 'inherit' }} />
+            style={{ paddingLeft: 34, paddingRight: 12, paddingTop: 8, paddingBottom: 8, borderRadius: 9, background: 'var(--fld-bg)', border: `1px solid ${C.border}`, color: C.t1, fontSize: 13, outline: 'none', width: 'clamp(140px,25vw,200px)', fontFamily: 'inherit' }} />
         </div>
       </div>
 
@@ -2117,7 +2169,7 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
           {filtered.map(doc => (
             <div key={doc.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18, display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 11, marginBottom: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(168,199,250,0.08)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.accent, flexShrink: 0 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--r-168-199-250-0_08)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.accent, flexShrink: 0 }}>
                   <Ic d={P.doc} s={17} />
                 </div>
                 <div style={{ minWidth: 0 }}>
@@ -2130,9 +2182,9 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
               </p>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                 <button onClick={() => navigator.clipboard.writeText(doc.content)}
-                  style={{ fontSize: 12, color: C.accent, background: 'rgba(168,199,250,0.07)', border: `1px solid rgba(168,199,250,0.14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>Copy</button>
+                  style={{ fontSize: 12, color: C.accent, background: 'var(--r-168-199-250-0_07)', border: `1px solid var(--r-168-199-250-0_14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>Copy</button>
                 <button onClick={() => remove(doc.id)}
-                  style={{ fontSize: 12, color: '#f87171', background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.16)', borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>
+                  style={{ fontSize: 12, color: 'var(--h-f87171)', background: 'var(--r-239-68-68-0_07)', border: '1px solid var(--r-239-68-68-0_16)', borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit' }}>Delete</button>
               </div>
             </div>
           ))}
@@ -2156,14 +2208,14 @@ function SavedDocsPage({ history, saved, setSaved, onNav }) {
                 {savingId === item.id ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
                     <input value={saveName} onChange={e => setSaveName(e.target.value)} placeholder="Document name…" autoFocus
-                      style={{ padding: '5px 9px', borderRadius: 7, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.border}`, color: C.t1, fontSize: 12, outline: 'none', width: 130, fontFamily: 'inherit' }}
+                      style={{ padding: '5px 9px', borderRadius: 7, background: 'var(--fld-bg)', border: `1px solid ${C.border}`, color: C.t1, fontSize: 12, outline: 'none', width: 130, fontFamily: 'inherit' }}
                       onKeyDown={e => { if (e.key === 'Enter') saveFromHistory(item); if (e.key === 'Escape') { setSavingId(null); setSaveName(''); } }} />
-                    <button onClick={() => saveFromHistory(item)} style={{ fontSize: 12, color: '#4ade80', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Save</button>
+                    <button onClick={() => saveFromHistory(item)} style={{ fontSize: 12, color: 'var(--h-4ade80)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Save</button>
                     <button onClick={() => { setSavingId(null); setSaveName(''); }} style={{ fontSize: 12, color: C.t3, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>✕</button>
                   </div>
                 ) : (
                   <button onClick={() => setSavingId(item.id)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: C.accent, background: 'rgba(168,199,250,0.07)', border: `1px solid rgba(168,199,250,0.14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: C.accent, background: 'var(--r-168-199-250-0_07)', border: `1px solid var(--r-168-199-250-0_14)`, borderRadius: 7, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
                     <Ic d={P.save} s={13} /> Save
                   </button>
                 )}
@@ -2189,8 +2241,8 @@ function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfil
     setTimeout(() => setSaveOk(false), 2000);
   }
 
-  const C = { card: 'rgba(255,255,255,0.04)', border: 'rgba(168,199,250,0.1)', t1: '#e3e3e3', t2: '#8e918f', t3: '#6b7a94', accent: '#a8c7fa' };
-  const inp = { width: '100%', padding: '11px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(168,199,250,0.14)', color: C.t1, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.15s' };
+  const C = { card: 'var(--r-255-255-255-0_04)', border: 'var(--r-168-199-250-0_1)', t1: 'var(--h-e3e3e3)', t2: 'var(--h-8e918f)', t3: 'var(--h-6b7a94)', accent: 'var(--h-a8c7fa)' };
+  const inp = { width: '100%', padding: '11px 14px', borderRadius: 10, background: 'var(--fld-bg)', border: '1px solid var(--r-168-199-250-0_14)', color: C.t1, fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', transition: 'border-color 0.15s' };
   const sectionLabel = { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.t3, margin: '0 0 14px' };
 
   return (
@@ -2206,8 +2258,8 @@ function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfil
           <div>
             <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Full Name</label>
             <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name" style={inp}
-              onFocus={e => e.target.style.borderColor = 'rgba(168,199,250,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(168,199,250,0.14)'} />
+              onFocus={e => e.target.style.borderColor = 'var(--r-168-199-250-0_4)'}
+              onBlur={e => e.target.style.borderColor = 'var(--r-168-199-250-0_14)'} />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 11, color: C.t2, marginBottom: 5 }}>Email</label>
@@ -2227,21 +2279,21 @@ function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfil
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
               <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>{subscription.tier === 'pro' ? 'Pro Plan' : 'Free Plan'}</span>
-              <span style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.22)', borderRadius: 999, padding: '2px 8px', fontSize: 10, fontWeight: 700, color: '#4ade80' }}>Active</span>
+              <span style={{ background: 'var(--r-74-222-128-0_1)', border: '1px solid var(--r-74-222-128-0_22)', borderRadius: 999, padding: '2px 8px', fontSize: 10, fontWeight: 700, color: 'var(--h-4ade80)' }}>Active</span>
             </div>
             <p style={{ fontSize: 12, color: C.t2, margin: 0 }}>
               {subscription.tier === 'pro' ? `${PRO_PRICE_GHS} GHS / month · Unlimited processing` : `${wordsRemaining(subscription)} of ${FREE_WORD_LIMIT} free words remaining today`}
             </p>
           </div>
           {subscription.tier === 'pro' && (
-            <div style={{ padding: '8px 16px', borderRadius: 9, border: '1px solid rgba(74,222,128,0.22)', color: '#4ade80', background: 'rgba(74,222,128,0.07)', fontSize: 12, fontWeight: 700 }}>Pro Active</div>
+            <div style={{ padding: '8px 16px', borderRadius: 9, border: '1px solid var(--r-74-222-128-0_22)', color: 'var(--h-4ade80)', background: 'var(--r-74-222-128-0_07)', fontSize: 12, fontWeight: 700 }}>Pro Active</div>
           )}
         </div>
 
         {subscription.tier !== 'pro' && (
-          <div style={{ marginTop: 16, padding: '18px 18px 16px', borderRadius: 12, border: '1px solid rgba(73,104,255,0.26)', background: 'linear-gradient(145deg, rgba(73,104,255,0.1), rgba(124,60,255,0.06))' }}>
+          <div style={{ marginTop: 16, padding: '18px 18px 16px', borderRadius: 12, border: '1px solid var(--r-73-104-255-0_26)', background: 'linear-gradient(145deg, var(--r-73-104-255-0_1), var(--r-124-60-255-0_06))' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{ color: '#c4b5fd', display: 'grid', placeItems: 'center' }}><Ic d={P.premium} s={18} fill /></span>
+              <span style={{ color: 'var(--h-c4b5fd)', display: 'grid', placeItems: 'center' }}><Ic d={P.premium} s={18} fill /></span>
               <span style={{ fontWeight: 800, fontSize: 15, color: C.t1 }}>Upgrade to Pro</span>
             </div>
             <p style={{ margin: '0 0 14px', fontSize: 13, color: C.t2 }}>
@@ -2249,28 +2301,28 @@ function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfil
             </p>
             <div style={{ display: 'grid', gap: 9, marginBottom: 16 }}>
               {proBenefits().map(b => (
-                <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, color: '#d8deef' }}>
-                  <span style={{ color: '#4ade80', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Ic d={P.check2} s={16} /></span>
+                <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, color: 'var(--h-d8deef)' }}>
+                  <span style={{ color: 'var(--h-4ade80)', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Ic d={P.check2} s={16} /></span>
                   {b}
                 </div>
               ))}
             </div>
-            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ width: '100%', padding: '12px 16px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13.5, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', boxShadow: '0 10px 24px rgba(73,104,255,0.26)', fontFamily: 'inherit', opacity: upgradeLoading ? 0.72 : 1, lineHeight: 1.3 }}>
+            <button onClick={onUpgrade} disabled={upgradeLoading} style={{ width: '100%', padding: '12px 16px', borderRadius: 10, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 13.5, border: 'none', cursor: upgradeLoading ? 'wait' : 'pointer', boxShadow: '0 10px 24px var(--r-73-104-255-0_26)', fontFamily: 'inherit', opacity: upgradeLoading ? 0.72 : 1, lineHeight: 1.3 }}>
               {upgradeLoading ? 'Redirecting to checkout…' : 'Pay with Card, Bank or Mobile Money'}
             </button>
             <PaymentMethods />
           </div>
         )}
-        {upgradeMessage && <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? '#4ade80' : C.t2, margin: '10px 0 0' }}>{upgradeMessage}</p>}
+        {upgradeMessage && <p style={{ fontSize: 12, color: upgradeMessage.toLowerCase().includes('verified') ? 'var(--h-4ade80)' : C.t2, margin: '10px 0 0' }}>{upgradeMessage}</p>}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         {onSignOut && profile.email.trim() ? (
-          <button onClick={onSignOut} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', color: '#fca5a5', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+          <button onClick={onSignOut} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 10, background: 'var(--r-239-68-68-0_08)', border: '1px solid var(--r-239-68-68-0_28)', color: 'var(--h-fca5a5)', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
             <Ic d={P.signout} s={17} /> Sign Out
           </button>
         ) : <span />}
-        <button onClick={handleSave} style={{ padding: '10px 26px', borderRadius: 10, background: saveOk ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 18px rgba(73,104,255,0.22)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+        <button onClick={handleSave} style={{ padding: '10px 26px', borderRadius: 10, background: saveOk ? 'linear-gradient(135deg,var(--h-059669),var(--h-10b981))' : 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 8px 18px var(--r-73-104-255-0_22)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
           {saveOk ? '✓ Saved' : 'Save Changes'}
         </button>
       </div>
@@ -2283,14 +2335,14 @@ function SettingsPage({ profile, subscription, onSignIn, onSignOut, onSaveProfil
 function AuthWall({ onSignIn, pageName = 'this page' }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '40px 24px', textAlign: 'center' }}>
-      <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(73,104,255,0.12)', border: '1px solid rgba(73,104,255,0.24)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a8c7fa', marginBottom: 20 }}>
+      <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--r-73-104-255-0_12)', border: '1px solid var(--r-73-104-255-0_24)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--h-a8c7fa)', marginBottom: 20 }}>
         <span className="material-symbols-outlined" style={{ fontSize: 26, fontVariationSettings: '"FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24' }}>lock</span>
       </div>
-      <h2 style={{ fontSize: 20, fontWeight: 800, color: '#e3e3e3', margin: '0 0 8px' }}>Sign in required</h2>
-      <p style={{ fontSize: 14, color: '#8e918f', margin: '0 0 28px', maxWidth: 300, lineHeight: 1.6 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--h-e3e3e3)', margin: '0 0 8px' }}>Sign in required</h2>
+      <p style={{ fontSize: 14, color: 'var(--h-8e918f)', margin: '0 0 28px', maxWidth: 300, lineHeight: 1.6 }}>
         You need to be signed in to access {pageName}.
       </p>
-      <button onClick={onSignIn} style={{ padding: '12px 32px', borderRadius: 12, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer', boxShadow: '0 12px 28px rgba(73,104,255,0.28)', fontFamily: 'inherit' }}>
+      <button onClick={onSignIn} style={{ padding: '12px 32px', borderRadius: 12, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 15, border: 'none', cursor: 'pointer', boxShadow: '0 12px 28px var(--r-73-104-255-0_28)', fontFamily: 'inherit' }}>
         Sign In
       </button>
     </div>
@@ -2302,12 +2354,12 @@ function AuthWall({ onSignIn, pageName = 'this page' }) {
 function Empty({ icon, text, action, onAction }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '72px 24px', textAlign: 'center' }}>
-      <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(168,199,250,0.06)', border: '1px solid rgba(168,199,250,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7a94', marginBottom: 16 }}>
+      <div style={{ width: 52, height: 52, borderRadius: 16, background: 'var(--r-168-199-250-0_06)', border: '1px solid var(--r-168-199-250-0_12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--h-6b7a94)', marginBottom: 16 }}>
         <Ic d={icon} s={22} />
       </div>
-      <p style={{ fontSize: 14, color: '#8e918f', marginBottom: 22, maxWidth: 280, lineHeight: 1.6 }}>{text}</p>
+      <p style={{ fontSize: 14, color: 'var(--h-8e918f)', marginBottom: 22, maxWidth: 280, lineHeight: 1.6 }}>{text}</p>
       {action && (
-        <button onClick={onAction} style={{ padding: '10px 24px', borderRadius: 10, background: 'linear-gradient(135deg,#4968ff,#7c3cff)', color: '#fff', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 10px 22px rgba(73,104,255,0.24)', fontFamily: 'inherit' }}>
+        <button onClick={onAction} style={{ padding: '10px 24px', borderRadius: 10, background: 'linear-gradient(135deg,var(--h-4968ff),var(--h-7c3cff))', color: '#fff', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer', boxShadow: '0 10px 22px var(--r-73-104-255-0_24)', fontFamily: 'inherit' }}>
           {action}
         </button>
       )}
@@ -2342,8 +2394,8 @@ function BannedScreen({ email, onSubmitAppeal, onBackToHome }) {
     <main
       style={{
         minHeight: '100dvh',
-        background: 'radial-gradient(ellipse at 50% 30%, rgba(248,113,113,0.10), transparent 60%), #0b0d12',
-        color: '#e7ebf5',
+        background: 'radial-gradient(ellipse at 50% 30%, var(--r-248-113-113-0_10), transparent 60%), var(--h-0b0d12)',
+        color: 'var(--h-e7ebf5)',
         fontFamily: '"Roboto", Arial, sans-serif',
         display: 'flex',
         alignItems: 'center',
@@ -2355,11 +2407,11 @@ function BannedScreen({ email, onSubmitAppeal, onBackToHome }) {
         style={{
           width: '100%',
           maxWidth: 460,
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(248,113,113,0.28)',
+          background: 'var(--r-255-255-255-0_04)',
+          border: '1px solid var(--r-248-113-113-0_28)',
           borderRadius: 18,
           padding: 28,
-          boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+          boxShadow: '0 24px 80px var(--r-0-0-0-0_5)',
         }}
       >
         <div
@@ -2367,38 +2419,38 @@ function BannedScreen({ email, onSubmitAppeal, onBackToHome }) {
             width: 52,
             height: 52,
             borderRadius: '50%',
-            background: 'rgba(248,113,113,0.12)',
-            border: '1px solid rgba(248,113,113,0.35)',
+            background: 'var(--r-248-113-113-0_12)',
+            border: '1px solid var(--r-248-113-113-0_35)',
             display: 'grid',
             placeItems: 'center',
             margin: '0 auto 16px',
           }}
         >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" strokeWidth="2" strokeLinecap="round">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--h-fca5a5)" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="12" r="9" />
             <path d="M5.6 5.6l12.8 12.8" />
           </svg>
         </div>
         <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800, textAlign: 'center' }}>Your account is banned</h1>
-        <p style={{ margin: '0 0 4px', fontSize: 13.5, color: '#9aa7c4', textAlign: 'center', lineHeight: 1.6 }}>
-          Access for <strong style={{ color: '#cdd6ee' }}>{email || 'this account'}</strong> has been suspended by an administrator.
+        <p style={{ margin: '0 0 4px', fontSize: 13.5, color: 'var(--h-9aa7c4)', textAlign: 'center', lineHeight: 1.6 }}>
+          Access for <strong style={{ color: 'var(--h-cdd6ee)' }}>{email || 'this account'}</strong> has been suspended by an administrator.
         </p>
-        <p style={{ margin: '0 0 20px', fontSize: 13.5, color: '#9aa7c4', textAlign: 'center', lineHeight: 1.6 }}>
+        <p style={{ margin: '0 0 20px', fontSize: 13.5, color: 'var(--h-9aa7c4)', textAlign: 'center', lineHeight: 1.6 }}>
           If you think this is a mistake, send an appeal and an admin will review it.
         </p>
 
         {status === 'sent' ? (
           <div
             style={{
-              background: 'rgba(74,222,128,0.1)',
-              border: '1px solid rgba(74,222,128,0.3)',
+              background: 'var(--r-74-222-128-0_1)',
+              border: '1px solid var(--r-74-222-128-0_3)',
               borderRadius: 12,
               padding: 16,
               textAlign: 'center',
             }}
           >
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#86efac' }}>Appeal submitted</p>
-            <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#9aa7c4', lineHeight: 1.6 }}>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--h-86efac)' }}>Appeal submitted</p>
+            <p style={{ margin: '6px 0 0', fontSize: 12.5, color: 'var(--h-9aa7c4)', lineHeight: 1.6 }}>
               Thanks — your appeal is now with our team. You’ll regain access if it’s approved.
             </p>
           </div>
@@ -2412,11 +2464,11 @@ function BannedScreen({ email, onSubmitAppeal, onBackToHome }) {
               maxLength={2000}
               style={{
                 width: '100%',
-                background: 'rgba(0,0,0,0.25)',
-                border: '1px solid rgba(168,199,250,0.16)',
+                background: 'var(--fld-bg-deep)',
+                border: '1px solid var(--r-168-199-250-0_16)',
                 borderRadius: 12,
                 padding: '12px 14px',
-                color: '#e7ebf5',
+                color: 'var(--h-e7ebf5)',
                 fontSize: 14,
                 fontFamily: 'inherit',
                 outline: 'none',
@@ -2424,7 +2476,7 @@ function BannedScreen({ email, onSubmitAppeal, onBackToHome }) {
                 boxSizing: 'border-box',
               }}
             />
-            {error && <p style={{ margin: 0, fontSize: 12.5, color: '#fca5a5' }}>{error}</p>}
+            {error && <p style={{ margin: 0, fontSize: 12.5, color: 'var(--h-fca5a5)' }}>{error}</p>}
             <button
               type="submit"
               disabled={status === 'sending'}
@@ -2432,7 +2484,7 @@ function BannedScreen({ email, onSubmitAppeal, onBackToHome }) {
                 width: '100%',
                 padding: '12px 16px',
                 borderRadius: 10,
-                background: 'linear-gradient(135deg,#5b76ff,#7c9fff)',
+                background: 'linear-gradient(135deg,var(--h-5b76ff),var(--h-7c9fff))',
                 color: '#fff',
                 fontWeight: 700,
                 fontSize: 14,
@@ -2455,10 +2507,10 @@ function BannedScreen({ email, onSubmitAppeal, onBackToHome }) {
             padding: '10px 16px',
             borderRadius: 10,
             background: 'transparent',
-            color: '#8e9dc2',
+            color: 'var(--h-8e9dc2)',
             fontWeight: 600,
             fontSize: 13,
-            border: '1px solid rgba(168,199,250,0.14)',
+            border: '1px solid var(--r-168-199-250-0_14)',
             cursor: 'pointer',
             fontFamily: 'inherit',
           }}

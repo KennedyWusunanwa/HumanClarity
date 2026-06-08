@@ -12,7 +12,7 @@ const App = dynamic(() => import('@/App'), {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#0b0d12',
+        background: 'var(--h-0b0d12)',
         overflow: 'hidden',
       }}
     >
@@ -25,7 +25,7 @@ const App = dynamic(() => import('@/App'), {
           width: 520,
           height: 520,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(73,104,255,0.18), transparent 70%)',
+          background: 'radial-gradient(circle, var(--r-73-104-255-0_18), transparent 70%)',
           filter: 'blur(48px)',
           pointerEvents: 'none',
         }}
@@ -41,15 +41,15 @@ const App = dynamic(() => import('@/App'), {
               position: 'absolute',
               inset: 0,
               borderRadius: '50%',
-              border: '3px solid rgba(126,151,255,0.16)',
-              borderTopColor: '#7c9fff',
+              border: '3px solid var(--r-126-151-255-0_16)',
+              borderTopColor: 'var(--h-7c9fff)',
             }}
           />
           <img
             src="/hc-icon.png"
             alt="HumanClarity AI"
             className="float-y"
-            style={{ width: 54, height: 54, objectFit: 'contain', filter: 'drop-shadow(0 0 12px rgba(124,82,255,0.45))' }}
+            style={{ width: 54, height: 54, objectFit: 'contain', filter: 'drop-shadow(0 0 12px var(--r-124-82-255-0_45))' }}
           />
         </div>
         <div style={{ textAlign: 'center' }}>
@@ -60,7 +60,7 @@ const App = dynamic(() => import('@/App'), {
               fontWeight: 800,
               fontFamily: '"Roboto", Arial, sans-serif',
               letterSpacing: 0.2,
-              background: 'linear-gradient(135deg, #e9edf7 0%, #7fb1ff 62%, #6f8cff 100%)',
+              background: 'linear-gradient(135deg, var(--h-e9edf7) 0%, var(--h-7fb1ff) 62%, var(--h-6f8cff) 100%)',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -68,7 +68,7 @@ const App = dynamic(() => import('@/App'), {
           >
             HumanClarity AI
           </p>
-          <p style={{ margin: '7px 0 0', fontSize: 13, color: '#8e9dc2' }}>Loading your workspace…</p>
+          <p style={{ margin: '7px 0 0', fontSize: 13, color: 'var(--h-8e9dc2)' }}>Loading your workspace…</p>
         </div>
       </div>
     </main>

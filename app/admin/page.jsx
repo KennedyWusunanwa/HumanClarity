@@ -2,21 +2,23 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import ThemeToggle from '@/components/ThemeToggle';
+
 // ─── theme ──────────────────────────────────────────────────────────────────
 const T = {
-  bg: '#0b0d12',
-  panel: 'rgba(255,255,255,0.04)',
-  panel2: 'rgba(255,255,255,0.025)',
-  border: 'rgba(168,199,250,0.12)',
-  borderStrong: 'rgba(168,199,250,0.22)',
-  t1: '#e7ebf5',
-  t2: '#8e9dc2',
-  t3: '#6b7a94',
-  accent: '#7c9fff',
-  accent2: '#8f5cff',
-  green: '#4ade80',
-  red: '#f87171',
-  amber: '#fbbf24',
+  bg: 'var(--h-0b0d12)',
+  panel: 'var(--r-255-255-255-0_04)',
+  panel2: 'var(--r-255-255-255-0_025)',
+  border: 'var(--r-168-199-250-0_12)',
+  borderStrong: 'var(--r-168-199-250-0_22)',
+  t1: 'var(--h-e7ebf5)',
+  t2: 'var(--h-8e9dc2)',
+  t3: 'var(--h-6b7a94)',
+  accent: 'var(--h-7c9fff)',
+  accent2: 'var(--h-8f5cff)',
+  green: 'var(--h-4ade80)',
+  red: 'var(--h-f87171)',
+  amber: 'var(--h-fbbf24)',
 };
 
 const PERM = {
@@ -87,11 +89,11 @@ function Btn({ children, variant = 'default', size = 'md', style, ...props }) {
     lg: { fontSize: 14, padding: '12px 18px' },
   };
   const variants = {
-    default: { background: 'rgba(255,255,255,0.06)', borderColor: T.border, color: T.t1 },
-    primary: { background: 'linear-gradient(135deg,#5b76ff,#7c9fff)', color: '#fff', borderColor: 'rgba(124,159,255,0.5)' },
+    default: { background: 'var(--r-255-255-255-0_06)', borderColor: T.border, color: T.t1 },
+    primary: { background: 'linear-gradient(135deg,var(--h-5b76ff),var(--h-7c9fff))', color: '#fff', borderColor: 'var(--r-124-159-255-0_5)' },
     ghost: { background: 'transparent', borderColor: T.border, color: T.t2 },
-    danger: { background: 'rgba(248,113,113,0.12)', borderColor: 'rgba(248,113,113,0.35)', color: '#fca5a5' },
-    success: { background: 'rgba(74,222,128,0.12)', borderColor: 'rgba(74,222,128,0.35)', color: '#86efac' },
+    danger: { background: 'var(--r-248-113-113-0_12)', borderColor: 'var(--r-248-113-113-0_35)', color: 'var(--h-fca5a5)' },
+    success: { background: 'var(--r-74-222-128-0_12)', borderColor: 'var(--r-74-222-128-0_35)', color: 'var(--h-86efac)' },
   };
   return (
     <button className="hc-btn" style={{ ...base, ...sizes[size], ...variants[variant], ...style }} {...props}>
@@ -112,7 +114,7 @@ function Field({ label, hint, children }) {
 
 const inputStyle = {
   width: '100%',
-  background: 'rgba(0,0,0,0.25)',
+  background: 'var(--fld-bg-deep)',
   border: `1px solid ${T.border}`,
   borderRadius: 10,
   padding: '11px 13px',
@@ -135,7 +137,7 @@ function Badge({ children, color = T.t2, bg, border }) {
         padding: '3px 9px',
         borderRadius: 999,
         color,
-        background: bg || 'rgba(255,255,255,0.05)',
+        background: bg || 'var(--r-255-255-255-0_05)',
         border: `1px solid ${border || T.border}`,
         whiteSpace: 'nowrap',
       }}
@@ -158,14 +160,14 @@ function Notice({ notice, onClose }) {
         transform: 'translateX(-50%)',
         zIndex: 60,
         maxWidth: 'min(92vw, 460px)',
-        background: isErr ? 'rgba(60,18,18,0.96)' : 'rgba(16,40,24,0.96)',
-        border: `1px solid ${isErr ? 'rgba(248,113,113,0.4)' : 'rgba(74,222,128,0.4)'}`,
-        color: isErr ? '#fecaca' : '#bbf7d0',
+        background: isErr ? 'var(--r-60-18-18-0_96)' : 'var(--r-16-40-24-0_96)',
+        border: `1px solid ${isErr ? 'var(--r-248-113-113-0_4)' : 'var(--r-74-222-128-0_4)'}`,
+        color: isErr ? 'var(--h-fecaca)' : 'var(--h-bbf7d0)',
         borderRadius: 12,
         padding: '12px 16px',
         fontSize: 13,
         fontWeight: 500,
-        boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+        boxShadow: '0 12px 40px var(--r-0-0-0-0_5)',
         display: 'flex',
         alignItems: 'center',
         gap: 12,
@@ -191,7 +193,7 @@ function Modal({ title, children, onClose }) {
         position: 'fixed',
         inset: 0,
         zIndex: 50,
-        background: 'rgba(0,0,0,0.6)',
+        background: 'var(--r-0-0-0-0_6)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
@@ -205,11 +207,11 @@ function Modal({ title, children, onClose }) {
         style={{
           width: '100%',
           maxWidth: 440,
-          background: '#12151d',
+          background: 'var(--h-12151d)',
           border: `1px solid ${T.borderStrong}`,
           borderRadius: 16,
           padding: 22,
-          boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+          boxShadow: '0 24px 80px var(--r-0-0-0-0_6)',
           maxHeight: '90vh',
           overflowY: 'auto',
         }}
@@ -313,7 +315,7 @@ function Brand({ subtitle }) {
     <div style={{ textAlign: 'center', marginBottom: 22 }}>
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
         <img src="/hc-icon.png" alt="" style={{ width: 34, height: 34, objectFit: 'contain' }} />
-        <span style={{ fontSize: 20, fontWeight: 800, background: 'linear-gradient(135deg,#e9edf7,#7fb1ff)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        <span style={{ fontSize: 20, fontWeight: 800, background: 'linear-gradient(135deg,var(--h-e9edf7),var(--h-7fb1ff))', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           HumanClarity
         </span>
       </div>
@@ -328,8 +330,8 @@ function SetupError({ message, onRetry }) {
     <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 18 }}>
       <div style={{ width: '100%', maxWidth: 520, background: T.panel, border: `1px solid ${T.border}`, borderRadius: 16, padding: 26 }}>
         <Brand subtitle="Admin dashboard setup" />
-        <div style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 12, padding: 14, marginBottom: 16 }}>
-          <p style={{ margin: 0, fontSize: 13, color: '#fde68a', fontWeight: 600 }}>Backend not configured yet</p>
+        <div style={{ background: 'var(--r-251-191-36-0_08)', border: '1px solid var(--r-251-191-36-0_3)', borderRadius: 12, padding: 14, marginBottom: 16 }}>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--h-fde68a)', fontWeight: 600 }}>Backend not configured yet</p>
           <p style={{ margin: '6px 0 0', fontSize: 12.5, color: T.t2, lineHeight: 1.6 }}>{message || 'The admin backend can’t reach Supabase.'}</p>
         </div>
         <ol style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 13, color: T.t2, lineHeight: 1.8 }}>
@@ -343,7 +345,7 @@ function SetupError({ message, onRetry }) {
     </div>
   );
 }
-const codeStyle = { background: 'rgba(124,159,255,0.12)', border: '1px solid rgba(124,159,255,0.2)', borderRadius: 5, padding: '1px 5px', fontSize: 11.5, color: '#bcd0ff' };
+const codeStyle = { background: 'var(--r-124-159-255-0_12)', border: '1px solid var(--r-124-159-255-0_2)', borderRadius: 5, padding: '1px 5px', fontSize: 11.5, color: 'var(--h-bcd0ff)' };
 
 // ─── login / bootstrap ──────────────────────────────────────────────────────
 function AuthCard({ mode, onSignedIn, flash }) {
@@ -390,7 +392,7 @@ function AuthCard({ mode, onSignedIn, flash }) {
               <input style={inputStyle} type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" />
             </Field>
           )}
-          {error && <p style={{ margin: 0, fontSize: 12.5, color: '#fca5a5' }}>{error}</p>}
+          {error && <p style={{ margin: 0, fontSize: 12.5, color: 'var(--h-fca5a5)' }}>{error}</p>}
           <Btn type="submit" variant="primary" size="lg" disabled={loading} style={{ width: '100%', marginTop: 4 }}>
             {loading ? 'Please wait…' : isBootstrap ? 'Create admin & continue' : 'Sign in'}
           </Btn>
@@ -444,6 +446,7 @@ function Dashboard({ me, onSignOut, flash, onAuthLost }) {
             <div style={{ fontSize: 13, fontWeight: 600, color: T.t1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>{me.username}</div>
             <div style={{ fontSize: 11, color: T.accent, fontWeight: 600 }}>{me.roleLabel || ROLE_LABELS[me.role]}</div>
           </div>
+          <ThemeToggle size={34} />
           <Btn variant="ghost" size="sm" onClick={onSignOut}>Sign out</Btn>
         </div>
       </header>
@@ -551,7 +554,7 @@ function EmailPolicyCard({ canManage, flash, onAuthLost }) {
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
           <span style={{ fontSize: 13.5, fontWeight: 700 }}>Sign-up email policy</span>
-          <Badge color={policy.mode === 'any' ? T.t2 : '#7fb1ff'} bg={policy.mode === 'any' ? undefined : 'rgba(124,159,255,0.12)'} border={policy.mode === 'any' ? T.border : 'rgba(124,159,255,0.35)'}>
+          <Badge color={policy.mode === 'any' ? T.t2 : 'var(--h-7fb1ff)'} bg={policy.mode === 'any' ? undefined : 'var(--r-124-159-255-0_12)'} border={policy.mode === 'any' ? T.border : 'var(--r-124-159-255-0_35)'}>
             {summary}
           </Badge>
         </span>
@@ -822,16 +825,16 @@ function UserActions({ u, busy, onAction }) {
 
 function PlanBadge({ user }) {
   return user.isPremium ? (
-    <Badge color="#c4b5fd" bg="rgba(143,92,255,0.12)" border="rgba(143,92,255,0.35)">★ Premium</Badge>
+    <Badge color="var(--h-c4b5fd)" bg="var(--r-143-92-255-0_12)" border="var(--r-143-92-255-0_35)">★ Premium</Badge>
   ) : (
     <Badge>Free</Badge>
   );
 }
 
 function StatusBadge({ user }) {
-  if (user.isBanned) return <Badge color="#fca5a5" bg="rgba(248,113,113,0.12)" border="rgba(248,113,113,0.35)">Banned</Badge>;
-  if (!user.emailConfirmed) return <Badge color="#fde68a" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.3)">Unconfirmed</Badge>;
-  return <Badge color="#86efac" bg="rgba(74,222,128,0.1)" border="rgba(74,222,128,0.3)">Active</Badge>;
+  if (user.isBanned) return <Badge color="var(--h-fca5a5)" bg="var(--r-248-113-113-0_12)" border="var(--r-248-113-113-0_35)">Banned</Badge>;
+  if (!user.emailConfirmed) return <Badge color="var(--h-fde68a)" bg="var(--r-251-191-36-0_1)" border="var(--r-251-191-36-0_3)">Unconfirmed</Badge>;
+  return <Badge color="var(--h-86efac)" bg="var(--r-74-222-128-0_1)" border="var(--r-74-222-128-0_3)">Active</Badge>;
 }
 
 function Pagination({ page, totalPages, onPage, total }) {
@@ -994,7 +997,7 @@ function AdminsTab({ me, can, flash, onAuthLost }) {
                   <div style={{ fontWeight: 700, color: T.t1, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     {a.username}
                     {a.id === me.id && <Badge color={T.accent}>You</Badge>}
-                    {a.disabled && <Badge color="#fca5a5" bg="rgba(248,113,113,0.1)" border="rgba(248,113,113,0.3)">Disabled</Badge>}
+                    {a.disabled && <Badge color="var(--h-fca5a5)" bg="var(--r-248-113-113-0_1)" border="var(--r-248-113-113-0_3)">Disabled</Badge>}
                   </div>
                   <div style={{ fontSize: 12, color: T.t3, marginTop: 4 }}>
                     Created {fmtDate(a.created_at)} · Last login {fmtDateTime(a.last_login_at)}
@@ -1116,7 +1119,7 @@ function AdminFormModal({ title, editing, isSelf, onClose, onSubmit, flash, onAu
             Disable this account (blocks sign-in)
           </label>
         )}
-        {error && <p style={{ margin: 0, fontSize: 12.5, color: '#fca5a5' }}>{error}</p>}
+        {error && <p style={{ margin: 0, fontSize: 12.5, color: 'var(--h-fca5a5)' }}>{error}</p>}
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4 }}>
           <Btn type="button" variant="ghost" onClick={onClose}>Cancel</Btn>
           <Btn type="submit" variant="primary" disabled={saving}>{saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create admin'}</Btn>
@@ -1128,9 +1131,9 @@ function AdminFormModal({ title, editing, isSelf, onClose, onSubmit, flash, onAu
 
 function RoleBadge({ role }) {
   const map = {
-    admin: { color: '#c4b5fd', bg: 'rgba(143,92,255,0.12)', border: 'rgba(143,92,255,0.35)' },
-    editor: { color: '#7fb1ff', bg: 'rgba(124,159,255,0.12)', border: 'rgba(124,159,255,0.35)' },
-    guest: { color: T.t2, bg: 'rgba(255,255,255,0.05)', border: T.border },
+    admin: { color: 'var(--h-c4b5fd)', bg: 'var(--r-143-92-255-0_12)', border: 'var(--r-143-92-255-0_35)' },
+    editor: { color: 'var(--h-7fb1ff)', bg: 'var(--r-124-159-255-0_12)', border: 'var(--r-124-159-255-0_35)' },
+    guest: { color: T.t2, bg: 'var(--r-255-255-255-0_05)', border: T.border },
   };
   const s = map[role] || map.guest;
   return <Badge color={s.color} bg={s.bg} border={s.border}>{ROLE_LABELS[role] || role}</Badge>;
@@ -1151,9 +1154,9 @@ function RoleLegend() {
 
 // ─── appeals tab ────────────────────────────────────────────────────────────
 function AppealStatusBadge({ status }) {
-  if (status === 'resolved') return <Badge color="#86efac" bg="rgba(74,222,128,0.1)" border="rgba(74,222,128,0.3)">Resolved</Badge>;
+  if (status === 'resolved') return <Badge color="var(--h-86efac)" bg="var(--r-74-222-128-0_1)" border="var(--r-74-222-128-0_3)">Resolved</Badge>;
   if (status === 'dismissed') return <Badge color={T.t2}>Dismissed</Badge>;
-  return <Badge color="#fde68a" bg="rgba(251,191,36,0.1)" border="rgba(251,191,36,0.3)">Open</Badge>;
+  return <Badge color="var(--h-fde68a)" bg="var(--r-251-191-36-0_1)" border="var(--r-251-191-36-0_3)">Open</Badge>;
 }
 
 function AppealsTab({ can, flash, onAuthLost, onChange }) {
@@ -1290,13 +1293,13 @@ const STYLES = `
 .hc-admin select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e9dc2' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
 .hc-btn:hover:not(:disabled) { filter: brightness(1.12); }
 .hc-btn:active:not(:disabled) { transform: translateY(1px); }
-.hc-admin input:focus, .hc-admin select:focus { border-color: ${T.accent}; box-shadow: 0 0 0 3px rgba(124,159,255,0.15); }
+.hc-admin input:focus, .hc-admin select:focus { border-color: ${T.accent}; box-shadow: 0 0 0 3px var(--r-124-159-255-0_15); }
 
-.hc-header { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; background: rgba(11,13,18,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid ${T.border}; }
-.hc-tabs { position: sticky; top: 53px; z-index: 20; display: flex; gap: 4px; padding: 8px 14px; background: rgba(11,13,18,0.88); backdrop-filter: blur(10px); border-bottom: 1px solid ${T.border}; overflow-x: auto; }
+.hc-header { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; background: var(--r-11-13-18-0_9); backdrop-filter: blur(10px); border-bottom: 1px solid ${T.border}; }
+.hc-tabs { position: sticky; top: 53px; z-index: 20; display: flex; gap: 4px; padding: 8px 14px; background: var(--r-11-13-18-0_88); backdrop-filter: blur(10px); border-bottom: 1px solid ${T.border}; overflow-x: auto; }
 .hc-tab { flex: 0 0 auto; background: transparent; border: none; color: ${T.t2}; font-family: inherit; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 9px; cursor: pointer; transition: all .15s; }
-.hc-tab:hover { color: ${T.t1}; background: rgba(255,255,255,0.04); }
-.hc-tab-active { color: #fff; background: rgba(124,159,255,0.16); }
+.hc-tab:hover { color: ${T.t1}; background: var(--r-255-255-255-0_04); }
+.hc-tab-active { color: var(--accent-strong); background: var(--r-124-159-255-0_16); }
 .hc-main { max-width: 1080px; margin: 0 auto; padding: 20px 18px 64px; }
 
 .hc-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -1304,14 +1307,14 @@ const STYLES = `
 .hc-table-wrap { overflow-x: auto; border: 1px solid ${T.border}; border-radius: 14px; background: ${T.panel}; }
 .hc-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .hc-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: ${T.t3}; font-weight: 700; padding: 12px 14px; border-bottom: 1px solid ${T.border}; white-space: nowrap; }
-.hc-table td { padding: 12px 14px; border-bottom: 1px solid rgba(168,199,250,0.06); vertical-align: middle; }
+.hc-table td { padding: 12px 14px; border-bottom: 1px solid var(--r-168-199-250-0_06); vertical-align: middle; }
 .hc-table tr:last-child td { border-bottom: none; }
-.hc-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+.hc-table tbody tr:hover { background: var(--r-255-255-255-0_02); }
 
 .hc-cards { display: grid; gap: 10px; }
 .hc-card { background: ${T.panel}; border: 1px solid ${T.border}; border-radius: 12px; padding: 14px; }
 
-.hc-skel { background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.07), rgba(255,255,255,0.03)); background-size: 200% 100%; animation: hc-shimmer 1.3s infinite; }
+.hc-skel { background: linear-gradient(90deg, var(--r-255-255-255-0_03), var(--r-255-255-255-0_07), var(--r-255-255-255-0_03)); background-size: 200% 100%; animation: hc-shimmer 1.3s infinite; }
 @keyframes hc-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 .hc-spin { animation: hc-rot 0.7s linear infinite; }
 @keyframes hc-rot { to { transform: rotate(360deg); } }
