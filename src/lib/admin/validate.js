@@ -12,6 +12,6 @@ export function usernameIssue(username) {
 }
 
 export function roleIssue(role) {
-  if (!ROLES.includes(role)) return 'Role must be admin, editor, or guest.';
+  if (!ROLES.includes(role)) return `Role must be one of: ${ROLES.join(', ')}.`;
   return null;
 }

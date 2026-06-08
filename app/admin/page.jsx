@@ -26,13 +26,15 @@ const PERM = {
   EDIT_PRICING: 'edit_pricing',
   MANAGE_USERS: 'manage_users',
   MANAGE_ADMINS: 'manage_admins',
+  VIEW_FINANCE: 'view_finance',
 };
 
-const ROLE_LABELS = { admin: 'Admin', editor: 'Editor', guest: 'Guest' };
+const ROLE_LABELS = { admin: 'Admin', editor: 'Editor', guest: 'Guest', accountant: 'Accountant' };
 const ROLE_DESC = {
-  admin: 'Full access — users, prices, and admin accounts.',
+  admin: 'Full access — users, prices, admin accounts, and income.',
   editor: 'Can view everything and change prices only.',
   guest: 'View-only. Cannot make changes.',
+  accountant: 'Income only — revenue & payment totals, nothing else.',
 };
 
 // ─── api helper ─────────────────────────────────────────────────────────────
@@ -409,9 +411,12 @@ function AuthCard({ mode, onSignedIn, flash }) {
 
 // ─── dashboard shell ────────────────────────────────────────────────────────
 function Dashboard({ me, onSignOut, flash, onAuthLost }) {
-  const [tab, setTab] = useState('users');
-  const [openAppeals, setOpenAppeals] = useState(0);
   const can = (perm) => Array.isArray(me.permissions) && me.permissions.includes(perm);
+  const canView = can(PERM.VIEW);
+  const canFinance = can(PERM.VIEW_FINANCE);
+  // Accountants (finance-only, no VIEW) land straight on the Income tab.
+  const [tab, setTab] = useState(canView ? 'users' : 'income');
+  const [openAppeals, setOpenAppeals] = useState(0);
 
   const loadAppealCount = useCallback(async () => {
     try {
@@ -423,14 +428,19 @@ function Dashboard({ me, onSignOut, flash, onAuthLost }) {
   }, []);
 
   useEffect(() => {
-    loadAppealCount();
-  }, [loadAppealCount]);
+    if (canView) loadAppealCount();
+  }, [loadAppealCount, canView]);
 
   const tabs = [
-    { key: 'users', label: 'Users' },
-    { key: 'pricing', label: 'Pricing' },
-    { key: 'admins', label: 'Admins' },
-    { key: 'appeals', label: 'Appeals', badge: openAppeals },
+    ...(canView
+      ? [
+          { key: 'users', label: 'Users' },
+          { key: 'pricing', label: 'Pricing' },
+          { key: 'admins', label: 'Admins' },
+          { key: 'appeals', label: 'Appeals', badge: openAppeals },
+        ]
+      : []),
+    ...(canFinance ? [{ key: 'income', label: 'Income' }] : []),
   ];
 
   return (
@@ -469,6 +479,7 @@ function Dashboard({ me, onSignOut, flash, onAuthLost }) {
         {tab === 'pricing' && <PricingTab can={can} flash={flash} onAuthLost={onAuthLost} />}
         {tab === 'admins' && <AdminsTab me={me} can={can} flash={flash} onAuthLost={onAuthLost} />}
         {tab === 'appeals' && <AppealsTab can={can} flash={flash} onAuthLost={onAuthLost} onChange={loadAppealCount} />}
+        {tab === 'income' && <IncomeTab flash={flash} onAuthLost={onAuthLost} />}
       </main>
     </div>
   );
@@ -488,6 +499,114 @@ function Stat({ label, value, color }) {
     <div style={{ flex: '1 1 120px', background: T.panel, border: `1px solid ${T.border}`, borderRadius: 12, padding: '14px 16px' }}>
       <div style={{ fontSize: 22, fontWeight: 800, color: color || T.t1, lineHeight: 1.1 }}>{value}</div>
       <div style={{ fontSize: 11.5, color: T.t2, marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{label}</div>
+    </div>
+  );
+}
+
+// ─── income tab ─────────────────────────────────────────────────────────────
+function money(n, currency) {
+  const v = Number(n) || 0;
+  return `${currency || 'GHS'} ${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function IncomeTab({ flash, onAuthLost }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api('/api/admin/income');
+      setData(res);
+    } catch (err) {
+      handleErr(err, flash, onAuthLost);
+    } finally {
+      setLoading(false);
+    }
+  }, [flash, onAuthLost]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (loading && !data) {
+    return (
+      <div>
+        <SectionHead title="Income" subtitle="Revenue and subscription totals." />
+        <SkeletonRows />
+      </div>
+    );
+  }
+  if (!data) return null;
+
+  const { currency, revenue, counts, recentPayments = [], proPrice, billingPeriod } = data;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+        <SectionHead title="Income" subtitle={`Pro plan is ${money(proPrice, currency)}/${billingPeriod}.`} noMargin />
+        <Btn variant="ghost" size="sm" onClick={load} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh'}</Btn>
+      </div>
+
+      {/* Headline revenue */}
+      <div style={{ background: 'linear-gradient(135deg, var(--r-124-82-255-0_1), var(--r-73-104-255-0_07))', border: `1px solid ${T.borderStrong}`, borderRadius: 16, padding: '20px 22px', marginBottom: 16 }}>
+        <div style={{ fontSize: 11.5, color: T.t2, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700 }}>Total revenue</div>
+        <div style={{ fontSize: 34, fontWeight: 900, color: T.t1, lineHeight: 1.1, marginTop: 6 }}>{money(revenue.total, currency)}</div>
+        <div style={{ fontSize: 12.5, color: T.t2, marginTop: 8, lineHeight: 1.5 }}>
+          From <strong style={{ color: T.green }}>{counts.paid}</strong> paid {counts.paid === 1 ? 'payment' : 'payments'}.
+          {revenue.estimatedCount > 0 && (
+            <> Includes <strong style={{ color: T.amber }}>{money(revenue.estimated, currency)}</strong> estimated for {revenue.estimatedCount} legacy {revenue.estimatedCount === 1 ? 'payer' : 'payers'} without a recorded amount (priced at the current rate).</>
+          )}
+        </div>
+      </div>
+
+      {/* Counts: premium total vs actually paid vs comped */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 18 }}>
+        <Stat label="Premium users" value={counts.premium} color={T.accent2} />
+        <Stat label="Actually paid" value={counts.paid} color={T.green} />
+        <Stat label="Comped / granted" value={counts.comped} color={T.amber} />
+        <Stat label="Free users" value={counts.free} />
+        <Stat label="Total users" value={counts.totalUsers} />
+      </div>
+
+      <div style={{ fontSize: 12, color: T.t3, marginBottom: 12, lineHeight: 1.5 }}>
+        “Actually paid” counts accounts with a real Paystack payment on record. “Comped / granted” are Premium accounts with no payment (admin-granted or legacy) — they don’t count toward revenue.
+      </div>
+
+      <SectionHead title="Recent payments" subtitle={recentPayments.length ? undefined : 'No recorded payments yet.'} />
+      {recentPayments.length > 0 && (
+        <div className="hc-table-wrap">
+          <table className="hc-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Amount</th>
+                <th className="hc-hide-sm">Date</th>
+                <th className="hc-hide-sm">Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentPayments.map((p, i) => (
+                <tr key={p.reference || i}>
+                  <td>
+                    <div style={{ fontWeight: 600, color: T.t1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>{p.email || '—'}</div>
+                    {p.name && <div style={{ fontSize: 12, color: T.t3 }}>{p.name}</div>}
+                  </td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    {p.amount != null ? (
+                      <span style={{ fontWeight: 700, color: T.green }}>{money(p.amount, p.currency)}</span>
+                    ) : (
+                      <span style={{ color: T.amber }} title="Amount not recorded; estimated at current price">~ {money(proPrice, currency)}</span>
+                    )}
+                  </td>
+                  <td className="hc-hide-sm" style={{ color: T.t2, whiteSpace: 'nowrap' }}>{p.upgradedAt ? new Date(p.upgradedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}</td>
+                  <td className="hc-hide-sm" style={{ color: T.t3, fontFamily: 'monospace', fontSize: 12 }}>{p.reference || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
@@ -1110,6 +1229,7 @@ function AdminFormModal({ title, editing, isSelf, onClose, onSubmit, flash, onAu
             <option value="admin">Admin</option>
             <option value="editor">Editor</option>
             <option value="guest">Guest</option>
+            <option value="accountant">Accountant</option>
           </select>
         </Field>
         {isSelf && <p style={{ margin: 0, fontSize: 11.5, color: T.t3 }}>You can’t change your own role or disable yourself.</p>}
@@ -1133,6 +1253,7 @@ function RoleBadge({ role }) {
   const map = {
     admin: { color: 'var(--h-c4b5fd)', bg: 'var(--r-143-92-255-0_12)', border: 'var(--r-143-92-255-0_35)' },
     editor: { color: 'var(--h-7fb1ff)', bg: 'var(--r-124-159-255-0_12)', border: 'var(--r-124-159-255-0_35)' },
+    accountant: { color: 'var(--h-4ade80)', bg: 'var(--r-74-222-128-0_1)', border: 'var(--r-74-222-128-0_22)' },
     guest: { color: T.t2, bg: 'var(--r-255-255-255-0_05)', border: T.border },
   };
   const s = map[role] || map.guest;

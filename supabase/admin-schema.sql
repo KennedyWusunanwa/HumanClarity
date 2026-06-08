@@ -19,8 +19,8 @@ create table if not exists public.admin_users (
   id            uuid primary key default gen_random_uuid(),
   username      text not null,
   password_hash text not null,                 -- scrypt: "scrypt$N$saltHex$hashHex"
-  role          text not null default 'guest'  -- 'admin' | 'editor' | 'guest'
-                check (role in ('admin', 'editor', 'guest')),
+  role          text not null default 'guest'  -- 'admin' | 'editor' | 'guest' | 'accountant'
+                check (role in ('admin', 'editor', 'guest', 'accountant')),
   disabled      boolean not null default false,
   created_at    timestamptz not null default now(),
   created_by    text,

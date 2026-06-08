@@ -2761,12 +2761,15 @@ export default function App() {
         if (!res.ok) throw new Error(data.error || 'Could not check your Premium status.');
         if (!data.restored) return;
 
+        const restoredAmount = Number(data.amount) > 0 ? Number(data.amount) / 100 : null;
         const nextSubscription = {
           ...subscription,
           tier: 'pro',
           paymentStatus: 'active',
           lastPaymentReference: data.reference || subscription.lastPaymentReference,
           upgradedAt: data.paid_at || subscription.upgradedAt || new Date().toISOString(),
+          amountPaid: restoredAmount ?? subscription.amountPaid ?? null,
+          paymentCurrency: data.currency || subscription.paymentCurrency || '',
         };
 
         await persistUserState(profile, history, saved, nextSubscription, {
@@ -2774,6 +2777,8 @@ export default function App() {
           paystack_reference: nextSubscription.lastPaymentReference,
           upgraded_at: nextSubscription.upgradedAt,
           payment_status: 'active',
+          payment_amount: nextSubscription.amountPaid,
+          payment_currency: nextSubscription.paymentCurrency,
         });
 
         setPaymentMessage('Premium restored on this account.');
@@ -2825,12 +2830,17 @@ export default function App() {
           throw new Error('This payment did not match the Pro plan amount.');
         }
 
+        // Record the actual amount charged (Paystack reports pesewas) so the admin
+        // income view can total real revenue rather than estimate it.
+        const paidAmount = Number(data.amount) > 0 ? Number(data.amount) / 100 : null;
         const nextSubscription = {
           ...subscription,
           tier: 'pro',
           paymentStatus: 'active',
           lastPaymentReference: reference,
           upgradedAt: data.paid_at || new Date().toISOString(),
+          amountPaid: paidAmount ?? subscription.amountPaid ?? null,
+          paymentCurrency: data.currency || subscription.paymentCurrency || '',
         };
 
         await persistUserState(profile, history, saved, nextSubscription, {
@@ -2838,6 +2848,8 @@ export default function App() {
           paystack_reference: reference,
           upgraded_at: nextSubscription.upgradedAt,
           payment_status: 'active',
+          payment_amount: nextSubscription.amountPaid,
+          payment_currency: nextSubscription.paymentCurrency,
         });
 
         setPaymentMessage('Payment verified. Pro is now active.');

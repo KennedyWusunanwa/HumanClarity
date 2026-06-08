@@ -70,6 +70,11 @@ export function normalizeUserRow(user) {
     usageDate: sub.usageDate || '',
     paymentStatus: sub.paymentStatus || meta.payment_status || 'inactive',
     lastPaymentReference: sub.lastPaymentReference || meta.paystack_reference || '',
+    // Amount actually charged (major currency units, e.g. GHS), recorded at the
+    // time of a verified Paystack payment. Empty for legacy payers (pre-recording)
+    // and for admin-granted premium — used to compute real vs estimated revenue.
+    amountPaid: Number.isFinite(Number(sub.amountPaid)) && Number(sub.amountPaid) > 0 ? Number(sub.amountPaid) : null,
+    paymentCurrency: sub.paymentCurrency || meta.payment_currency || '',
     upgradedAt: sub.upgradedAt || meta.upgraded_at || '',
     adminOverride: meta.admin_override || '', // 'granted' | 'revoked' | ''
     isBanned,
