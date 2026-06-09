@@ -30,6 +30,7 @@ export interface HumanizeResult {
 }
 
 export interface ProtectedRegion {
+  index: number;
   placeholder: string;
   original: string;
 }
